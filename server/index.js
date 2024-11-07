@@ -15,16 +15,16 @@ app.get("/", (req, res) => {
     res.json({msg: "Home Page"})
 })
 
-// app.listen(PORT, async () => {
-//     try {
-//         await connection;
-//         console.log(`The server is running at ${PORT} and db is connected`);
-//     } catch  (error){
-//         console.log("Server error -", error);
-//     }
-// }, )
+app.listen(PORT, async () => {
+    try {
+        await connection;
+        console.log(`The server is running at ${PORT} and db is connected`);
+    } catch  (error){
+        console.log("Server error -", error);
+    }
+}, )
 
-module.exports = async (req, res) => {
-    await connection;
-    return app(req, res);
-}
+// module.exports = async (req, res) => {
+//     await connection;
+//     return app(req, res)
+// }
