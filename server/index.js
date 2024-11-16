@@ -2,12 +2,17 @@ const express = require("express");
 const { connection } = require("./config/db");
 const { userRouter } = require("./routes/userRoutes");
 const dotenv = require("dotenv").config();
+const cors = require("cors");
 
 const app = express();
 
 const PORT = process.env.PORT;
 
+
 app.use(express.json())
+app.use(cors({
+    origin: "*"
+}));
 
 app.use("/api/v1/user", userRouter)
 

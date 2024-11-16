@@ -1,0 +1,92 @@
+.loginPage {
+  /* border: 1px solid red; */
+  /* padding: 50px 100px; */
+  padding-top: 200px;
+  background-color: #f2f6ff;
+  height: 100vh;
+}
+
+.loginHeader {
+  text-align: center;
+  /* border: 1px solid #0000ff; */
+  /* padding: 25px 0; */
+  padding-top: 5px;
+  font-size: 24px;
+}
+
+.loginBox {
+  /* border: 1px solid red; */
+  width: 80%;
+  margin: auto;
+  /* margin-top: 100px; */
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.loginBoxOuter {
+  /* border: 1px solid green; */
+  width: 25%;
+  margin: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; /* margin-top: 25px; */
+}
+
+.loginLogo {
+  /* border: 1px solid red; */
+  display: flex;
+  width: 35%;
+  justify-content: center;
+  margin: auto;
+  /* position: fixed; */
+  margin-bottom: 50px;
+  align-content: center;
+}
+
+.loginTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #31507d;
+  margin-bottom: 0.5rem;
+}
+
+.loginSubtitle {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 0;
+}
+
+.loginBox>div{
+    border: 1px solid #f3f7ff;
+    border-radius: 4px;
+    width: 100%;
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+
+}
+
+.loginBox>div>img{
+    height: 18px;
+    width: 18px;
+    margin-left: 20px;
+    
+}
+.loginBox>div>input{
+    /* height: 18px; */
+    /* height: 100%; */
+    width: 100%;
+    padding: 10px 0;
+    outline: 0;
+    margin-left: 20px;
+    border: none;
+}
+
+.loginBox>div>input:focus, .loginBox>div>input:focus-visible {
+    border: none;
+}
