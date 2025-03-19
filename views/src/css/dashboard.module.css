@@ -1,0 +1,10 @@
+.dashboardPage{
+    padding-top: 20px;
+}
+
+.dashboardPage>p{
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+
+}

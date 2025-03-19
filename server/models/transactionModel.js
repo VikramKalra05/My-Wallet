@@ -18,6 +18,11 @@ const transactionSchema = mongoose.Schema(
       ref: "user",
       required: true,
     }, // required
+    accountId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "account",
+      required: true,
+    }, // required
     category: { 
       categoryName: { type: String },
       id: { type: Number, required: true }, //required

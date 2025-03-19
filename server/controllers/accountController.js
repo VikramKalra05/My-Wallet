@@ -27,10 +27,9 @@ const getUserAccounts = async (req, res) => {
     const {userId} = req.body.user;
 
     try{
-        const accounts = AccountModel.find({userId});
+        const accounts = await AccountModel.find({userId});
 
         res.json({
-            // msg: `New account has been created`,
             accounts: accounts
         });
     }catch (error){

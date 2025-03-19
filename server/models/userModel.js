@@ -7,6 +7,8 @@ const userSchema = mongoose.Schema({
     password: {type: String, required: false},
     phone: {type: Number},
     photo: {type: String},
+    isFirstLogin: {type: Boolean, default: true},
+    currency: {type: String, default: "INR"},
 },{
     versionKey: false
 })

@@ -24,6 +24,7 @@ const getUserDashboard = async (req, res) => {
       name: user.name,
       phone: user.phone,
       email: user.email,
+      isFirstLogin: user.isFirstLogin
     };
     // await user.save();
     res.status(200).send({ message: "Welcome to your wallet!", details });
@@ -115,6 +116,12 @@ const loginUserController = async (req, res) => {
           process.env.secretKey,
           { expiresIn: "7d" }
         );
+
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: false,  // Set to true only if using HTTPS
+          sameSite: "Lax"
+        });
 
         return res.status(200).send({
           msg: "Login successful",

@@ -5,12 +5,11 @@ const dotenv = require("dotenv").config();
 const passport = require("passport");
 require("./config/passport"); //  Import the Passport config
 const session = require("express-session");
-const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { transactionRouter } = require("./routes/transactionRoutes");
 const { accountRouter } = require("./routes/accountRoutes");
-
+const { authRouter } = require("./routes/authRoutes");
 
 const app = express();
 
@@ -19,7 +18,8 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser()); // Add this to parse cookies
 app.use(cors({
-    origin: "*"
+    origin: "http://localhost:3000",  // Your frontend's URL
+    credentials: true  // Allow cookies to be sent with requests
 }));
 
 // 🔹 Add session middleware (BEFORE Passport)
@@ -40,35 +40,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Google Auth Route
-app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-
-// Google Auth Callback
-app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/" }), (req, res) => {
-    const token = jwt.sign(
-        { userId: req.user._id, name: req.user.name, email: req.user.email, photo: req.user.photo }, 
-        process.env.secretKey, 
-        { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, {
-        httpOnly: true,  // Prevents XSS attacks
-        secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-        sameSite: "Strict", // Prevents CSRF attacks
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-    res.redirect("https://my-wallet-frontend-liard.vercel.app/dashboard"); // Redirect user after login
-});
-
-// Logout Route
-app.get("/auth/logout", (req, res) => {
-    req.logout((err) => {
-      if (err) return res.send("Error logging out");
-      res.redirect("https://my-wallet-frontend-liard.vercel.app/");
-    });
-  });
-
+app.use("/api/v1/auth", authRouter); 
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/transaction", transactionRouter);
 app.use("/api/v1/account", accountRouter);

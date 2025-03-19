@@ -1,5 +1,6 @@
 const CATEGORIES = require("../constants/categories");
 const { TYPE } = require("../constants/type");
+const { AccountModel } = require("../models/accountModel");
 const { TransactionModel } = require("../models/transactionModel");
 const { UserModel } = require("../models/userModel");
 
@@ -11,9 +12,7 @@ const getAllUserTransactions = async (req, res) => {
     // console.log(transactions);
 
     res.json({
-      msg: `You have ${
-        transactions.length ? transactions.length : 0
-      } transactions`,
+      msg: `You have ${transactions.length} transactions`,
       transactions,
     });
   } catch (error) {
@@ -28,9 +27,7 @@ const getAllTransactions = async (req, res) => {
     const transactions = await TransactionModel.find();
 
     res.json({
-      msg: `Total ${
-        transactions.length ? transactions.length : 0
-      } transactions`,
+      msg: `Total ${transactions.length} transactions`,
       transactions,
     });
   } catch (error) {
@@ -51,12 +48,13 @@ const createTransaction = async (req, res) => {
     status,
     payee,
     label,
+    accountId,
   } = req.body;
   const { userId } = req.body.user;
 
-  if (!title || !amount || !date || !type.id || !category.id) {
+  if (!title || !amount || !date || !type.id || !category.id || !accountId) {
     return res.status(400).send({
-      error: `Missing required fields: title, amount, category.id, type.id, date`,
+      error: `Missing required fields: title, amount, category.id, type.id, date, accountId`,
     });
   }
 
@@ -82,17 +80,23 @@ const createTransaction = async (req, res) => {
   const categoryDetails = {
     id: category.id,
     categoryName: CATEGORIES[category.id].categoryName,
-    subCategory: category.subCategory.id
-      ? {
-          id: category.subCategory.id,
-          subCategoryName:
-            CATEGORIES[category.id].subCategories[category.subCategory.id],
-        }
-      : null,
+    // subCategory: category.subCategory.id
+    //   ? {
+    //       id: category.subCategory.id,
+    //       subCategoryName:
+    //         CATEGORIES[category.id].subCategories[category.subCategory.id],
+    //     }
+    //   : null,
   };
 
+  const account = await AccountModel.findOne({"_id" : accountId, userId});
+
+  if(!account){
+    return res.status(400).json({ error: "Account does not exist" });
+  }
+
   try {
-    const transaction = new TransactionModel({
+     const transaction = new TransactionModel({
       title,
       amount,
       date,
@@ -103,7 +107,10 @@ const createTransaction = async (req, res) => {
       status,
       payee,
       label,
+      accountId
     });
+
+    await AccountModel.findByIdAndUpdate(accountId, { $inc: { balance: -amount } });
 
     await transaction.save();
 
@@ -137,6 +144,10 @@ const deleteTransaction = async (req, res) => {
     }
     
     await TransactionModel.findByIdAndDelete(id);
+
+    await AccountModel.findByIdAndUpdate(transaction.accountId, {
+      $inc: { balance: transaction.amount },
+    });    
 
     return res.status(200).json({
       msg: `The transaction has been deleted successfully`,
