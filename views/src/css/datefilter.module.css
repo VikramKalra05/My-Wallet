@@ -1,0 +1,54 @@
+/* datefilter.module.css */
+
+/* Container for dropdown button */
+.dropdownButton {
+   margin-top: -50px; 
+   margin-bottom: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  
+  /* Dropdown menu styling */
+  .dropdownMenu {
+    /* position: absolute; */
+    top: 40px;
+    background-color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    /* z-index: 10; */
+    padding: 12px;
+    width: 220px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .firsthalf, .lasthalf {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .firsthalf {
+    border-right: 2px solid #ddd; 
+  }
+  
+  .filterOption {
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .filterOption:hover {
+    background: #007bff;
+  }
+  
+ 
+  

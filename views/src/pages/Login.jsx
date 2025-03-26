@@ -9,6 +9,7 @@ import LOADINGGIF from "../assets/Login-Page/loadingAnimation.gif";
 // import LOGINLEFTHALFIMG from "../assets/Login-Page/loginLeftHalfImage.svg";
 import { loginUser } from "../utils/userUtils";
 import { TESTING_URL } from "../ApiLinks";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const emailInputRef = useRef(null);
@@ -19,6 +20,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const {isAuthenticated}=useAuth()
 
   const handleUserDetails = (e) => {
     setUserFormDetails({
@@ -45,6 +47,10 @@ const Login = () => {
     }
     setLoading(false);
   };
+
+  if(isAuthenticated){
+    navigate("/dashboard")
+  }
 
   const handleEmailFocus = () => {
     emailInputRef.current?.focus();

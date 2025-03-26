@@ -1,0 +1,298 @@
+import { useContext, useState } from "react";
+import styles from "../css/addrecords.module.css";
+import categoriesData from "../utils/modalCategories";
+import Select from "react-select";
+import AppContext from "../context/AppContext";
+
+const AddRecords = () => {
+  const {setRecords, setAddRecords}=useContext(AppContext)
+  const [recordType, setRecordType] = useState(2);
+  const [account, setAccount] = useState("Cash");
+  const [amount, setAmmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  // const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  //   const [time, setTime]=useState(new Date().toLocaleTimeString([],{ hour: '2-digit', minute: '2-digit' }))
+
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  ); // ISO format (yyyy-mm-dd)
+  const [displayDate, setDisplayDate] = useState(
+    new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })
+  ); // Display format "Month Day"
+
+  const addNewRecord=(newRecord)=>{
+    setRecords((prevRecords)=> [...prevRecords,newRecord])
+  }
+
+  const handleDateChange = (e) => {
+    const newDate = new Date(e.target.value);
+    setSelectedDate(e.target.value); // Keeps the date in ISO format (yyyy-mm-dd)
+    setDisplayDate(
+      newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
+    ); // Formats to "March 25"
+  };
+
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+  });
+
+  const [payee, setPayee] = useState("");
+  const [note, setNote] = useState("");
+  const [paymentType, setPaymentType] = useState("Cash");
+  const [paymentStatus, setPaymentStatus] = useState("Cleared");
+
+  const handleSubmit = () => {
+    if (!amount || !category || !subCategory) {
+      alert("Please fill all the required fields!");
+      return;
+    }
+    const newRecord = {
+      type: recordType,
+      account,
+      amount,
+      category: category?.label,
+      subCategory: subCategory?.label,
+      displayDate,
+      selectedDate,
+      time,
+      payee,
+      note,
+      paymentType,
+      paymentStatus,
+    };
+    addNewRecord(newRecord);
+    setAddRecords(false);
+  };
+  const categoryOptions = categoriesData.map((cat) => ({
+    value: cat.id,
+    label: cat.name, // Label should be a string
+    icon: cat.icon,
+  }));
+
+  const handleCategoryChange = (selectedCategory) => {
+    console.log(selectedCategory);
+    setCategory(selectedCategory);
+    setSubCategory(null);
+  };
+
+  //filter subcategory based on selected category...using find here bcause find compares with a single word also from category and displays subcategory accordingly
+  const filteredSubcategories =
+    categoriesData.find((cat) => cat.id === category?.value)?.subCategories ||
+    [];
+
+  const subcategoryOptions = filteredSubcategories.map((sub) => ({
+    value: sub.id,
+    label: sub.name,
+    icon: sub.icon,
+  }));
+
+  const customSingleValue = ({ data }) => {
+    return (
+      <div style={{
+        display: "flex",
+        position: "absolute",
+        top: "auto",
+        left: "8px",
+        gap: "5px",
+        alignItems: "center",
+        textWrap: "nowrap",
+        overflow: "hidden",
+      }}>
+        {data.icon} <p style={{
+          display: "flex",
+          justifyContent: "left",
+          width: "150px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}>{data.label}</p>
+      </div>
+    );
+  };
+  const customOption = ({ data, innerRef, innerProps }) => (
+    <div
+      ref={innerRef}
+      {...innerProps}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "8px 12px",
+        cursor: "pointer",
+      }}
+    >
+      <span style={{ fontSize: "16px" }}>{data.icon}</span>
+      <span style={{ fontSize: "14px" }}>{data.label}</span>
+    </div>
+  );
+
+  console.log("Filtered Subcategories: ", filteredSubcategories);
+  console.log("Subcategory Options: ", subcategoryOptions);
+
+  return (
+    <div className={styles.modalOverlay} onClick={() => setAddRecords(false)}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <h3>ADD RECORD</h3>
+        <button
+          onClick={() => setAddRecords(false)}
+          className={styles.closeButton}
+        >
+          X
+        </button>
+
+        <div className={styles.recordTypeToggle}>
+          <button
+            className={recordType === 2 ? styles.active : ""}
+            onClick={() => setRecordType(2)}
+          >
+            Expense
+          </button>
+          <button
+            className={recordType === 1 ? styles.active : ""}
+            onClick={() => setRecordType(1)}
+          >
+            Income
+          </button>
+        </div>
+        <div className={styles.upperhalf}>
+          <div className={styles.accamt}>
+            <div className={styles.inputGroup}>
+              <label>Account</label>
+              <select
+                value={account}
+                onChange={(e) => setAccount(e.target.value)}
+              >
+                <option>Cash</option>
+                <option>Bank</option>
+              </select>
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Amount</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmmount(e.target.value)}
+                placeholder="0"
+              ></input>
+            </div>
+          </div>
+
+          <div className={styles.category}>
+            <div className={styles.inputGroup}>
+              <label>Category</label>
+              <Select
+                options={categoryOptions}
+                value={category}
+                onChange={handleCategoryChange}
+                components={{
+                  SingleValue: customSingleValue,
+                  Option: customOption,
+                }}
+                placeholder="Choose Category"
+                isSearchable={false}
+                className={styles.reactSelect}
+              />
+              
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Subcategory</label>
+              <Select
+                options={subcategoryOptions}
+                value={
+                  subcategoryOptions.find(
+                    (option) => option.value === subCategory?.value
+                  ) || null
+                }
+                onChange={setSubCategory}
+                components={{
+                  SingleValue: customSingleValue,
+                  Option: customOption,
+                }}
+                placeholder="Choose Subcategory"
+                isSearchable={false}
+                className={styles.reactSelect}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.lowerhalf}>
+          <div className={styles.dateTimeWrapper}>
+            <div className={styles.inputGroup}>
+              <label>Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+              ></input>
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Time</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              ></input>
+            </div>
+          </div>
+
+          <div className={styles.payees}>
+            <div className={styles.inputGroup}>
+              <label>Payment Type</label>
+              <select
+                value={paymentType}
+                onChange={(e) => setPaymentType(e.target.value)}
+              >
+                <option>Cash</option>
+                <option>Debit Card</option>
+                <option>Credit Card</option>
+                <option>Transfer</option>
+                <option>Voucher</option>
+                <option>UPI</option>
+              </select>
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Payment Status</label>
+              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+                <option>Cleared</option>
+                <option>Pending</option>
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.note}>
+            <div className={styles.inputGroup}>
+              <label>Payee</label>
+              <input
+                type="text"
+                value={payee}
+                onChange={(e) => setPayee(e.target.value)}
+                placeholder="Enter payee name"
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Note</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Add a note"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button className={styles.addButton} onClick={handleSubmit}>
+          ADD RECORD
+        </button>
+      </div>
+    </div>
+  );
+};
+export default AddRecords;

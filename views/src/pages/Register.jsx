@@ -9,6 +9,8 @@ import LOADINGGIF from "../assets/Login-Page/loadingAnimation.gif";
 import USERICON from "../assets/Register-Page/userIcon.svg";
 // import LOGINLEFTHALFIMG from "../assets/Login-Page/loginLeftHalfImage.svg";
 import { registerUser } from "../utils/userUtils";
+import { TESTING_URL } from "../ApiLinks";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
   const emailInputRef = useRef(null);
@@ -23,6 +25,7 @@ const Register = () => {
     password: "",
     confirmedPassword: "",
   });
+  const {isAuthenticated}=useAuth()
 
   const handleUserDetails = (e) => {
     setUserFormDetails({
@@ -54,11 +57,14 @@ const Register = () => {
       // alert("Login Successful");
     } else {
       // console.log("error aeee", res);
-      alert("Registe Failed");
+      alert("Register Failed");
     }
     setLoading(false);
     // }
   };
+  if(isAuthenticated){
+    navigate("/dashboard")
+  }
 
   const handleEmailFocus = () => {
     emailInputRef.current?.focus();
@@ -77,7 +83,7 @@ const Register = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location = "http://localhost:8080/auth/google";
+    window.location = `${TESTING_URL}/auth/google`;
   }
 
   return (
