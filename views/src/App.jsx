@@ -1,16 +1,15 @@
 // import './App.css';
-import Navbar from './components/Navbar';
-import AllRoutes from './routes/AllRoutes';
-import PrivateRoutes from './routes/PrivateRoutes';
+
+import Navbar from "./components/Navbar";
+import AllRoutes from "./routes/AllRoutes";
 
 function App() {
   return (
-    <div className="App">
+    <div>
       <Navbar />
-      <div className="main">
-        <AllRoutes /> 
-      </div>
-    </div>
+      <div style={{paddingTop:"60px"}}><AllRoutes /></div>
+      
+    </ div>
   );
 }
 

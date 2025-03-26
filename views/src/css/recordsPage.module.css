@@ -1,0 +1,23 @@
+/* recordsPage.module.css */
+.container {
+    display: flex;  /* Align Sidebar & Records side by side */
+    align-items: flex-start; /* Align items to the top */
+    gap: 20px; /* Space between sidebar and records */
+    padding: 20px;
+    background-color: #f4f4f4;
+    min-height: 100vh; /* Full screen height */
+}
+
+/* Sidebar takes a fixed width */
+.sidebar {
+    flex-shrink: 0;
+    width: 370px;
+    margin-top: 70px;
+}
+
+/* Records take the remaining space */
+.recordsContent {
+    flex: 1; /* Takes remaining space */
+    min-width: 0;
+    margin-top: 70px;
+}
