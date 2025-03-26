@@ -14,12 +14,46 @@ const createNewAccount = async (req, res) => {
         const newAccount = new AccountModel({accountName, balance, userId});
         await newAccount.save();
 
-        res.json({
+        res.status(200).json({
             msg: `New account has been created`,
             account: newAccount
         });
     }catch (error){
         return res.status(400).send({"error" : `Something went wrong while creating new account, ${error}`});
+    }
+}
+
+const deleteAccount = async (req, res) => {
+    const {id} = req.body;
+    const {userId} = req.body.user;
+
+    console.log(id, userId);
+
+    if(!id){
+        return res.status(400).send({"error" : `Missing required field: Account ID`});
+    }
+
+    try{
+        const account = await AccountModel.findById(id);
+
+        if (!account) {
+            return res.status(404).json({ msg: `Account not found` });
+        }
+
+        if (account.userId.toString() !== userId) {
+            return res.status(403).json({
+              msg: `You are not authorized to delete this account`,
+            });
+        }
+
+        await account.deleteOne();
+
+        res.status(200).json({
+            msg: `The account has been deleted`,
+            account: account
+        });
+    }catch (error){
+        return res.status(400).send({"error" : `Something went wrong while deleting account, ${error}`});
     }
 }
 
@@ -74,5 +108,6 @@ const updateUserAccount = async (req, res) => {
 module.exports = {
     createNewAccount,
     updateUserAccount,
-    getUserAccounts
+    getUserAccounts,
+    deleteAccount
 }

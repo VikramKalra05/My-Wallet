@@ -3,7 +3,7 @@ import { createContext, useState } from 'react'
 
 const ThemeContext = createContext()
 
-const ThemeContextProvider = () => {
+const ThemeContextProvider = ({children}) => {
   const [darkTheme, setDarkTheme] = useState(false);
 
   return (
@@ -13,4 +13,4 @@ const ThemeContextProvider = () => {
   )
 }
 
-export default ThemeContextProvider
+export { ThemeContextProvider }

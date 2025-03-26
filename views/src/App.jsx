@@ -7,7 +7,7 @@ function App() {
   return (
     <div>
       <Navbar />
-      <div style={{paddingTop:"60px"}}><AllRoutes /></div>
+      <div style={{paddingTop:"60px", overflowY:"auto"}}><AllRoutes /></div>
       
     </ div>
   );
