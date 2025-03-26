@@ -37,7 +37,42 @@ const getUserAccounts = async (req, res) => {
     }
 }
 
+const updateUserAccount = async (req, res) => {
+    const {userId} = req.body.user;
+    const {id, accountName, balance} = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: "Account ID is required." });
+    }
+
+    // Create update object dynamically
+    const updateFields = {};
+    if (accountName !== undefined) updateFields.accountName = accountName;
+    if (balance !== undefined) updateFields.balance = balance;
+
+    if (Object.keys(updateFields).length === 0) {
+        return res.status(400).json({ error: "At least one field (accountName, balance) must be provided." });
+    }
+
+    try{
+        const updatedAccount = await AccountModel.findOneAndUpdate(
+            { _id: id, userId }, 
+            { $set: updateFields  }, 
+            { new: true, runValidators: true } // Return updated account & run schema validations
+        );
+
+        if (!updatedAccount) {
+            return res.status(404).json({ error: "Account not found or unauthorized." });
+        }
+
+        res.status(200).json({ msg: `The account has been updated`, account: updatedAccount });
+    }catch (error){
+        return res.status(400).send({"error" : `Something went wrong while updating your account, ${error}`});
+    }
+}
+
 module.exports = {
     createNewAccount,
+    updateUserAccount,
     getUserAccounts
 }

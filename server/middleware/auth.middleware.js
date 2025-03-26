@@ -1,6 +1,4 @@
-const jwt = require("jsonwebtoken");
 const verifyToken = require("../utils/verifyToken");
-const dotenv = require("dotenv").config();
 
 const auth = async (req, res, next) => {
     // Check for the presence of token in cookies
@@ -11,7 +9,6 @@ const auth = async (req, res, next) => {
 
     // Check if token is blacklisted
     try {
-        
         // Verify token
         const decoded = await verifyToken(token);
         req.body.user = decoded;  // Attach user to req

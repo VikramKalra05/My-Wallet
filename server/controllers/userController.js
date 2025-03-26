@@ -24,7 +24,8 @@ const getUserDashboard = async (req, res) => {
       name: user.name,
       phone: user.phone,
       email: user.email,
-      isFirstLogin: user.isFirstLogin
+      isFirstLogin: user.isFirstLogin,
+      photo: user?.photo
     };
     // await user.save();
     res.status(200).send({ message: "Welcome to your wallet!", details });

@@ -56,7 +56,7 @@ app.get("/*", (req, res) => {
 app.listen(PORT, async () => {
     try {
         await connection;
-        console.log(`The server is running at ${PORT} and db is connected`);
+        console.log(`The server is running at ${PORT} and db is connected ${Date.now()}`);
     } catch  (error){
         console.log("Server error -", error);
     }
