@@ -34,6 +34,44 @@ const getUserDashboard = async (req, res) => {
   }
 };
 
+const updateUserDetails = async (req, res) => {
+  const { userId } = req.body.user;
+  const { name, phone, email, isFirstLogin, photo } = req.body;
+
+  const updateFields = {};
+  if (name !== undefined) updateFields.name = name;
+  if (phone !== undefined) updateFields.phone = phone;
+  if (email !== undefined) updateFields.email = email;
+  if (isFirstLogin !== undefined) updateFields.isFirstLogin = isFirstLogin;
+  if (photo !== undefined) updateFields.photo = photo;
+
+  if (Object.keys(updateFields).length === 0) {
+    return res.status(400).json({ error: "At least one field (name, phone, email, isFirstLogin, photo) must be provided." });
+  }
+
+  try {
+    const user = await UserModel.findOne({ _id: userId });
+
+    if(!user){
+      res.status(404).send({ err: `User not found` });
+      return;
+    }
+
+    const details = {
+      _id: user._id,
+      name: user.name,
+      phone: user.phone,
+      email: user.email,
+      isFirstLogin: user.isFirstLogin,
+      photo: user?.photo
+    };
+    // await user.save();
+    res.status(200).send({ message: "Welcome to your wallet!", details });
+  } catch (error) {
+    res.status(400).send({ err: `Something went wrong while updating user details, ${error}` });
+  }
+};
+
 const registerUserController = async (req, res) => {
   // console.log(req?.body);
   const { name, email, password } = req.body;

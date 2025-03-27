@@ -14,15 +14,17 @@ const Accounts = () => {
     // useEffect to fetch accounts on component mount
 
     const fetchAccounts = async () => {
-        const data = await getAccounts();
-        setAccounts(data.accounts);
+        const accounts = await getAccounts();
+        setAccounts(accounts?.accounts);
     }
 
     useEffect(() => {
         fetchAccounts();
     }, []);
 
-    
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);   
     
     
     return(

@@ -20,7 +20,7 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const {isAuthenticated}=useAuth()
+  const {isAuthenticated}=useAuth();
 
   const handleUserDetails = (e) => {
     setUserFormDetails({
