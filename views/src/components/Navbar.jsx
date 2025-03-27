@@ -35,7 +35,7 @@ const Navbar = () => {
         </div>
 
         <div className={styles.links}>
-          {isHomePage ? (
+          {isHomePage && !isAuthenticated ? (
             <>
               <Link to="/login" className={styles.link}>Login</Link>
               <Link to="/register" className={styles.link}>Register</Link>

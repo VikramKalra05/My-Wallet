@@ -15,14 +15,16 @@ const Accounts = () => {
 
     const fetchAccounts = async () => {
         const accounts = await getAccounts();
-        setAccounts(accounts.accounts);
+        setAccounts(accounts?.accounts);
     }
 
     useEffect(() => {
         fetchAccounts();
     }, []);
 
-    
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);   
     
     
     return(

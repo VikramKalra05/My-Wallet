@@ -162,9 +162,49 @@ const deleteTransaction = async (req, res) => {
   // res.json({msg: "You have 0 expenses"})
 };
 
+const updateTransaction = async (req, res) => {
+  const {userId} = req.body.user;
+  const {id, accountId} = req.body;
+
+  if(!id || !accountId){  
+    return res.status(400).json({ error: "Both Transaction ID and Account ID are required." });
+  }
+
+  const {title, amount, date, type, category, description, status, payee, label} = req.body;
+
+  // // Create update object dynamically
+  const updateFields = {};
+  if (title !== undefined) updateFields.title = title;
+  if (amount !== undefined) updateFields.amount = amount;
+  if (date !== undefined) updateFields.date = date;
+  if (type !== undefined) updateFields.type = type;
+  if (category !== undefined) updateFields.category = category;
+  if (description !== undefined) updateFields.description = description;
+  if (status !== undefined) updateFields.status = status;
+  if (payee !== undefined) updateFields.payee = payee;
+  if (label !== undefined) updateFields.label = label;
+
+  try {
+    const transaction = await TransactionModel.findById(id);
+
+    var final = {};
+
+    for (key in updateFields){
+      if(transaction[key] !== updateFields[key]){
+        final[key] = updateFields[key];
+      }
+    }
+    
+    res.status(200).json({transaction, final})
+  } catch (error) {
+    res.status(400).send({ error: `Error in updating transaction, ${error}` });
+  }
+}
+
 module.exports = {
   createTransaction,
   deleteTransaction,
   getAllUserTransactions,
   getAllTransactions,
+  updateTransaction
 };
