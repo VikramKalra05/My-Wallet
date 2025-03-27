@@ -1,11 +1,12 @@
 import { useState } from "react";
 import styles from "../css/accounts.module.css"
 import { createAccount } from "../utils/accountUtils";
+import { RxCross2 } from "react-icons/rx";
 
 const AddAccountModal = ({accounts, setAccounts, showAddAccountModal, setShowAddAccountModal}) => {
     const [newAccountDetails, setNewAccountDetails] = useState({
         accountName: "",
-        balance: null
+        balance: undefined
     })
     // implement add account
     // create a form to add account - account name and balance
@@ -36,15 +37,21 @@ const AddAccountModal = ({accounts, setAccounts, showAddAccountModal, setShowAdd
     return (
         <div className={styles.AddAccountModalOverlay} onClick={() => setShowAddAccountModal(false)}>
             <div className={styles.AddAccountModalContent} onClick={(e) => e.stopPropagation()}>
-                <h2>Add Account</h2>
-                <button onClick={() => setShowAddAccountModal(false)}>Close</button>
-                <div>
-                    <input type="text" placeholder="Account Name" value={newAccountDetails.accountName} onChange={(e) => setNewAccountDetails({ ...newAccountDetails, accountName: e.target.value })} />
-                    <input type="number" placeholder="Account Balance" value={newAccountDetails.balance} onChange={(e) => setNewAccountDetails({ ...newAccountDetails, balance: e.target.value })} />
-                    <button onClick={handleCreate}>Create</button>
+                <div className={styles.top}>
+                <h2 style={{fontSize:"18px"}}>Add Account</h2>
+                <button className={styles.closeButton} onClick={() => setShowAddAccountModal(false)}><RxCross2 /></button>
+                </div>
+                <div className={styles.inputGroup}>
+                    <label>Account Name</label>
+                    <input type="text" placeholder="Enter Account Name" value={newAccountDetails.accountName} onChange={(e) => setNewAccountDetails({ ...newAccountDetails, accountName: e.target.value })} />
+                    <label>Balance</label>
+                    <input type="number" placeholder="Enter Balance" value={newAccountDetails.balance} onChange={(e) => setNewAccountDetails({ ...newAccountDetails, balance: e.target.value })} />
+                    </div>
+                    <div className={styles.createButton}>
+                    <button onClick={handleCreate}>ADD</button>
+                    </div>
                 </div>
             </div>
-        </div>
     )
 }
 

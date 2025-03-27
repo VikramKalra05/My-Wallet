@@ -14,8 +14,8 @@ const Accounts = () => {
     // useEffect to fetch accounts on component mount
 
     const fetchAccounts = async () => {
-        const accounts = await getAccounts();
-        setAccounts(accounts.accounts);
+        const data = await getAccounts();
+        setAccounts(data.accounts);
     }
 
     useEffect(() => {
@@ -31,15 +31,20 @@ const Accounts = () => {
                 <h2>Accounts</h2>
             </div> */}
             <div className={styles.accountsContainer}>
+                <div className={styles.accountsForm}>
+                    <p>Create new account</p>
+                    <div style={{
+                        margin: "auto"
+                    }}>
+                        <button className={styles.formbutton} onClick={() => setShowAddAccountModal(true)}>Add Account</button>
+                    </div>
+                    {showAddAccountModal && <AddAccountModal accounts={accounts} setAccounts={setAccounts} showAddAccountModal={showAddAccountModal} setShowAddAccountModal={setShowAddAccountModal} />}
+                </div>
                 <div className={styles.accountsList}>
                     {/* map accounts */}
                     {accounts?.map((account, id) => (
                         <AccountCard key={id} account={account} fetchAccounts={fetchAccounts} />
                     ))}
-                </div>
-                <div className={styles.accountsForm}>
-                    <button onClick={() => setShowAddAccountModal(true)}>Add Account</button>
-                    {showAddAccountModal && <AddAccountModal accounts={accounts} setAccounts={setAccounts} showAddAccountModal={showAddAccountModal} setShowAddAccountModal={setShowAddAccountModal} />}
                 </div>
             </div>
 

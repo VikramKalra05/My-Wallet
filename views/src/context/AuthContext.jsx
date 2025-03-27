@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { TESTING_URL } from '../ApiLinks';
+import { getUserDetails } from '../utils/userUtils';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const [userDetails, setUserDetails] = useState({});
 
     // Function to check auth
     const verifyAuth = async () => {
@@ -33,8 +35,18 @@ export const AuthContextProvider = ({ children }) => {
         return () => clearInterval(interval); // Clean up on unmount
     }, []);
 
+    useEffect(() => {
+        handleFetchUserDetails();
+        console.log("user details",userDetails);
+    }, [isAuthenticated])
+
+    const handleFetchUserDetails = async () => {
+        const user = await getUserDetails();
+        setUserDetails(user?.details)
+    }
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated}}>
+        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, userDetails,setUserDetails}}>
             {children}
         </AuthContext.Provider>
     );

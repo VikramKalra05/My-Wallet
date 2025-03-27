@@ -100,22 +100,48 @@
     gap: 10px;
     cursor: pointer;
 }
-.profileName {
+
+.profileName{
+    font-size: 16px;
+}
+
+.profileContainer{
     color: wheat;
-    padding: 5px 10px;
+    padding: 0px 10px;
     font-weight: 600;
     background: rgba(255, 255, 255, 0.1); 
     border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: min-content;
+    /* border: 1px solid; */
+    height: 40px;
+    position: relative;
+    gap: 5px;
 }
 
+.icon{
+    display: flex;
+    align-items: center;
+}
+.icon img{
+    /* border: 1px solid red; */
+    height: 24px;
+    width: 24px;
+    margin: auto;
+    border-radius: 50%;
+}
 .dropdownMenu {
     position: absolute;
-    right: 0;
+    /* right: 0; */
     top: 100%; 
+    left: 0;
+    margin-top: 2px;
     background: white;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    width: 150px;
+    width: 100%;
     z-index: 100;
     overflow: hidden;
 }

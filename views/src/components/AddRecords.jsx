@@ -1,13 +1,20 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "../css/addrecords.module.css";
 import categoriesData from "../utils/modalCategories";
 import Select from "react-select";
 import AppContext from "../context/AppContext";
+import { getAccounts } from "../utils/accountUtils";
+import AddAccountModal from "./AddAccountModal";
+import { RxCross2 } from "react-icons/rx";
 
 const AddRecords = () => {
-  const {setRecords, setAddRecords}=useContext(AppContext)
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const { setRecords, setAddRecords } = useContext(AppContext);
   const [recordType, setRecordType] = useState(2);
-  const [account, setAccount] = useState("Cash");
+  const [accLoading, setAccLoading] = useState(true);
+  const [accountId, setAccountId] = useState("");
+  const [accounts, setAccounts] = useState([]);
+
   const [amount, setAmmount] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
@@ -21,9 +28,9 @@ const AddRecords = () => {
     new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })
   ); // Display format "Month Day"
 
-  const addNewRecord=(newRecord)=>{
-    setRecords((prevRecords)=> [...prevRecords,newRecord])
-  }
+  const addNewRecord = (newRecord) => {
+    setRecords((prevRecords) => [...prevRecords, newRecord]);
+  };
 
   const handleDateChange = (e) => {
     const newDate = new Date(e.target.value);
@@ -46,14 +53,16 @@ const AddRecords = () => {
   const [paymentStatus, setPaymentStatus] = useState("Cleared");
 
   const handleSubmit = () => {
-    if (!amount || !category || !subCategory) {
+    console.log(accountId);
+    if (!amount || !category || !subCategory || !accountId) {
       alert("Please fill all the required fields!");
       return;
     }
-    const newRecord = {
+
+    var newRecord = {
       type: recordType,
-      account,
       amount,
+      accountId,
       category: category?.label,
       subCategory: subCategory?.label,
       displayDate,
@@ -92,23 +101,30 @@ const AddRecords = () => {
 
   const customSingleValue = ({ data }) => {
     return (
-      <div style={{
-        display: "flex",
-        position: "absolute",
-        top: "auto",
-        left: "8px",
-        gap: "5px",
-        alignItems: "center",
-        textWrap: "nowrap",
-        overflow: "hidden",
-      }}>
-        {data.icon} <p style={{
+      <div
+        style={{
           display: "flex",
-          justifyContent: "left",
-          width: "150px",
+          position: "absolute",
+          top: "auto",
+          left: "8px",
+          gap: "5px",
+          alignItems: "center",
+          textWrap: "nowrap",
           overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}>{data.label}</p>
+        }}
+      >
+        {data.icon}{" "}
+        <p
+          style={{
+            display: "flex",
+            justifyContent: "left",
+            width: "150px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {data.label}
+        </p>
       </div>
     );
   };
@@ -129,8 +145,18 @@ const AddRecords = () => {
     </div>
   );
 
-  console.log("Filtered Subcategories: ", filteredSubcategories);
-  console.log("Subcategory Options: ", subcategoryOptions);
+  const handleFetchAccounts = async () => {
+    setAccLoading(true);
+    const data = await getAccounts();
+    setAccounts(data.accounts);
+    setAccLoading(false);
+  };
+  useEffect(() => {
+    handleFetchAccounts();
+  }, []);
+
+
+  console.log(accountId);
 
   return (
     <div className={styles.modalOverlay} onClick={() => setAddRecords(false)}>
@@ -140,7 +166,7 @@ const AddRecords = () => {
           onClick={() => setAddRecords(false)}
           className={styles.closeButton}
         >
-          X
+          <RxCross2 />
         </button>
 
         <div className={styles.recordTypeToggle}>
@@ -162,12 +188,40 @@ const AddRecords = () => {
             <div className={styles.inputGroup}>
               <label>Account</label>
               <select
-                value={account}
-                onChange={(e) => setAccount(e.target.value)}
+                value={accountId}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+
+                  if (selectedValue === "add_account") {
+                    setShowAddAccountModal(true); // Open modal
+                  } else {
+                    setAccountId(selectedValue); // Set selected account
+                  }
+                }}
               >
-                <option>Cash</option>
-                <option>Bank</option>
+                {accLoading && <option>Loading</option>}
+                {!accLoading && accounts?.length === 0 && (
+                  <option value="1">Cash</option>
+                )}
+                {accounts?.map((account, id) => {
+                  return (
+                    <option
+                      key={id}
+                      value={account._id}
+                    >
+                      {account?.accountName}
+                    </option>
+                  );
+                })}
+                <option  style={{fontWeight:"600"}} value="add_account">+ Add Account
+                </option>
               </select>
+              {showAddAccountModal && (
+                <AddAccountModal accounts={accounts} setAccounts={setAccounts}
+                  showAddAccountModal={showAddAccountModal}
+                  setShowAddAccountModal={setShowAddAccountModal}
+                />
+              )}
             </div>
 
             <div className={styles.inputGroup}>
@@ -196,7 +250,6 @@ const AddRecords = () => {
                 isSearchable={false}
                 className={styles.reactSelect}
               />
-              
             </div>
 
             <div className={styles.inputGroup}>
@@ -259,7 +312,10 @@ const AddRecords = () => {
 
             <div className={styles.inputGroup}>
               <label>Payment Status</label>
-              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value)}
+              >
                 <option>Cleared</option>
                 <option>Pending</option>
               </select>
