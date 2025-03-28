@@ -6,12 +6,15 @@ import AppContext from "../context/AppContext";
 import { getAccounts } from "../utils/accountUtils";
 import AddAccountModal from "./AddAccountModal";
 import { RxCross2 } from "react-icons/rx";
+import { IoMdAdd } from "react-icons/io";
+import { FaMinus } from "react-icons/fa6";
 
 const AddRecords = () => {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const { setRecords, setAddRecords } = useContext(AppContext);
   const [recordType, setRecordType] = useState(2);
   const [accLoading, setAccLoading] = useState(true);
+  const [title, setTitle] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
 
@@ -20,6 +23,10 @@ const AddRecords = () => {
   const [subCategory, setSubCategory] = useState("");
   // const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   //   const [time, setTime]=useState(new Date().toLocaleTimeString([],{ hour: '2-digit', minute: '2-digit' }))
+
+  useEffect(() => {
+    setAccountId(accounts[0]?._id)
+  }, [accounts])
 
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -54,7 +61,7 @@ const AddRecords = () => {
 
   const handleSubmit = () => {
     console.log(accountId);
-    if (!amount || !category || !subCategory || !accountId) {
+    if (!title || !amount || !category || !accountId) {
       alert("Please fill all the required fields!");
       return;
     }
@@ -65,15 +72,15 @@ const AddRecords = () => {
       accountId,
       category: category?.label,
       subCategory: subCategory?.label,
-      displayDate,
-      selectedDate,
-      time,
+      // date,
+      title,
       payee,
       note,
       paymentType,
       paymentStatus,
     };
     addNewRecord(newRecord);
+    console.log(newRecord)
     setAddRecords(false);
   };
   const categoryOptions = categoriesData.map((cat) => ({
@@ -107,19 +114,24 @@ const AddRecords = () => {
           position: "absolute",
           top: "auto",
           left: "8px",
-          gap: "5px",
+          gap: "10px",
           alignItems: "center",
           textWrap: "nowrap",
           overflow: "hidden",
         }}
       >
-        {data.icon}{" "}
+        <div style={{
+          fontSize: "18px",
+        }}>
+          {data.icon}
+        </div>
         <p
           style={{
             display: "flex",
             justifyContent: "left",
             width: "150px",
             overflow: "hidden",
+            fontSize: "16px",
             textOverflow: "ellipsis",
           }}
         >
@@ -140,8 +152,8 @@ const AddRecords = () => {
         cursor: "pointer",
       }}
     >
-      <span style={{ fontSize: "16px" }}>{data.icon}</span>
-      <span style={{ fontSize: "14px" }}>{data.label}</span>
+      <span style={{ fontSize: "18px", alignItems: "center", display: "flex" }}>{data.icon}</span>
+      <span style={{ fontSize: "16px", textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{data.label}</span>
     </div>
   );
 
@@ -171,16 +183,16 @@ const AddRecords = () => {
 
         <div className={styles.recordTypeToggle}>
           <button
-            className={recordType === 2 ? styles.active : ""}
-            onClick={() => setRecordType(2)}
-          >
-            Expense
-          </button>
-          <button
-            className={recordType === 1 ? styles.active : ""}
+            className={recordType === 1 ? styles.activeInc : ""}
             onClick={() => setRecordType(1)}
           >
             Income
+          </button>
+          <button
+            className={recordType === 2 ? styles.activeExp : ""}
+            onClick={() => setRecordType(2)}
+          >
+            Expense
           </button>
         </div>
         <div className={styles.upperhalf}>
@@ -213,7 +225,7 @@ const AddRecords = () => {
                     </option>
                   );
                 })}
-                <option  style={{fontWeight:"600"}} value="add_account">+ Add Account
+                <option style={{ fontWeight: "600" }} value="add_account">+ Add Account
                 </option>
               </select>
               {showAddAccountModal && (
@@ -223,16 +235,17 @@ const AddRecords = () => {
                 />
               )}
             </div>
-
-            <div className={styles.inputGroup}>
-              <label>Amount</label>
+            <div className={`${styles.inputGroup} ${styles.titleInput}`}>
+              <label>Title</label>
               <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmmount(e.target.value)}
-                placeholder="0"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter Title"
               ></input>
             </div>
+
+
           </div>
 
           <div className={styles.category}>
@@ -270,6 +283,28 @@ const AddRecords = () => {
                 isSearchable={false}
                 className={styles.reactSelect}
               />
+            </div>
+          </div>
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+            margin:"auto",
+            // border:"1px solid red",
+            width: "250px"
+          }}>
+
+            {recordType === 1 ? (<IoMdAdd />) : recordType === 2 ? (<FaMinus />) : null}
+
+            <div className={`${styles.inputGroup} ${styles.amountInput}`}>
+              <label>Amount</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmmount(e.target.value)}
+                placeholder="0"
+              ></input>
             </div>
           </div>
         </div>

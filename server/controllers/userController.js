@@ -2,7 +2,7 @@ const { UserModel } = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config();
-const { OAuth2Client } = require('google-auth-library');
+const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const getAllUsers = async (req, res) => {
@@ -25,7 +25,7 @@ const getUserDashboard = async (req, res) => {
       phone: user.phone,
       email: user.email,
       isFirstLogin: user.isFirstLogin,
-      photo: user?.photo
+      photo: user?.photo,
     };
     // await user.save();
     res.status(200).send({ message: "Welcome to your wallet!", details });
@@ -35,40 +35,53 @@ const getUserDashboard = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-  const { userId } = req.body.user;
-  const { name, phone, email, isFirstLogin, photo } = req.body;
-
-  const updateFields = {};
-  if (name !== undefined) updateFields.name = name;
-  if (phone !== undefined) updateFields.phone = phone;
-  if (email !== undefined) updateFields.email = email;
-  if (isFirstLogin !== undefined) updateFields.isFirstLogin = isFirstLogin;
-  if (photo !== undefined) updateFields.photo = photo;
-
-  if (Object.keys(updateFields).length === 0) {
-    return res.status(400).json({ error: "At least one field (name, phone, email, isFirstLogin, photo) must be provided." });
-  }
-
   try {
-    const user = await UserModel.findOne({ _id: userId });
+    const { userId } = req.body.user;
+    const { name, email, isFirstLogin } = req.body;
 
-    if(!user){
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
+    // if (phone !== undefined) updateFields.phone = phone;
+    if (email !== undefined) updateFields.email = email;
+    if (isFirstLogin !== undefined) updateFields.isFirstLogin = isFirstLogin;
+    // if (photo !== undefined) updateFields.photo = photo;
+
+    // Handle photo upload
+    if (req.file && req.file.path) {
+      updateFields.photo = req.file.path; // Use Cloudinary URL
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        error:
+          "At least one field (name, phone, email, isFirstLogin, photo) must be provided.",
+      });
+    }
+
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
       res.status(404).send({ err: `User not found` });
       return;
     }
 
-    const details = {
-      _id: user._id,
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      isFirstLogin: user.isFirstLogin,
-      photo: user?.photo
-    };
-    // await user.save();
-    res.status(200).send({ message: "Welcome to your wallet!", details });
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: updateFields },
+      { new: true, runValidators: true } // Return updated user & run schema validations
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Update failed." });
+    }
+
+    res
+      .status(200)
+      .send({ message: "Your account has been updated", updatedUser });
   } catch (error) {
-    res.status(400).send({ err: `Something went wrong while updating user details, ${error}` });
+    res.status(400).send({
+      err: `Something went wrong while updating user details, ${error}`,
+    });
   }
 };
 
@@ -115,18 +128,20 @@ const loginUserController = async (req, res) => {
 
   if (data.email) {
     isEmailLogin = true;
-  } else if (!data.phone) { 
+  } else if (!data.phone) {
     res.status(400).send({ msg: `Email or phone number required` });
     return;
   }
-  
-  if(!data.password){
+
+  if (!data.password) {
     res.status(400).send({ msg: `Password required for login` });
     return;
   }
 
   if (data.password.length < 8) {
-    res.status(400).send({ msg: `Invalid Password! Password should be of length 8 or more` });
+    res.status(400).send({
+      msg: `Invalid Password! Password should be of length 8 or more`,
+    });
     return;
   }
 
@@ -158,8 +173,8 @@ const loginUserController = async (req, res) => {
 
         res.cookie("token", token, {
           httpOnly: true,
-          secure: false,  // Set to true only if using HTTPS
-          sameSite: "Lax"
+          secure: false, // Set to true only if using HTTPS
+          sameSite: "Lax",
         });
 
         return res.status(200).send({
@@ -180,4 +195,5 @@ module.exports = {
   loginUserController,
   getUserDashboard,
   getAllUsers,
+  updateUserDetails,
 };

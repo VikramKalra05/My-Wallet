@@ -61,7 +61,7 @@ export const getUserDetails = async () => {
       headers: {
         "Content-type": "Application/json",
       },
-      credentials: 'include'
+      credentials: "include",
     });
 
     if (res.ok) {
@@ -74,23 +74,20 @@ export const getUserDetails = async () => {
   }
 };
 
-export const updateUserDetails = async (credentials) => {
-  //pending
+export const updateUserDetails = async (formData) => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/dashboard`, {
-      method: "POST",
-      headers: {
-        "Content-type": "Application/json",
-      },
-      body: JSON.stringify(credentials),
+    const res = await fetch(`${TESTING_URL}/user/update`, {
+      method: "PATCH",
+      body: formData,
+      credentials: "include",
     });
 
     if (res.ok) {
       const data = await res.json();
-      console.log(`Register data: ${data}`);
+      console.log(`Updated User data: ${data}`);
       return data;
     }
   } catch (error) {
-    console.log("error at register:", error);
+    console.log("error at updating user details:", error);
   }
 };

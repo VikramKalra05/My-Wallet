@@ -1,0 +1,53 @@
+.settingsPage{
+    background-color: #f4f4f4;
+    width: 100%;
+    min-height: 93vh;
+    padding-top: 50px;
+}
+
+.settingCont{
+    border: 1px solid red;
+    width: 80%;
+    margin: auto;
+}
+
+.settingHeader{
+    border: 1px solid red;
+    width: fit-content;
+    font-size: 30px;
+    font-weight: 600;
+    margin: auto;
+}
+
+.settingMain{
+    display: flex;
+    padding: 0 100px;
+}
+
+.setImgDiv{
+    margin-top: 50px;
+    /* border: 1px solid red; */
+}
+
+.setImgDiv>img{
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+}
+
+.updatePfpBtn{
+    /* border: 1px solid red; */
+    width: 100%;
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 5px;
+    background-color: #64748b;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.updatePfpBtn:hover{
+    background-color: #4b5768;
+}

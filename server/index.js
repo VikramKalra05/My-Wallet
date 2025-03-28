@@ -21,6 +21,7 @@ app.use(cors({
     origin: "http://localhost:3000",  // Your frontend's URL
     credentials: true  // Allow cookies to be sent with requests
 }));
+app.use("/uploads", express.static("uploads")); 
 
 // 🔹 Add session middleware (BEFORE Passport)
 app.use(

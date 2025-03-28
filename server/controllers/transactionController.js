@@ -39,20 +39,19 @@ const getAllTransactions = async (req, res) => {
 
 const createTransaction = async (req, res) => {
   const {
-    title,
     amount,
     date,
     type,
     category,
-    description,
     status,
     payee,
-    label,
+    note,
+    paymentType,
     accountId,
   } = req.body;
   const { userId } = req.body.user;
 
-  if (!title || !amount || !date || !type.id || !category.id || !accountId) {
+  if (!amount || !date || !type.id || !category.id || !accountId) {
     return res.status(400).send({
       error: `Missing required fields: title, amount, category.id, type.id, date, accountId`,
     });
@@ -65,7 +64,7 @@ const createTransaction = async (req, res) => {
   if (!CATEGORIES[category.id]) {
     return res.status(400).json({ error: "Invalid category ID" });
   } else {
-    if (category.subCategory) {
+    if (category?.subCategory?.id) {
       if (!CATEGORIES[category.id].subCategories[category.subCategory.id]) {
         return res.status(400).json({ error: "Invalid subCategory ID" });
       }
@@ -80,13 +79,13 @@ const createTransaction = async (req, res) => {
   const categoryDetails = {
     id: category.id,
     categoryName: CATEGORIES[category.id].categoryName,
-    // subCategory: category.subCategory.id
-    //   ? {
-    //       id: category.subCategory.id,
-    //       subCategoryName:
-    //         CATEGORIES[category.id].subCategories[category.subCategory.id],
-    //     }
-    //   : null,
+    subCategory: category?.subCategory?.id
+      ? {
+          id: category.subCategory.id,
+          subCategoryName:
+            CATEGORIES[category.id].subCategories[category.subCategory.id],
+        }
+      : null,
   };
 
   const account = await AccountModel.findOne({"_id" : accountId, userId});
@@ -97,19 +96,23 @@ const createTransaction = async (req, res) => {
 
   try {
      const transaction = new TransactionModel({
-      title,
       amount,
       date,
       type: typeDetails,
       category: categoryDetails,
       userId,
-      description,
       status,
       payee,
       label,
-      accountId
+      note,      
+      paymentType,
+      account: {
+        accountId,
+        accountName: account.accountName 
+      }
     });
 
+    
     await AccountModel.findByIdAndUpdate(accountId, { $inc: { balance: -amount } });
 
     await transaction.save();

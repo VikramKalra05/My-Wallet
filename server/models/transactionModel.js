@@ -2,27 +2,35 @@ const mongoose = require("mongoose");
 
 const transactionSchema = mongoose.Schema(
   {
-    title: { type: String, required: true, max: 250}, // required
-    description: { type: String, default: "" },
     amount: { type: Number, required: true }, // required
     date: { type: Date, required: true }, // required
     type: {
       typeName: { type: String },
       id: { type: Number, required: true }, // required
     },
-    status: { type: String },
+    status: { type: String, default: "Cleared" },
+    paymentType: { type: String, default: "" },
     payee: { type: String, default: "" },
-    label: { type: String, default: "" },
+    note: { type: String, default: "" },
+    // label: { type: String, default: "" },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       required: true,
     }, // required
-    accountId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "account",
-      required: true,
-    }, // required
+    // accountId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "account",
+    //   required: true,
+    // }, // required
+    account: {
+      accountId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "account",
+        required: true,
+      },
+      accountName: { type: String },
+    },
     category: { 
       categoryName: { type: String },
       id: { type: Number, required: true }, //required

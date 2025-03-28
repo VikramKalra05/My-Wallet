@@ -9,8 +9,9 @@ import AppContext from "../context/AppContext";
 const Records = ({ selectedCategory }) => {
   const {records, setRecords} = useContext(AppContext);
   
-  const handleDelete = (id) => {
-    const updatedRecords = records.filter((record) => record.id !== id);
+  const handleDelete = (index) => {
+    const updatedRecords = records.filter((record) => record.id !== index);
+    console.log(updatedRecords);
     setRecords(updatedRecords);
   };
   const isCategorySelected = (category) =>
@@ -39,8 +40,8 @@ const Records = ({ selectedCategory }) => {
         <p>No Records Found</p>
       ) : (
         <div className={styles.recordsContainer}>
-          {finalRecords.map((record) => (
-            <div key={record.id} className={styles.recordsItem}>
+          {finalRecords.map((record, index) => (
+            <div key={index} className={styles.recordsItem}>
               <div className={styles.leftSection}>
                 <div className={styles.icon}>
                   {getCategoryIcon(record.category)}
@@ -64,7 +65,7 @@ const Records = ({ selectedCategory }) => {
                 <div className={styles.amount}>₹{record.amount}</div>
                 <button
                   className={styles.delete}
-                  onClick={() => handleDelete(record.id)}
+                  onClick={() => handleDelete(index)}
                 >
                   <MdDelete size={20} />
                 </button>
