@@ -65,7 +65,7 @@ const createTransaction = async (req, res) => {
   if (!CATEGORIES[category.id]) {
     return res.status(400).json({ error: "Invalid category ID" });
   } else {
-    if (category.subCategory) {
+    if (category?.subCategory?.id) {
       if (!CATEGORIES[category.id].subCategories[category.subCategory.id]) {
         return res.status(400).json({ error: "Invalid subCategory ID" });
       }

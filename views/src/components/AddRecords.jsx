@@ -6,6 +6,7 @@ import AppContext from "../context/AppContext";
 import { getAccounts } from "../utils/accountUtils";
 import AddAccountModal from "./AddAccountModal";
 import { RxCross2 } from "react-icons/rx";
+import { createTransaction, getAllTransactionsOfUser } from "../utils/transactionUtils";
 
 const AddRecords = () => {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -15,10 +16,10 @@ const AddRecords = () => {
   const [accountId, setAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
 
-  const [amount, setAmmount] = useState("");
+  const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
-  // const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   //   const [time, setTime]=useState(new Date().toLocaleTimeString([],{ hour: '2-digit', minute: '2-digit' }))
 
   const [selectedDate, setSelectedDate] = useState(
@@ -35,9 +36,9 @@ const AddRecords = () => {
   const handleDateChange = (e) => {
     const newDate = new Date(e.target.value);
     setSelectedDate(e.target.value); // Keeps the date in ISO format (yyyy-mm-dd)
-    setDisplayDate(
-      newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
-    ); // Formats to "March 25"
+    // setDisplayDate(
+    //   newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
+    // ); // Formats to "March 25"
   };
 
   const [time, setTime] = useState(() => {
@@ -47,34 +48,68 @@ const AddRecords = () => {
     ).padStart(2, "0")}`;
   });
 
+  function getTimeStampFromDateandTime(dateStr,timeStr){
+    const combined = `${dateStr}T${timeStr}:00`
+    const date= new Date(combined)
+    return (date.getTime())
+  }
+  const fetchRecords=async ()=>{
+      const fetchedRecords=await getAllTransactionsOfUser()
+      setRecords(fetchedRecords) 
+      console.log(fetchedRecords);
+     }
+
+
+useEffect(() => {
+  setDate(getTimeStampFromDateandTime(selectedDate,time))
+  const newDate = new Date(`${selectedDate}T${time}`);
+  setDisplayDate(
+    newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
+  );
+}, [selectedDate, time]);
+
+
   const [payee, setPayee] = useState("");
   const [note, setNote] = useState("");
   const [paymentType, setPaymentType] = useState("Cash");
   const [paymentStatus, setPaymentStatus] = useState("Cleared");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log(accountId);
-    if (!amount || !category || !subCategory || !accountId) {
+    // console.log(subCategory.value);
+    if (!amount || !category
+      //  || !accountId
+      ) {
       alert("Please fill all the required fields!");
       return;
     }
 
     var newRecord = {
-      type: recordType,
+      type: {id: recordType},
       amount,
-      accountId,
-      category: category?.label,
-      subCategory: subCategory?.label,
-      displayDate,
-      selectedDate,
-      time,
+      accountId: "67e665227dce313b677c6bbf",
+      category: {
+        id: category?.value,
+        subCategory: {
+          id: subCategory?.value
+        }
+      },
+      // subCategory: subCategory?.label,
+      // displayDate,
+      // selectedDate,
+      // time,
+      title: "Vikram",
       payee,
+      date,
       note,
       paymentType,
-      paymentStatus,
+      status: paymentStatus,
     };
-    addNewRecord(newRecord);
+    await createTransaction(newRecord)
+    // addNewRecord(newRecord);
     setAddRecords(false);
+    await fetchRecords()
+    console.log(newRecord);
   };
   const categoryOptions = categoriesData.map((cat) => ({
     value: cat.id,
@@ -152,11 +187,12 @@ const AddRecords = () => {
     setAccLoading(false);
   };
   useEffect(() => {
+    if(accounts.length===0)
     handleFetchAccounts();
   }, []);
 
 
-  console.log(accountId);
+  // console.log(accountId);  
 
   return (
     <div className={styles.modalOverlay} onClick={() => setAddRecords(false)}>
@@ -229,7 +265,7 @@ const AddRecords = () => {
               <input
                 type="number"
                 value={amount}
-                onChange={(e) => setAmmount(e.target.value)}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
               ></input>
             </div>
