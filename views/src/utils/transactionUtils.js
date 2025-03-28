@@ -58,7 +58,7 @@ export const getAllTransactionsOfUser = async (credentials) => {
         if(res.ok){
             const data = await res.json();
             console.log(`All transactions of user: ${data}`);
-            return data;
+            return data.transactions;
         }
 
     } catch (error) {
