@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { editAccount } from "../utils/accountUtils";
 import styles from "../css/accounts.module.css";
+import { RxCross2 } from "react-icons/rx";
+
 
 const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => {
- const [updatedAccount,setUpdatedAccount]=useState(account)   
+ const [updatedAccount, setUpdatedAccount]=useState(account)   
 
     // implement edit account
     // create a form to edit account - account name and balance
@@ -19,17 +21,23 @@ const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => 
     } 
 
     return (
-        <div className={styles.editAccountModal} onClick={()=>setShowEditAccountModal(false)}>
-            <div className={styles.editAccountModalContent} onClick={(e) => e.stopPropagation()}>
-                <h1>Edit Account</h1>
-                <button onClick={() => setShowEditAccountModal(false)}>Close</button>
-                <div>
-                    <input type="text" placeholder="Account Name" value={updatedAccount?.accountName} onChange={(e) => setUpdatedAccount({ ...updatedAccount, accountName: e.target.value })} />
-                    <input type="number" placeholder="Account Balance" value={updatedAccount?.balance} onChange={(e) => setUpdatedAccount({ ...updatedAccount, balance: e.target.value })} />
-                    <button onClick={handleEdit}>Edit</button>
+        <div className={styles.AddAccountModalOverlay} onClick={() => setShowEditAccountModal(false)}>
+            <div className={styles.AddAccountModalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.top}>
+                <h2 style={{fontSize:"18px"}}>Edit Account</h2>
+                <button className={styles.closeButton} onClick={() => setShowEditAccountModal(false)}><RxCross2 /></button>
+                </div>
+                <div className={styles.inputGroup}>
+                    <label>Account Name</label>
+                    <input type="text" placeholder="Enter Account Name" value={updatedAccount.accountName} onChange={(e) => setUpdatedAccount({ ...updatedAccount, accountName: e.target.value })} />
+                    <label>Balance</label>
+                    <input type="number" placeholder="Enter Balance" value={updatedAccount.balance} onChange={(e) => setUpdatedAccount({ ...updatedAccount, balance: e.target.value })} />
+                    </div>
+                    <div className={styles.createButton}>
+                    <button onClick={handleEdit}>Save</button>
+                    </div>
                 </div>
             </div>
-        </div>
     )
 }
 

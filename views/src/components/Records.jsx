@@ -6,6 +6,7 @@ import { MdDelete } from "react-icons/md";
 import categoriesData from "../utils/modalCategories";
 import AppContext from "../context/AppContext";
 import { displayDate } from "../dateConversions/displayDate";
+import { deleteTransaction } from "../utils/transactionUtils";
 
 const Records = ({ selectedCategory, fetchRecords }) => {
   const { records, setRecords } = useContext(AppContext);
@@ -14,6 +15,7 @@ const Records = ({ selectedCategory, fetchRecords }) => {
     // const updatedRecords = records.filter((record) => record.id !== id);
     // api call to delete the record
     // fetch records AGAIN
+    await deleteTransaction(id);
     await fetchRecords();
     // setRecords(updatedRecords);
   };
@@ -87,6 +89,7 @@ const Records = ({ selectedCategory, fetchRecords }) => {
                     <div className={styles.paymentStatus}>
                       {record?.status}
                     </div>
+                    <div className={styles.payee}>{record?.paymentType}</div>
                     <div className={styles.payee}>{record?.payee}</div>
                     {/* <div> {record.accountId}</div> */}
                     <div className={styles.note}>{record?.note}</div>

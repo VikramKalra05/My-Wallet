@@ -15,7 +15,6 @@ const AddRecords = () => {
   const { setRecords, setAddRecords } = useContext(AppContext);
   const [recordType, setRecordType] = useState(2);
   const [accLoading, setAccLoading] = useState(true);
-  const [title, setTitle] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
 
@@ -267,14 +266,18 @@ useEffect(() => {
                 />
               )}
             </div>
+
             <div className={`${styles.inputGroup} ${styles.titleInput}`}>
-              <label>Title</label>
+              <label>Amount</label>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-              ></input>
+                >
+
+                {/* {recordType === 1 ? (<IoMdAdd />) : recordType === 2 ? (<FaMinus />) : null} */}
+                </input>
             </div>
 
 
@@ -327,17 +330,7 @@ useEffect(() => {
             width: "250px"
           }}>
 
-            {recordType === 1 ? (<IoMdAdd />) : recordType === 2 ? (<FaMinus />) : null}
 
-            <div className={`${styles.inputGroup} ${styles.amountInput}`}>
-              <label>Amount</label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmmount(e.target.value)}
-                placeholder="0"
-              ></input>
-            </div>
           </div>
         </div>
 

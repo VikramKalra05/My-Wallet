@@ -27,8 +27,6 @@ const deleteAccount = async (req, res) => {
     const {id} = req.body;
     const {userId} = req.body.user;
 
-    console.log(id, userId);
-
     if(!id){
         return res.status(400).send({"error" : `Missing required field: Account ID`});
     }

@@ -3,11 +3,22 @@ import styles from "../css/sidebar.module.css";
 import { CATEGORIES } from "../utils/categories";
 import { FaAngleRight, FaAngleDown } from "react-icons/fa";
 import AppContext from "../context/AppContext";
+import { getCategories } from "../utils/categoryUtils";
 
-const Sidebar = ({ selectedCategory, setSelectedCategory}) => {
-  const {setAddRecords}=useContext(AppContext)
+const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
+  const { setAddRecords } = useContext(AppContext);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedSubCategories, setExpandedSubCategories] = useState({});
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategories = async () => {
+    const res = await getCategories();
+    if (res) {
+      setCategories(res);
+    } else {
+      // toast to show error TBD
+    }
+  };
 
   const toggleCategory = (categoryId, categoryName) => {
     setExpandedCategories((prev) => ({
@@ -32,14 +43,50 @@ const Sidebar = ({ selectedCategory, setSelectedCategory}) => {
       }
     });
   };
-  
 
   return (
     <div className={styles.sidebar}>
       <h2>Records</h2>
-      <button onClick={()=>setAddRecords(true)} className={styles.addButton}>+ Add</button>
+      <button onClick={() => setAddRecords(true)} className={styles.addButton}>
+        + Add
+      </button>
 
       <h4 style={{ fontWeight: "500" }}>FILTER</h4>
+      <div>
+        <p
+          onClick={fetchCategories}
+          style={{
+            backgroundColor: "green",
+            color: "white",
+          }}
+        >
+          Categories
+        </p>
+
+        <div>
+          {categories.length > 0 &&
+            categories.map((category) => {
+              return (
+                <div key={category._id}>
+                  <p style={{ fontSize: "14px", fontWeight: "700" }}>{category?.categoryName}</p>
+                  <div>
+                    {category?.subCategories?.length > 0 &&
+                      category?.subCategories?.map((sub) => {
+                        return (
+                          <div key={sub._id}>
+                            <p style={{ fontSize: "12px" }}>
+                              {sub?.subCategoryName}
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+
       {CATEGORIES.map((category) => (
         <div key={category.id}>
           {/* Main category */}
@@ -55,7 +102,7 @@ const Sidebar = ({ selectedCategory, setSelectedCategory}) => {
               <FaAngleRight />
             )}{" "}
             {category.categoryName}
-          </div>  
+          </div>
 
           {/* Show Subcategories if expanded */}
           {expandedCategories[category.id] && (
@@ -92,12 +139,17 @@ const Sidebar = ({ selectedCategory, setSelectedCategory}) => {
                       {sub.subCategories.map((nested) => (
                         <div
                           key={nested.id}
-                          onClick={(e) =>{e.stopPropagation()
-                             handleCategorySelection(nested.name)}}
-                          style={{ color: selectedCategory.includes(nested.name) ? "blue" : "black" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCategorySelection(nested.name);
+                          }}
+                          style={{
+                            color: selectedCategory.includes(nested.name)
+                              ? "blue"
+                              : "black",
+                          }}
                           // Updated to change color if selected
                         >
-                      
                           • {nested.name}
                         </div>
                       ))}
