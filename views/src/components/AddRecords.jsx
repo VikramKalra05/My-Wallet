@@ -15,7 +15,7 @@ const AddRecords = () => {
   const { setRecords, setAddRecords } = useContext(AppContext);
   const [recordType, setRecordType] = useState(2);
   const [accLoading, setAccLoading] = useState(true);
-  const [title, setTitle] = useState("");
+  // const [title, setTitle] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
 
@@ -98,10 +98,6 @@ useEffect(() => {
           id: subCategory?.value
         }
       },
-      // subCategory: subCategory?.label,
-      // displayDate,
-      // selectedDate,
-      // time,
       payee,
       date,
       note,
@@ -267,7 +263,7 @@ useEffect(() => {
                 />
               )}
             </div>
-            <div className={`${styles.inputGroup} ${styles.titleInput}`}>
+            {/* <div className={`${styles.inputGroup} ${styles.titleInput}`}>
               <label>Title</label>
               <input
                 type="number"
@@ -275,7 +271,7 @@ useEffect(() => {
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
               ></input>
-            </div>
+            </div> */}
 
 
           </div>
@@ -334,7 +330,7 @@ useEffect(() => {
               <input
                 type="number"
                 value={amount}
-                onChange={(e) => setAmmount(e.target.value)}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
               ></input>
             </div>

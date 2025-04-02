@@ -16,6 +16,11 @@
     background: #f8f9fa;
     height: 45px;
     gap: 12px;
+    /* border: 5px solid yellow; */
+}
+.recordsItem:hover{
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1.01);
 }
 
 .leftSection {
@@ -47,17 +52,24 @@
     justify-content: flex-start;
 }
 
-.paymentMethod {
+.accountName {
     font-size: 14px;
-    color: #6c757d;
     flex: 1;
+    color: black;
+    font-weight: 400;
 }
 
 .paymentStatus {
     font-size: 14px;
     font-weight: bold;
     color: #28a745;
-    flex: 1;
+    flex: 2;
+}
+.paymentType{
+    font-size: 14px;
+    color: #6c757d;
+    flex:2;
+
 }
 
 .note {
@@ -66,11 +78,15 @@
     flex: 2;
     text-align: left;
 }
+.payee{
+    flex:1;
+    color: #0074D9;
+}
 
 .rightSection {
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 2;
     justify-content: flex-end;
     gap: 15px;
 }

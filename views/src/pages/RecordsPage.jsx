@@ -8,8 +8,12 @@ import { getAllTransactionsOfUser} from "../utils/transactionUtils"
 
 const RecordsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState([]);
-  const {records,setRecords} =useContext(AppContext);
+  const {records ,setRecords} =useContext(AppContext);
   const [sortedRecords , setSortedRecords]=useState(records) //for date sorting
+
+  useEffect(() => {
+    setSortedRecords(records);
+  }, [records])
 
   const fetchRecords=async ()=>{
     const fetchedRecords=await getAllTransactionsOfUser()
@@ -29,7 +33,7 @@ const RecordsPage = () => {
       </div>
       <div className={styles.recordsContent}>
         <DateSorting setSortedRecords={setSortedRecords} />
-        <Records selectedCategory={selectedCategory} fetchRecords={fetchRecords} />
+        <Records selectedCategory={selectedCategory} fetchRecords={fetchRecords} sortedRecords={sortedRecords}/>
       </div>
     </div>
   );

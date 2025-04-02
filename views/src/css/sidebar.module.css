@@ -50,11 +50,10 @@
 
 .category {
     margin-top: 10px;
-    font-weight: 600;
+    font-weight: 800;
     cursor: pointer;
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    /* color: pink; */
     
 }
 
@@ -66,14 +65,13 @@
     color: #555;
     cursor: pointer;
     margin-left: 30px;
-
-}
-
-.subCategory:hover {
     color: #10b981;
+    font-weight: 600;
+
 }
-.nestedSubCategory:hover{
+.nestedSubCategory{
     color: #f1c40f;
+    font-weight: 600;
 }
 
 .nestedSubCategory div {

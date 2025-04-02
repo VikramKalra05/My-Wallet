@@ -103,7 +103,7 @@ const createTransaction = async (req, res) => {
       userId,
       status,
       payee,
-      label,
+      // label,
       note,      
       paymentType,
       account: {

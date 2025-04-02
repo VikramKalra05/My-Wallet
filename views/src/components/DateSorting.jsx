@@ -3,7 +3,7 @@ import styles from "../css/datefilter.module.css";
 import { FaAngleDown } from "react-icons/fa";
 import AppContext from "../context/AppContext";
 
-const DateSorting = ({ setSortedRecords }) => {
+const DateSorting = ({ sortedRecords, setSortedRecords }) => {
   const {records} = useContext(AppContext);
   const [dateFilter, setDateFilter] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
@@ -19,102 +19,116 @@ const DateSorting = ({ setSortedRecords }) => {
     thisYear: "This Year",
   };
 
-  //helper functions to get the start dates for filtering
+  // Helper functions to get the start dates for filtering
   const getStartOfWeek = () => {
     const start = new Date();
     start.setDate(start.getDate() - start.getDay());
+    start.setHours(0, 0, 0, 0); // Normalize time
     return start;
   };
 
   const getStartOfMonth = () => {
     const start = new Date();
     start.setDate(1);
+    start.setHours(0, 0, 0, 0); // Normalize time
     return start;
   };
 
   const getStartOfYear = () => {
     const start = new Date();
     start.setMonth(0, 1);
+    start.setHours(0, 0, 0, 0); // Normalize time
     return start;
   };
 
   const filterFunctions = {
     all: () => records,
+
     today: () => {
       const today = new Date();
-      console.log(today)
-      return records.filter(
-        (record) =>
-          new Date(record.displayDate).toDateString() === today.toDateString()
+      today.setHours(0, 0, 0, 0); // Normalize time
+
+      return records?.filter(
+        (record) => new Date(record.date).toDateString() === today.toDateString()
       );
     },
+
     thisWeek: () => {
       const startOfWeek = getStartOfWeek();
-      startOfWeek.setHours(0, 0, 0, 0);
-      console.log("Start of This Week:", startOfWeek);
-      return records.filter(
-        (record) => new Date(record.displayDate) >= startOfWeek
-      );
+      return records?.filter((record) => new Date(record.date) >= startOfWeek);
     },
+
     thisMonth: () => {
       const startOfMonth = getStartOfMonth();
-      startOfMonth.setHours(0, 0, 0, 0);
-      console.log("Start of This Month:", startOfMonth);
-      return records.filter(
-        (record) => new Date(record.displayDate) >= startOfMonth
-      );
+      return records?.filter((record) => new Date(record.date) >= startOfMonth);
     },
+
     thisYear: () => {
       const startOfYear = getStartOfYear();
-      console.log(startOfYear)
-      return records.filter(
-        (record) =>
-          new Date(record.displayDate).getFullYear() ===
-          startOfYear.getFullYear()
+      return records?.filter(
+        (record) => new Date(record.date).getFullYear() === startOfYear.getFullYear()
       );
     },
+
     last7days: () => {
       const last7days = new Date();
       last7days.setDate(last7days.getDate() - 7);
-      return records.filter(
-        (record) => new Date(record.displayDate) >= last7days
-      );
+      last7days.setHours(0, 0, 0, 0); // Normalize time
+
+      return records?.filter((record) => new Date(record.date) >= last7days);
     },
+
     lastMonth: () => {
-      const lastMonth = new Date();
-      lastMonth.setMonth(lastMonth.getMonth()-1);
-      return records.filter(
-        (record) =>
-          new Date(record.displayDate).getMonth() === lastMonth.getMonth()
-      );
+      // Improved: Ensure the range is the exact last month
+      const startOfLastMonth = new Date();
+      startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1, 1);
+      startOfLastMonth.setHours(0, 0, 0, 0);
+
+      const endOfLastMonth = new Date(startOfLastMonth);
+      endOfLastMonth.setMonth(endOfLastMonth.getMonth() + 1, 0);
+      endOfLastMonth.setHours(23, 59, 59, 999);
+
+      return records?.filter((record) => {
+        const recordDate = new Date(record.date);
+        return recordDate >= startOfLastMonth && recordDate <= endOfLastMonth;
+      });
     },
+
     lastYear: () => {
-      const lastYear = new Date();
-      lastYear.setFullYear(lastYear.getFullYear() - 1);
-      return records.filter(
-        (record) =>
-          new Date(record.displayDate).getFullYear() === lastYear.getFullYear()
-      );
+      // Improved: Ensure the range is the exact last year
+      const startOfLastYear = new Date();
+      startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1, 0, 1);
+      startOfLastYear.setHours(0, 0, 0, 0);
+
+      const endOfLastYear = new Date(startOfLastYear);
+      endOfLastYear.setFullYear(endOfLastYear.getFullYear(), 11, 31);
+      endOfLastYear.setHours(23, 59, 59, 999);
+
+      return records?.filter((record) => {
+        const recordDate = new Date(record.date);
+        return recordDate >= startOfLastYear && recordDate <= endOfLastYear;
+      });
     },
   };
 
-  const handleDateFilterChange = (filter) => {
+  const handleDateFilterChange = async (filter) => {
     setDateFilter(filter);
+    console.log("filter", filterFunctions[filter]());
     setSortedRecords(filterFunctions[filter]());
     setIsOpen(false);
   };
-  //applying "all" filter by default whenever records change
+  
+  // Applying "all" filter by default whenever records change
   useEffect(() => {
     setSortedRecords(filterFunctions["all"]());
-  }, [records]); //runs when records change
+    setIsOpen(false);
+
+  }, [sortedRecords]);
 
   return (
     <div>
       <div style={{ position: "absolute" }}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={styles.dropdownButton}
-        >
+        <button onClick={() => setIsOpen(!isOpen)} className={styles.dropdownButton}>
           {filterLabels[dateFilter] || "All Records"}
           <span className={`${styles.arrow} ${isOpen ? styles.open : ""}`}>
             <FaAngleDown color="green" />
@@ -129,7 +143,7 @@ const DateSorting = ({ setSortedRecords }) => {
                   key={filter}
                   onClick={() => handleDateFilterChange(filter)}
                   className={`${styles.filterOption} ${
-                    dateFilter === "filter" ? styles.activeFilter : ""
+                    dateFilter === filter ? styles.activeFilter : ""
                   }`}
                 >
                   {filterLabels[filter]}
@@ -158,3 +172,4 @@ const DateSorting = ({ setSortedRecords }) => {
 };
 
 export default DateSorting;
+

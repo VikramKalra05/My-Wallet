@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { editAccount } from "../utils/accountUtils";
 import styles from "../css/accounts.module.css";
+import { RxCross2 } from "react-icons/rx";
+
 
 const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => {
  const [updatedAccount,setUpdatedAccount]=useState(account)   
@@ -19,14 +21,19 @@ const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => 
     } 
 
     return (
-        <div className={styles.editAccountModal} onClick={()=>setShowEditAccountModal(false)}>
+        <div className={styles.editAccountModalOverlay} onClick={()=>setShowEditAccountModal(false)}>
             <div className={styles.editAccountModalContent} onClick={(e) => e.stopPropagation()}>
-                <h1>Edit Account</h1>
-                <button onClick={() => setShowEditAccountModal(false)}>Close</button>
-                <div>
+                <div className={styles.editTop}>
+                <h1 style={{fontSize:"18px"}}>Edit Account</h1>
+                <button className={styles.closeEditButton} onClick={() => setShowEditAccountModal(false)}><RxCross2 /></button>
+                </div>
+                <div className={styles.editInputGroup}>
+                    <label>Account name</label>
                     <input type="text" placeholder="Account Name" value={updatedAccount?.accountName} onChange={(e) => setUpdatedAccount({ ...updatedAccount, accountName: e.target.value })} />
+                    <label>Balance</label>
                     <input type="number" placeholder="Account Balance" value={updatedAccount?.balance} onChange={(e) => setUpdatedAccount({ ...updatedAccount, balance: e.target.value })} />
-                    <button onClick={handleEdit}>Edit</button>
+                    <div className={styles.saveButton}>
+                    <button onClick={handleEdit}>Save</button></div>
                 </div>
             </div>
         </div>

@@ -35,7 +35,7 @@ const AccountCard = ({ account, fetchAccounts }) => {
         <div className={styles.delete}>
           <h1  className={styles.accBalance}>
             {/* <span style={{ fontWeight: "bolder" }}>Balance:</span>₹ */}
-            {account?.balance}
+            ₹{account?.balance}
           </h1>
           <button className={styles.deletebutton} onClick={handleDelete}>
             <MdDelete size={18} />

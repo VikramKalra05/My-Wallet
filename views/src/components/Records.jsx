@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 // import { records as initialRecords } from "../utils/dummydata";
 import styles from "../css/records.module.css";
 // import {deleteIcon} from "@chakra-ui/icons"
@@ -7,8 +7,9 @@ import categoriesData from "../utils/modalCategories";
 import AppContext from "../context/AppContext";
 import { displayDate } from "../dateConversions/displayDate";
 
-const Records = ({ selectedCategory, fetchRecords }) => {
-  const { records, setRecords } = useContext(AppContext);
+const Records = ({ selectedCategory, fetchRecords, sortedRecords }) => {
+  // const { records, setRecords } = useContext(AppContext);
+  const [ finalRecords, setFinalRecords ] = useState([]);
 
   const handleDelete = async (id) => {
     // const updatedRecords = records.filter((record) => record.id !== id);
@@ -17,43 +18,62 @@ const Records = ({ selectedCategory, fetchRecords }) => {
     await fetchRecords();
     // setRecords(updatedRecords);
   };
-  const isCategorySelected = (category) =>
-    Array.isArray(selectedCategory) && selectedCategory.includes(category);
 
-  // Ensure filtering strictly matches selected categories
-  const filteredRecords = records?.filter(
-    (record) =>
-      selectedCategory?.length === 0 || // Show all if nothing is selected
-      isCategorySelected(record.category) ||
-      isCategorySelected(record.subCategory?.label || record.subCategory)
-  );
+  const isCategorySelected = (record) => {
+    if (!selectedCategory || selectedCategory.length === 0) return true;
+  
+    const mainCategory = record.category?.categoryName;
+    const subCategory = record.subCategory?.subCategoryName || record.category?.subCategory?.subCategoryName;
+    const recordType=record?.type?.typeName
+    const paymentType=record?.paymentType
+    const paymentStatus=record?.status
+  
+    return (
+      selectedCategory.includes(mainCategory) ||
+      selectedCategory.includes(subCategory) || 
+      selectedCategory.includes(recordType) ||
+      selectedCategory.includes(paymentType) || 
+      selectedCategory.includes(paymentStatus)
+    )
+  };
+  
+  
+  // const dateFilteredRecords = applyDateFilter(filteredRecords || []);
+  
+  const updateFinally = () => {
+    const filteredRecords = sortedRecords
+      ?.filter(isCategorySelected) || []
+    setFinalRecords([...(filteredRecords || [])].sort((a, b) => new Date(b.date) - new Date(a.date)))
+  }
 
-  // If no records match the selection, show "No Records Found" and sorting the records date wise from newest to oldest
-  const finalRecords =
-    filteredRecords?.length > 0
-      ? [...filteredRecords].sort((a, b) => new Date(b.date) - new Date(a.date))
-      : [];
+  useEffect(() => {
+    updateFinally()
+  }, [sortedRecords, selectedCategory])
+
+  // const finalRecords = [...(filteredRecords || [])].sort((a, b) => new Date(b.date) - new Date(a.date))
+   
 
   const getCategoryIcon = (categoryName) => {
     const category = categoriesData.find((cat) => cat.name === categoryName);
     return category ? category.icon : null;
   };
 
-  console.log("lalalalal", records);
+  console.log("sortedRecords", sortedRecords);
+  console.log("finalRecords", finalRecords);
   return (
     <div className={styles.container}>
       {/* <p>Showing records for: <strong>{selectedCategory || "All Categories"}</strong> </p> */}
-      {records?.length === 0 ? (
+      {finalRecords?.length === 0 ? (
         <p>No Records Found</p>
       ) : (
         <div className={styles.recordsContainer}>
-          {records?.map((record, id) => {
+          {finalRecords?.map((record, id) => {
             const currentDate = displayDate(record?.date);
-            const prevDate = id > 0 ? displayDate(records[id - 1].date) : null;
-            const showDateHeader = currentDate != prevDate;
+            const prevDate = id > 0 ? displayDate(finalRecords[id - 1].date) : null;
+            const showDateHeader = currentDate !== prevDate;
             // console.log(record);
             return (
-              <div key={id}>
+              <div key={record._id}>
                 {showDateHeader && (
                   <div className={styles.dateDiv}>
                     <div className={styles.date}>{currentDate}</div>
@@ -79,20 +99,34 @@ const Records = ({ selectedCategory, fetchRecords }) => {
                         {record?.category?.categoryName}
                       </div>
                     )}
-                  </div>
-                  <div className={styles.middleSection}>
-                    <div className={styles.paymentMethod}>
+                     <div className={styles.accountName}>
                       {record?.account?.accountName}
                     </div>
-                    <div className={styles.paymentStatus}>
+                  </div>
+                  <div className={styles.middleSection}>
+                   
+                    <div className={styles.paymentType}>
+                      {record?.paymentType}
+                      </div>
+                    <div className={styles.paymentStatus}
+                    style={{
+                      color: (record?.status === "Pending" ? "red" : "green")
+                    }}
+                    >
                       {record?.status}
+                     
                     </div>
                     <div className={styles.payee}>{record?.payee}</div>
                     {/* <div> {record.accountId}</div> */}
                     <div className={styles.note}>{record?.note}</div>
                   </div>
                   <div className={styles.rightSection}>
-                    <div className={styles.amount}>₹{record?.amount}</div>
+                    <div className={styles.amount}
+                    style={{
+                      color: (record?.type?.id === 2 ? "red" : "green")
+                    }}
+                    >{record?.type?.id === 2 ? "-" : null}₹{record?.amount}
+                    </div>
                     <button
                       className={styles.delete}
                       onClick={() => handleDelete(record?._id)}
