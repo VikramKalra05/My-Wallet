@@ -1,5 +1,7 @@
 const passport = require("passport");
 const { UserModel } = require("../models/userModel");
+const CATEGORIES = require("../constants/categories");
+const { CategoryModel } = require("../models/categoryModel");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const dotenv = require("dotenv").config();
 
@@ -27,6 +29,20 @@ passport.use(
           });
 
           await user.save(); // Save to database
+
+          console.log(CATEGORIES)
+          
+          // Insert default categories for the new user
+          const defaultCategories = CATEGORIES.map((cat) => ({
+            userId: user._id,
+            categoryName: cat.categoryName,
+            subCategories: cat.subCategories,
+          }));
+          
+          console.log(defaultCategories)
+          await CategoryModel.insertMany(defaultCategories);
+          
+          console.log("done");
         } else {
           // If user exists, update their details (in case they changed their Google profile)
           user.name = profile.displayName;

@@ -1,6 +1,8 @@
+const { default: mongoose } = require("mongoose");
 const CATEGORIES = require("../constants/categories");
 const { TYPE } = require("../constants/type");
 const { AccountModel } = require("../models/accountModel");
+const { CategoryModel } = require("../models/categoryModel");
 const { TransactionModel } = require("../models/transactionModel");
 const { UserModel } = require("../models/userModel");
 
@@ -52,42 +54,56 @@ const createTransaction = async (req, res) => {
   } = req.body;
   const { userId } = req.body.user;
 
-  if (!amount || !date || !type.id || !category.id || !accountId) {
+  if (!amount || !date || !type.id 
+    // || !category?.id 
+    || !accountId) {
     return res.status(400).send({
       error: `Missing required fields: title, amount, category.id, type.id, date, accountId`,
     });
   }
 
+  console.log(category)
+
   if (!TYPE[type.id]) {
     return res.status(400).json({ error: "Invalid type ID" });
   }
 
-  if (!CATEGORIES[category.id]) {
+  const categoryId = new mongoose.Types.ObjectId(category?.id);
+
+
+  const categoryDoc = await CategoryModel.findOne({ _id: categoryId, userId });
+
+  if (!categoryDoc) {
     return res.status(400).json({ error: "Invalid category ID" });
-  } else {
-    if (category?.subCategory?.id) {
-      if (!CATEGORIES[category.id].subCategories[category.subCategory.id]) {
-        return res.status(400).json({ error: "Invalid subCategory ID" });
-      }
-    }
   }
+
+  let subCategoryDetails = null;
+
+  if (category?.subCategory?.id) {
+
+    const subCategoryId = new mongoose.Types.ObjectId(category?.subCategory?.id);
+
+    const subCategory = categoryDoc.subCategories.id(subCategoryId);
+    if (!subCategory) {
+      return res.status(400).json({ error: "Invalid subCategory ID" });
+    }
+
+    subCategoryDetails = {
+      id: subCategoryId,
+      subCategoryName: subCategory?.subCategoryName,
+    };
+  }
+
+  const categoryDetails = {
+    id: categoryId,
+    categoryName: categoryDoc?.categoryName,
+    subCategory: subCategoryDetails,
+  };
 
   const typeDetails = {
     id: type.id,
     typeName: TYPE[type.id]
   }
-
-  const categoryDetails = {
-    id: category.id,
-    categoryName: CATEGORIES[category.id].categoryName,
-    subCategory: category?.subCategory?.id
-      ? {
-          id: category.subCategory.id,
-          subCategoryName:
-            CATEGORIES[category.id].subCategories[category.subCategory.id],
-        }
-      : null,
-  };
 
   const account = await AccountModel.findOne({"_id" : accountId, userId});
 
@@ -104,7 +120,7 @@ const createTransaction = async (req, res) => {
       userId,
       status,
       payee,
-      // label,
+      label,
       note,      
       paymentType,
       account: {

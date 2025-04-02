@@ -12,17 +12,12 @@ const transactionSchema = mongoose.Schema(
     paymentType: { type: String, default: "" },
     payee: { type: String, default: "" },
     note: { type: String, default: "" },
-    // label: { type: String, default: "" },
+    label: { type: String, default: "" },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       required: true,
     }, // required
-    // accountId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "account",
-    //   required: true,
-    // }, // required
     account: {
       accountId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,10 +28,10 @@ const transactionSchema = mongoose.Schema(
     },
     category: { 
       categoryName: { type: String },
-      id: { type: Number, required: true }, //required
+      id: { type: mongoose.Types.ObjectId, required: true }, //required
       subCategory: {
         subCategoryName: { type: String },
-        id: { type: Number },
+        id: { type: mongoose.Types.ObjectId },
       },
     },
   },
