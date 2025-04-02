@@ -22,6 +22,28 @@ export const createTransaction = async (transaction) => {
     }
 } 
 
+export const deleteTransaction = async (transactionId) => {
+    try {
+        const res = await fetch(`${TESTING_URL}/transaction/delete`, {
+            method: "DELETE",
+            headers: {
+                "Content-type": "Application/json"
+            },
+            body: JSON.stringify({id: transactionId}),
+            credentials: "include"
+        })
+
+        if(res.ok){
+            const data = await res.json();
+            console.log(`Transaction deleted: ${data}`);
+            return data;
+        }
+
+    } catch (error) {
+        console.log("error in deleting transaction:", error);
+    }
+} 
+
 export const updateTransaction = async (transaction) => {
     try {
         const res = await fetch(`${TESTING_URL}/transaction/update`, {

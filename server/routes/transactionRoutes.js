@@ -9,6 +9,7 @@ transactionRouter.get("/all", auth, getAllTransactions)
 transactionRouter.post("/create", auth, createTransaction);
 transactionRouter.delete("/delete", auth, deleteTransaction);
 transactionRouter.patch("/update", auth, updateTransaction);
+// transactionRouter.get("/categories", auth, getCategories);
 
 module.exports = {
     transactionRouter

@@ -39,6 +39,8 @@ const Login = () => {
 
     const res = await loginUser(userFormDetails);
 
+    window.localStorage.setItem("token", res?.token);
+
     if (res?.token) {
       console.log("Login Successful");
       navigate("/dashboard");

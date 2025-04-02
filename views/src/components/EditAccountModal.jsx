@@ -3,9 +3,8 @@ import { editAccount } from "../utils/accountUtils";
 import styles from "../css/accounts.module.css";
 import { RxCross2 } from "react-icons/rx";
 
-
 const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => {
- const [updatedAccount,setUpdatedAccount]=useState(account)   
+ const [updatedAccount, setUpdatedAccount]=useState(account)   
 
     // implement edit account
     // create a form to edit account - account name and balance

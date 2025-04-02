@@ -3,12 +3,23 @@ import styles from "../css/sidebar.module.css";
 import { CATEGORIES } from "../utils/categories";
 import { FaAngleRight, FaAngleDown } from "react-icons/fa";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
+import { getCategories } from "../utils/categoryUtils";
 import AppContext from "../context/AppContext";
 
 const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
   const { setAddRecords } = useContext(AppContext);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedSubCategories, setExpandedSubCategories] = useState({});
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategories = async () => {
+    const res = await getCategories();
+    if (res) {
+      setCategories(res);
+    } else {
+      // toast to show error TBD
+    }
+  };
 
   // Expand/collapse main category
   const toggleCategoryExpand = (categoryId) => {
@@ -50,7 +61,7 @@ const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
   
       return hasSelectedSiblings ? updated : updated.filter((item) => item !== parentCategory);
     });
-  };  
+  };
 
   return (
     <div className={styles.sidebar}>
@@ -59,22 +70,58 @@ const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
         + Add
       </button>
 
-      <h4 className={styles.filterHeading}>FILTER</h4>
+      <h4 style={{ fontWeight: "500" }}>FILTER</h4>
+      <div>
+        <p
+          onClick={fetchCategories}
+          style={{
+            backgroundColor: "green",
+            color: "white",
+          }}
+        >
+          Categories
+        </p>
 
-      {CATEGORIES.map((category) => {
-        const isCategorySelected = selectedCategory.includes(category.categoryName);
-        const subCategoryNames = category.subCategories?.map((sub) => sub.name) || [];
+        <div>
+          {categories.length > 0 &&
+            categories.map((category) => {
+              return (
+                <div key={category._id}>
+                  <p style={{ fontSize: "14px", fontWeight: "700" }}>{category?.categoryName}</p>
+                  <div>
+                    {category?.subCategories?.length > 0 &&
+                      category?.subCategories?.map((sub) => {
+                        return (
+                          <div key={sub._id}>
+                            <p style={{ fontSize: "12px" }}>
+                              {sub?.subCategoryName}
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
 
-        return (
-          <div key={category.id}>
-            {/* Main Category - Click anywhere to expand/collapse */}
-            <div className={styles.category} onClick={() => toggleCategoryExpand(category.id)}>
-              <span>
-                {expandedCategories[category.id] ? <FaAngleDown color="green" /> : <FaAngleRight />}
-              </span>
-            
-              <span>{category.categoryName}</span>
-            </div>
+      {CATEGORIES.map((category) => (
+        <div key={category.id}>
+          {/* Main category */}
+          <div
+            onClick={() => {
+              toggleCategoryExpand(category.id);
+            }}
+            className={styles.clickingCategory}
+          >
+            {expandedCategories[category.id] ? (
+              <FaAngleDown color="green" /> // Added color change when expanded
+            ) : (
+              <FaAngleRight />
+            )}{" "}
+            {category.categoryName}
+          </div>
 
             {/* Subcategories */}
             {expandedCategories[category.id] && (
@@ -93,7 +140,7 @@ const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
                         <span
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleSubCategorySelection(sub.name, category.categoryName, subCategoryNames);
+                            handleSubCategorySelection(sub.name, category.categoryName, nestedSubNames);
                           }}
                         >
                           {isSubSelected ? <MdCheckBox color="blue" /> : <MdCheckBoxOutlineBlank />}
@@ -132,8 +179,8 @@ const Sidebar = ({ selectedCategory, setSelectedCategory }) => {
               </div>
             )}
           </div>
-        );
-      })}
+        )
+      )}
     </div>
   );
 };

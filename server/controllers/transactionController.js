@@ -45,6 +45,7 @@ const createTransaction = async (req, res) => {
     category,
     status,
     payee,
+    label,
     note,
     paymentType,
     accountId,
@@ -148,13 +149,14 @@ const deleteTransaction = async (req, res) => {
     
     await TransactionModel.findByIdAndDelete(id);
 
-    await AccountModel.findByIdAndUpdate(transaction.accountId, {
+    const account = await AccountModel.findByIdAndUpdate(transaction.account.accountId, {
       $inc: { balance: transaction.amount },
     });    
 
     return res.status(200).json({
       msg: `The transaction has been deleted successfully`,
       transaction,
+      account
     });
 
   } catch (error) {
@@ -209,5 +211,5 @@ module.exports = {
   deleteTransaction,
   getAllUserTransactions,
   getAllTransactions,
-  updateTransaction
+  updateTransaction,
 };

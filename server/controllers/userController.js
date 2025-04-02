@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
+const CATEGORIES = require("../constants/categories");
+const categoryModel = require("../models/categoryModel");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const getAllUsers = async (req, res) => {
@@ -113,6 +115,16 @@ const registerUserController = async (req, res) => {
       } else {
         const user = new UserModel({ name, email, password: hash });
         await user.save();
+
+        // Insert default categories for the new user
+        const defaultCategories = CATEGORIES.map((cat) => ({
+          userId: user._id,
+          categoryName: cat.categoryName,
+          subCategories: cat.subCategories,
+        }));
+
+        await categoryModel.CategoryModel.insertMany(defaultCategories);
+
         res.status(200).send({ msg: "User has been registered" });
       }
     });
@@ -173,7 +185,7 @@ const loginUserController = async (req, res) => {
 
         res.cookie("token", token, {
           httpOnly: true,
-          secure: false, // Set to true only if using HTTPS
+          secure: process.env.NODE_ENV === "production", // Set to true only if using HTTPS
           sameSite: "Lax",
         });
 
