@@ -24,7 +24,7 @@ const EditAccountModal = ({account, fetchAccounts, setShowEditAccountModal}) => 
             <div className={styles.editAccountModalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.editTop}>
                 <h1 style={{fontSize:"18px"}}>Edit Account</h1>
-                <button className={styles.closeEditButton} onClick={() => setShowEditAccountModal(false)}><RxCross2 /></button>
+                <button className={styles.closeEditButton} onClick={() => setShowEditAccountModal(false)}> <RxCross2 /></button>
                 </div>
                 <div className={styles.editInputGroup}>
                     <label>Account name</label>
