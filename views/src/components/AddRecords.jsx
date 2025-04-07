@@ -7,8 +7,9 @@ import { getAccounts } from "../utils/accountUtils";
 import AddAccountModal from "./AddAccountModal";
 import { RxCross2 } from "react-icons/rx";
 import { createTransaction, getAllTransactionsOfUser } from "../utils/transactionUtils";
-import { IoMdAdd } from "react-icons/io";
-import { FaMinus } from "react-icons/fa6";
+import { getCategories } from "../utils/categoryUtils";
+import categoryIcons from "../constants/categoryIcons";
+
 
 const AddRecords = () => {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -19,14 +20,32 @@ const AddRecords = () => {
   const [accounts, setAccounts] = useState([]);
 
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [subCategory, setSubCategory] = useState("");
+  const [categories, setCategories] = useState([]); // Store all categories fetched
+  const [category, setCategory] = useState(null);
+  const [subCategory, setSubCategory] = useState(null);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   //   const [time, setTime]=useState(new Date().toLocaleTimeString([],{ hour: '2-digit', minute: '2-digit' }))
 
   useEffect(() => {
     setAccountId(accounts[0]?._id)
   }, [accounts])
+
+  useEffect(() => {
+    const fetchCategories = async () => {  
+      try {
+        const res = await getCategories();
+        if (res) {
+          setCategories(res);
+        } 
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchCategories();
+  }, []);
+  
+  
 
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -86,7 +105,9 @@ useEffect(() => {
       alert("Please fill all the required fields!");
       return;
     }
-
+    console.log("Sending Category ID:", category?.value);
+    console.log("Sending SubCategory ID:", subCategory?.value);
+    
     var newRecord = {
       type: {id: recordType},
       amount,
@@ -94,7 +115,7 @@ useEffect(() => {
       category: {
         id: category?.value,
         subCategory: {
-          id: subCategory?.value
+          id: subCategory?.value,
         }
       },
       payee,
@@ -109,11 +130,17 @@ useEffect(() => {
     await fetchRecords()
     console.log(newRecord);
   };
-  const categoryOptions = categoriesData.map((cat) => ({
-    value: cat.id,
-    label: cat.name, // Label should be a string
-    icon: cat.icon,
-  }));
+  
+  const categoryOptions = categories?.map((cat) => ({
+    value: cat._id,
+    label: cat.categoryName, // Label should be a string
+    icon: categoryIcons[cat.categoryName],
+  }))
+  const selectedCategory = categories.find((cat) => cat._id === category?.value);
+  const categoryIcon = categoryIcons[selectedCategory?.categoryName] 
+
+  const filteredSubcategories =
+    categories.find((cat) => cat._id === category?.value)?.subCategories || [];
 
   const handleCategoryChange = (selectedCategory) => {
     console.log(selectedCategory);
@@ -121,16 +148,20 @@ useEffect(() => {
     setSubCategory(null);
   };
 
-  //filter subcategory based on selected category...using find here bcause find compares with a single word also from category and displays subcategory accordingly
-  const filteredSubcategories =
-    categoriesData.find((cat) => cat.id === category?.value)?.subCategories ||
-    [];
+  const handleSubCategoryChange = (selectedSubCategory) => {
+    console.log(selectedSubCategory);
+    setSubCategory(selectedSubCategory);
+  };
 
-  const subcategoryOptions = filteredSubcategories.map((sub) => ({
-    value: sub.id,
-    label: sub.name,
-    icon: sub.icon,
+  //filter subcategory based on selected category...using find here bcause find compares with a single word also from category and displays subcategory accordingly
+  
+    
+    const subcategoryOptions = filteredSubcategories.map((sub) => ({
+    value: sub._id,
+    label: sub.subCategoryName,
+    icon: categoryIcon,
   }));
+  console.log("options", subcategoryOptions)
 
   const customSingleValue = ({ data }) => {
     return (
@@ -149,7 +180,7 @@ useEffect(() => {
         <div style={{
           fontSize: "18px",
         }}>
-          {data.icon}
+          {data?.icon}
         </div>
         <p
           style={{
@@ -178,7 +209,7 @@ useEffect(() => {
         cursor: "pointer",
       }}
     >
-      <span style={{ fontSize: "18px", alignItems: "center", display: "flex" }}>{data.icon}</span>
+      <span style={{ fontSize: "18px", alignItems: "center", display: "flex" }}>{data?.icon}</span>
       <span style={{ fontSize: "16px", textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{data.label}</span>
     </div>
   );
@@ -301,11 +332,9 @@ useEffect(() => {
               <Select
                 options={subcategoryOptions}
                 value={
-                  subcategoryOptions.find(
-                    (option) => option.value === subCategory?.value
-                  ) || null
+                  subCategory
                 }
-                onChange={setSubCategory}
+                onChange={handleSubCategoryChange}
                 components={{
                   SingleValue: customSingleValue,
                   Option: customOption,
