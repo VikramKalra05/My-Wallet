@@ -47,12 +47,20 @@ const AddRecords = () => {
   
   
 
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  ); // ISO format (yyyy-mm-dd)
-  const [displayDate, setDisplayDate] = useState(
-    new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })
-  ); // Display format "Month Day"
+  // const [selectedDate, setSelectedDate] = useState(
+  //   new Date().toISOString().split("T")[0]
+  // ); // ISO format (yyyy-mm-dd)
+  const today = new Date();
+const initialDate = today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // 'YYYY-MM-DD'
+const initialDisplayDate = today.toLocaleDateString("en-IN", { month: "long", day: "numeric", timeZone: "Asia/Kolkata" });
+
+const [selectedDate, setSelectedDate] = useState(initialDate);
+const [displayDate, setDisplayDate] = useState(initialDisplayDate);
+
+  // const [displayDate, setDisplayDate] = useState(
+  //   new Date().toLocaleDateString("en-IN", { month: "long", day: "numeric" })
+  // ); // Display format "Month Day"
+  // console.log("initially",displayDate);
 
   const addNewRecord = (newRecord) => {
     setRecords((prevRecords) => [...prevRecords, newRecord]);
@@ -76,6 +84,7 @@ const AddRecords = () => {
   function getTimeStampFromDateandTime(dateStr,timeStr){
     const combined = `${dateStr}T${timeStr}:00`
     const date= new Date(combined)
+    console.log("get current time", combined);
     return (date.getTime())
   }
   const fetchRecords=async ()=>{
@@ -88,10 +97,12 @@ const AddRecords = () => {
 useEffect(() => {
   setDate(getTimeStampFromDateandTime(selectedDate,time))
   const newDate = new Date(`${selectedDate}T${time}`);
+  console.log("updated", newDate);
   setDisplayDate(
-    newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
+    newDate.toLocaleDateString("en-IN", { month: "long", day: "numeric", timeZone: "Asia/Kolkata" })
   );
 }, [selectedDate, time]);
+console.log("bruhhh:",displayDate)
 
 
   const [payee, setPayee] = useState("");

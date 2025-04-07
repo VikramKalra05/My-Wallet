@@ -143,7 +143,7 @@ const Records = ({
                     >
                       {record?.status}
                     </div>
-                    <div className={styles.payee}>{record?.paymentType}</div>
+                    {/* <div className={styles.payee}>{record?.paymentType}</div> */}
                     <div className={styles.payee}>{record?.payee}</div>
                     {/* <div> {record.accountId}</div> */}
                     <div className={styles.note}>{record?.note}</div>
