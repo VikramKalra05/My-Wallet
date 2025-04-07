@@ -11,6 +11,7 @@ const { transactionRouter } = require("./routes/transactionRoutes");
 const { accountRouter } = require("./routes/accountRoutes");
 const { authRouter } = require("./routes/authRoutes");
 const { categoryRouter } = require("./routes/categoryRoutes");
+const analyticsRouter = require("./routes/analyticRoutes");
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/user", userRouter)
 app.use("/api/v1/transaction", transactionRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/analytics", analyticsRouter);
 
 app.get("/", (req, res) => {
     res.json({msg: "Home Page"})

@@ -7,9 +7,11 @@ const {
   loginUserController,
   getUserDashboard,
   updateUserDetails,
+  resetPasswordController,
+  deleteAccount,
 } = require("../controllers/userController");
 const { auth } = require("../middleware/auth.middleware");
-const { upload } = require("../config/cloudinary"); // Import Cloudinary upload middleware
+const { uploadMiddleware } = require("../middleware/upload.middleware");
 
 const userRouter = express.Router();
 
@@ -17,12 +19,14 @@ const userRouter = express.Router();
 // userRouter.get("/all", auth, adminAuth, getAllUsers);
 userRouter.post("/register", registerUserController);
 userRouter.post("/login", loginUserController);
+userRouter.post("/reset-password", resetPasswordController);
 userRouter.post("/logout", (req, res) => {
   res.clearCookie("token");
   res.status(200).send({ msg: "Logged out successfully" });
 });
 userRouter.get("/dashboard", auth, getUserDashboard);
-userRouter.patch("/update", auth, upload, updateUserDetails);
+userRouter.patch("/update", auth, uploadMiddleware, updateUserDetails);
+userRouter.delete("/delete", auth, deleteAccount);
 
 module.exports = {
   userRouter,

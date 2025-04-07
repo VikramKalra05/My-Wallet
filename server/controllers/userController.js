@@ -28,6 +28,7 @@ const getUserDashboard = async (req, res) => {
       email: user.email,
       isFirstLogin: user.isFirstLogin,
       photo: user?.photo,
+      hasPassword: !!user.password, // `true` if password exists, `false` if Google login
     };
     // await user.save();
     res.status(200).send({ message: "Welcome to your wallet!", details });
@@ -38,13 +39,21 @@ const getUserDashboard = async (req, res) => {
 
 const updateUserDetails = async (req, res) => {
   try {
-    const { userId } = req.body.user;
+    const { userId } = req.body;
+    console.log(userId);
     const { name, email, isFirstLogin } = req.body;
 
     const updateFields = {};
     if (name !== undefined) updateFields.name = name;
     // if (phone !== undefined) updateFields.phone = phone;
-    if (email !== undefined) updateFields.email = email;
+    if (email !== undefined) {
+      // Validate email format using regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+      updateFields.email = email;
+    }
     if (isFirstLogin !== undefined) updateFields.isFirstLogin = isFirstLogin;
     // if (photo !== undefined) updateFields.photo = photo;
 
@@ -202,10 +211,90 @@ const loginUserController = async (req, res) => {
   }
 };
 
+const resetPasswordController = async (req, res) => {
+  try {
+    const { email, oldPassword, newPassword } = req.body;
+
+    if (!email || !oldPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Email, old password, and new password are required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "New password must be at least 8 characters long" });
+    }
+
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (newPassword === oldPassword) {
+      return res
+        .status(400)
+        .json({ error: "New password must be different from old password" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Incorrect old password" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 8);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ msg: "Password reset successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error resetting password: ${error.message}` });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Find user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // If the user has a password, verify it
+    if (user.password) {
+      if (!password) {
+        return res.status(400).json({ error: "Password is required" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Incorrect password" });
+      }
+    }
+
+    await UserModel.deleteOne({ email });
+
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: `Error deleting account: ${error.message}` });
+  }
+};
+
 module.exports = {
   registerUserController,
   loginUserController,
   getUserDashboard,
   getAllUsers,
   updateUserDetails,
+  resetPasswordController,
+  deleteAccount,
 };

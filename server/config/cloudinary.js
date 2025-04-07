@@ -17,7 +17,6 @@ const storage = new CloudinaryStorage({
     folder: "user-photos", // Cloudinary folder name
     format: async (req, file) => "png", // Convert all images to PNG
     public_id: (req, file) => `${Date.now()}-${file.originalname}`, 
-    allowedFormats: ["png", "jpg", "jpeg", "gif"],
   },
 });
 
