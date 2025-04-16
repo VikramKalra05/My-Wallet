@@ -17,6 +17,7 @@ export const AuthContextProvider = ({ children }) => {
             });
 
             setIsAuthenticated(response.ok); // true if 200, false otherwise
+            console.log("Auth Success")
         } catch (error) {
             console.error('Auth verification failed:', error);
             setIsAuthenticated(false);

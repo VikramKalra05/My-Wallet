@@ -45,5 +45,3 @@ const TransactionModel = mongoose.model("transaction", transactionSchema);
 module.exports = {
   TransactionModel,
 };
-
-//tokens, expenses, blacklist
