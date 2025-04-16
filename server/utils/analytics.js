@@ -1,102 +1,220 @@
 const { AnalyticsModel } = require("../models/analyticsModel");
+const moment = require("moment");
 
-const updateAnalytics = async (
+function getPeriodInfo(transactionDate, type = "month") {
+  const date = moment(transactionDate);
+
+  if (type === "month") {
+    return {
+      periodType: "month",
+      periodId: date.format("YYYY-MM"), // e.g., "2025-04"
+      startDate: date.startOf("month").toDate(),
+      endDate: date.endOf("month").toDate(),
+    };
+  } else if (type === "week") {
+    return {
+      periodType: "week",
+      periodId: date.format("GGGG-[W]WW"), // e.g., "2025-W15"
+      startDate: date.startOf("week").toDate(),
+      endDate: date.endOf("week").toDate(),
+    };
+  } else if (type === "year") {
+    return {
+      periodType: "year",
+      periodId: date.format("YYYY"),
+      startDate: date.startOf("year").toDate(),
+      endDate: date.endOf("year").toDate(),
+    };
+  }
+}
+const updateAnalyticsDoc = async ({
   userId,
-  date,
+  category,
+  subcategory,
   amount,
   type,
-  category,
-  subCategory
-) => {
-  console.log("Updating analytics for:", {
-    userId,
-    date,
-    amount,
-    type,
-    category,
-    subCategory,
-  });
-
-  const month = date.getMonth() + 1; // Get month (1-12)
-  const year = date.getFullYear();
-
-  // Find if analytics exists for this user
-  let analytics = await AnalyticsModel.findOne({ userId });
-
-  if (!analytics) {
-    // Create a new analytics record if it doesn't exist
-    analytics = new AnalyticsModel({ userId, data: [] });
-  }
-
-  // Find month-year entry inside `data` array
-  let monthDataIndex = analytics.data.findIndex(
-    (d) => d.month === month && d.year === year
-  );
-
-  if (monthDataIndex === -1) {
-    // Month-year entry does not exist, create a new one
-    analytics.data.push({
-      month,
-      year,
-      totalIncome: 0,
-      totalExpense: 0,
-      categoryBreakdown: [],
-    });
-    monthDataIndex = analytics.data.length - 1;
-  }
-
-  // Reference the correct monthData
-  let monthData = analytics.data[monthDataIndex];
-
-  // Update total income/expense
-  if (type === "Income") {
-    monthData.totalIncome += amount;
-  } else if (type === "Expense") {
-    monthData.totalExpense += amount;
-  }
-
-  // Find category in `categoryBreakdown`
-  let categoryIndex = monthData.categoryBreakdown.findIndex(
-    (c) => c.categoryId?.toString() === category
-  );
-
-  if (categoryIndex === -1) {
-    // Create a new category if it doesn't exist
-    monthData.categoryBreakdown.push({
-      categoryId: category,
-      categoryName: "Unknown", // Fetch actual name if needed
-      totalSpent: 0,
-      subCategories: [],
-    });
-    categoryIndex = monthData.categoryBreakdown.length - 1;
-  }
-
-  let categoryData = monthData.categoryBreakdown[categoryIndex];
-  categoryData.totalSpent += amount;
-
-  // If there's a subcategory, update it
-  if (subCategory) {
-    let subCategoryIndex = categoryData.subCategories.findIndex(
-      (sc) => sc.subCategoryId?.toString() === subCategory
-    );
-
-    if (subCategoryIndex === -1) {
-      categoryData.subCategories.push({
-        subCategoryId: subCategory,
-        subCategoryName: "Unknown",
-        amount: 0,
-      });
-      subCategoryIndex = categoryData.subCategories.length - 1;
+  periodId,
+  periodType,
+  startDate,
+  endDate,
+}) => {
+  try {
+    // Validate that all required fields are present
+    if (!startDate || !endDate || !periodId || !periodType) {
+      console.error(
+        "Missing required fields: startDate, endDate, periodId, periodType"
+      );
+      // Handle the error as necessary, e.g., throw an error or return early
+      throw new Error("Analytics update failed: Missing required fields");
     }
 
-    categoryData.subCategories[subCategoryIndex].amount += amount;
+    const doc = await AnalyticsModel.findOne({
+      userId,
+      periodId,
+      periodType,
+    });
+
+    console.log(doc, periodId, periodType);
+    if (!doc) {
+      console.log(
+        userId,
+        type,
+        category,
+        subcategory,
+        amount,
+        periodId,
+        periodType,
+        startDate,
+        endDate
+      );
+      await AnalyticsModel.create({
+        userId,
+        totalIncome: type === "Income" ? amount : 0,
+        totalExpense: type === "Expense" ? amount : 0,
+        categoryBreakdown: [
+          {
+            categoryName: category,
+            amount: amount,
+            subcategories: subcategory
+              ? [
+                  {
+                    subCategoryName: subcategory,
+                    amount: amount,
+                  },
+                ]
+              : [],
+          },
+        ],
+        periodId,
+        periodType,
+        startDate,
+        endDate,
+      });
+      console.log("created");
+    } else {
+      if (type === "Income") {
+        doc.totalIncome += amount;
+      } else {
+        doc.totalExpense += amount;
+      }
+
+      // Checking if the category already exists in categoryBreakdown
+      const categoryIndex = doc.categoryBreakdown.findIndex(
+        (item) => item.categoryName === category
+      );
+
+      if (categoryIndex === -1) {
+        // If the category doesn't exist, add it
+        doc.categoryBreakdown.push({
+          categoryName: category,
+          amount: amount,
+          subCategories: subcategory
+            ? [
+                {
+                  subCategoryName: subcategory,
+                  amount: amount,
+                },
+              ]
+            : [],
+        });
+      } else {
+        // If the category exists, update it
+        doc.categoryBreakdown[categoryIndex].amount += amount;
+
+        // If subcategory is provided, handle it
+        if (subcategory) {
+          const subCategoryIndex = doc.categoryBreakdown[
+            categoryIndex
+          ].subCategories.findIndex(
+            (sub) => sub.subCategoryName === subcategory
+          );
+
+          if (subCategoryIndex === -1) {
+            // If the subcategory doesn't exist, add it
+            doc.categoryBreakdown[categoryIndex].subCategories.push({
+              subCategoryName: subcategory,
+              amount: amount,
+            });
+          } else {
+            // If the subcategory exists, update it
+            doc.categoryBreakdown[categoryIndex].subCategories[
+              subCategoryIndex
+            ].amount += amount;
+          }
+        }
+      }
+
+      await doc.save();
+    }
+  } catch (err) {
+    console.error("Error updating analytics doc:", err);
+  }
+};
+
+const updateAnalyticsForTransaction = async ({
+  userId,
+  transaction,
+  operation,
+  oldTransaction,
+}) => {
+  const results = {
+    operation,
+    userId,
+    success: true,
+    errors: [],
+  };
+
+  try {
+    const extractDetails = (tx) => {
+      if (!tx.date) {
+        throw new Error("Transaction missing 'date' field");
+      }
+
+      const period = getPeriodInfo(tx.date, "month");
+
+      return {
+        userId,
+        startDate: period.startDate,
+        endDate: period.endDate,
+        periodId: period.periodId,
+        periodType: period.periodType,
+        category: tx.category.categoryName,
+        subcategory: tx?.category?.subCategory?.subCategoryName ?? null,
+        amount: tx.amount,
+        type: tx.type.typeName,
+      };
+    };
+
+    if (operation === "create") {
+      await updateAnalyticsDoc(extractDetails(transaction));
+    } else if (operation === "delete") {
+      const reversed = extractDetails(transaction);
+      reversed.amount *= -1;
+      await updateAnalyticsDoc(reversed);
+    } else if (operation === "update") {
+      const reverseOld = extractDetails(oldTransaction);
+      reverseOld.amount *= -1;
+      await updateAnalyticsDoc(reverseOld);
+      await updateAnalyticsDoc(extractDetails(transaction));
+    } else {
+      results.success = false;
+      results.errors.push("Invalid operation type.");
+      console.error("Invalid analytics operation type:", operation);
+    }
+
+    console.log(results);
+  } catch (err) {
+    results.success = false;
+    results.errors.push(err.message || "Unknown error");
+    console.error(
+      `Error in updateAnalyticsForTransaction for user ${userId} | op: ${operation}`
+    );
+    console.error(err);
   }
 
-  await analytics.save();
-
-  console.log("Analytics updated successfully.", analytics);
+  return results;
 };
 
 module.exports = {
-  updateAnalytics,
+  updateAnalyticsForTransaction,
 };

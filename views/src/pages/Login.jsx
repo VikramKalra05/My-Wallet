@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../css/login.module.css";
 import EMAILICON from "../assets/emailIcon.svg";
@@ -9,7 +9,7 @@ import LOADINGGIF from "../assets/Login-Page/loadingAnimation.gif";
 // import LOGINLEFTHALFIMG from "../assets/Login-Page/loginLeftHalfImage.svg";
 import { loginUser } from "../utils/userUtils";
 import { TESTING_URL } from "../ApiLinks";
-import { useAuth } from "../context/AuthContext";
+import { AuthContext, useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const emailInputRef = useRef(null);
@@ -20,7 +20,8 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const {isAuthenticated}=useAuth();
+  const { isAuthenticated } = useAuth();
+  const { setIsAuthenticated } = useContext(AuthContext);
 
   const handleUserDetails = (e) => {
     setUserFormDetails({
@@ -34,15 +35,15 @@ const Login = () => {
       console.log("Fill in the details");
       return;
     }
-    
+
     setLoading(true);
 
     const res = await loginUser(userFormDetails);
 
-    window.localStorage.setItem("token", res?.token);
-
     if (res?.token) {
+      window.localStorage.setItem("token", res.token);
       console.log("Login Successful");
+      setIsAuthenticated(true);
       navigate("/dashboard");
     } else {
       alert("Login Failed");
@@ -50,7 +51,7 @@ const Login = () => {
     setLoading(false);
   };
 
-  if(isAuthenticated){
+  if (isAuthenticated) {
     navigate("/dashboard")
   }
 
@@ -101,7 +102,7 @@ const Login = () => {
                 value={userFormDetails.password}
                 onChange={(e) => handleUserDetails(e)}
                 onKeyDown={(e) => {
-                  if(e.key === "Enter"){
+                  if (e.key === "Enter") {
                     handleLoginUser();
                   }
                 }}

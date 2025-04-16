@@ -33,8 +33,6 @@ const Settings = () => {
             const formdata = new FormData();
             formdata.append("photo", selectedPfp);
 
-            // If you need to send name, email, etc., add them here:
-            formdata.append("name", "vikram");
             // formData.append("email", userDetails.email);;
             for (let pair of formdata.entries()) {
                 console.log(pair[0], pair[1]); // Logs key-value pairs

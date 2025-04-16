@@ -58,9 +58,17 @@ const Navbar = () => {
                     className={styles.profileContainer}
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                   >
-                    <div className={styles.icon}>
-                      <img src={userDetails?.photo} alt="user" loading="lazy" />
-                    </div>
+                    {userDetails.photo && (
+                      <div className={styles.icon}>
+                        <img 
+                          src={userDetails?.photo} 
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/default-avatar.png';
+                          }}
+                          alt="user" loading="lazy" />
+                      </div>
+                    )}
                     <p className={styles.profileName}>{userDetails?.name}</p>
                     <FaAngleDown />{" "}
                   </div>

@@ -233,9 +233,7 @@ const resetPasswordController = async (req, res) => {
     }
 
     if (newPassword === oldPassword) {
-      return res
-        .status(400)
-        .json({ error: "New password must be different from old password" });
+      return res.status(400).json({ error: "New password must be different from old password" });
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);

@@ -5,7 +5,7 @@
   const { CategoryModel } = require("../models/categoryModel");
   const { TransactionModel } = require("../models/transactionModel");
   const { UserModel } = require("../models/userModel");
-  const { updateAnalytics } = require("../utils/analytics");
+  const { updateAnalyticsForTransaction } = require("../utils/analytics");
 
   const getAllUserTransactions = async (req, res) => {
     const { userId } = req.body.user;
@@ -160,20 +160,19 @@
       });
 
       await transaction.save();
-    
+
       // TBD
-      // await updateAnalytics(
-      //   userId,
-      //   new Date(date),
-      //   amount,
-      //   typeDetails.typeName,
-      //   categoryDetails.id,
-      //   categoryDetails.subCategory?.id
-      // );
+      await updateAnalyticsForTransaction({
+        userId,
+        transaction,
+        operation: "create",
+        // transactionDate: transaction.date,
+      });
+      // console.log(transaction.date);
 
       res.json({
         msg: `The transaction has been added`,
-        transaction: transaction,
+        transaction: transaction
       });
     } catch (error) {
       return res
@@ -232,7 +231,7 @@
         .json({ error: "Both Transaction ID and Account ID are required." });
     }
   
-    const { amount, date, type, category, status, payee, label } = req.body;
+    const { amount, date, type, category, status, payee, label, note, paymentType } = req.body;
   
     const updateFields = {};
     if (amount !== undefined) updateFields.amount = amount;
@@ -240,6 +239,8 @@
     if (status !== undefined) updateFields.status = status;
     if (payee !== undefined) updateFields.payee = payee;
     if (label !== undefined) updateFields.label = label;
+    if (note !== undefined) updateFields.note = note;
+    if (paymentType !== undefined) updateFields.paymentType = paymentType;
   
     try {
       const transaction = await TransactionModel.findOne({ _id: id, userId });
