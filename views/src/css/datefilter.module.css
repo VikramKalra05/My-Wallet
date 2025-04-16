@@ -17,12 +17,12 @@
   
   /* Dropdown menu styling */
   .dropdownMenu {
-    /* position: absolute; */
-    top: 40px;
+    position: absolute;
+    top: -13px;
     background-color: white;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
-    /* z-index: 10; */
+    z-index: 20;
     padding: 12px;
     width: 220px;
     display: flex;

@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import styles from "../css/addrecords.module.css";
-import categoriesData from "../utils/modalCategories";
 import Select from "react-select";
 import AppContext from "../context/AppContext";
 import { getAccounts } from "../utils/accountUtils";

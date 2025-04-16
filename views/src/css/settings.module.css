@@ -1,53 +1,375 @@
-.settingsPage{
+.settingsPage {
     background-color: #f4f4f4;
     width: 100%;
     min-height: 93vh;
     padding-top: 50px;
 }
 
-.settingCont{
-    border: 1px solid red;
-    width: 80%;
+.settingCont {
+    width: 90%;
     margin: auto;
+    min-height: 100vh;
 }
 
-.settingHeader{
-    border: 1px solid red;
-    width: fit-content;
+.settingHeader {
+    text-align: center;
     font-size: 30px;
     font-weight: 600;
     margin: auto;
 }
 
-.settingMain{
+.settingMain {
+    /* border: 1px solid red; */
     display: flex;
-    padding: 0 100px;
+    gap: 40px;
+    padding: 0 30px;
 }
 
-.setImgDiv{
-    margin-top: 50px;
-    /* border: 1px solid red; */
-}
 
-.setImgDiv>img{
-    height: 200px;
-    width: 200px;
-    border-radius: 50%;
-}
-
-.updatePfpBtn{
-    /* border: 1px solid red; */
-    width: 100%;
-    margin-top: 20px;
+/* Tab bar styles */
+.tabBar {
+    display: flex;
+    justify-content: center;
+    margin: 40px;
+    width: 1300px;
+    /* border-radius:16px; */
+    overflow: hidden;
+    padding: 4px;
+  }
+  
+  .tabButton {
+    flex: 1;
+    padding: 14px 0;
     text-align: center;
-    padding: 10px 0;
-    border-radius: 5px;
-    background-color: #64748b;
+    background-color: #20b9b4; /* teal */
+    /* border: none; */
+    border: 1px solid white;
+    color:white;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-radius: 12px;
+  }
+  
+  .tabButton:hover {
+    background-color: turquoise;
+  }
+  
+  .activeTab {
+    background-color: turquoise;
     color: white;
+    font-weight: 700;
+  }
+  
+
+.profileContainer {
+    /* border: 1px solid green; */
+    margin:auto;
+    display: flex; 
+    gap: 3rem;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.profileSidebar {
+    /* border: 1px solid green; */
+    border-right: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    gap:1.5rem;
+    width: 220px;
+    padding: 1rem;
+    /* height: 220px; */
+}
+.profileImageWrapper {
+    /* border: 1px solid green; */
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto;
+  }
+  
+  .profilePic {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #eee;
+  }
+  
+  .editIconBtn {
+    position: absolute;
+    bottom: 4px;  /* slightly tighter */
+    right: 4px;   /* slightly tighter */
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    padding: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+    z-index: 2;
+  }
+  
+  .editIconBtn:hover {
+    background-color: lightgray;
+  }
+  
+.updatePhotoBtn {
+    padding: 0.6rem 1.2rem;
+    background-color: #20b9b4;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
 }
+.updatePhotoBtn:hover{
+    background-color: turquoise;
+}
 
-.updatePfpBtn:hover{
-    background-color: #4b5768;
+.profileForm {
+    flex: 1;
+}
+
+.profileHeading {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.inputGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.inputGroup label {
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.inputGroup input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border 0.2s ease-in-out;
+}
+
+.inputGroup input:focus {
+    outline: none;
+    border-color: turquoise;
+}
+
+.actionButtons {
+    margin-top: 2rem;
+}
+
+.saveBtn {
+    padding: 0.7rem 1.4rem;
+    background-color: #38a169;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.saveBtn:hover{
+    background-color: #227147;
+}
+.deleteBtnWrapper {
+    position: absolute;
+    right: 2.5rem;
+    bottom: 2.5rem;
+}
+
+.deleteBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* spacing between icon and text */
+    padding: 0.7rem 1.4rem;
+    background-color: transparent;
+    color: #e53e3e;
+    font-weight: 600;
+    font-size: 15px;
+    border: 2px solid #e53e3e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .deleteBtn:hover {
+    background-color: #e53e3e;
+    color: white;
+  }
+  
+  .deleteicon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+ 
+  /* ...................... */
+  /* category tabs css */
+
+  .categoryContainer {
+    /* border: 1px solid red; */
+    display: flex;
+    gap: 30px;
+    padding: 15px;
+  }
+  
+  .categoryTabs {
+    /* border: 3px solid red; */
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    border-right: 1px solid #ccc;
+    padding-right: 1rem;
+  }
+  
+  .categoryTab {
+    /* border: 3px solid red; */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease;
+  }
+  
+  .categoryTab:hover {
+    background-color: #e6e6e6;
+  }
+  
+  .categoryTabActive {
+    background-color: #20b9b4;
+    color: #fff;
+  }
+  .categoryTabActive:hover{
+    background-color: #438684;
+    color: #fff;
+  }
+  
+  .subcategoryList {
+    /* border: 3px solid red; */
+    flex: 1;
+    width:800px;
+  }
+  
+  .subcategoryItem {
+    /* border: 3px solid red; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+  }
+  /* .wrapper{
+    border: 2px solid green;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wrapper > div {
+    flex: 1;
+  } */
+  
+  .subName{
+    /* border: 3px solid yellow; */
+    display: flex;
+    /* justify-content: space-between; */
+    align-items: center;
+    gap:10px;
+
+  }
+  .editButtons{
+    /* border: 6px solid pink; */
+    display: flex;
+    align-items: center;
+    gap:10px;
+
+  }
+  .delete {
+    padding: 3px;
+    border: none;
+    color: #e74c3c;
+    background-color: #f4f4f4;
+    cursor: pointer;
+    border-radius: 5px;
+ 
+}
+.edit{
+    padding: 3px;
+    border: none;
+    color:rgb(25, 158, 55);
+    background-color: #f4f4f4;
+
+    cursor: pointer;
+    border-radius: 5px;
+}
+  /* styles.module.css */
+.inlineEditRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgb(220, 250, 247);
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.editInput {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #007bff;
+  outline: none;
+}
+
+.saveButton {
+  background-color: #00b074;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background-color: white;
+  color: #007bff;
+  padding: 6px 14px;
+  border: 1px solid #007bff;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.cancelBtn:hover{
+  background-color: #007bff;
+  color:white;
 }

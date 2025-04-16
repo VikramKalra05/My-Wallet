@@ -69,6 +69,7 @@ const Navbar = () => {
                       <Link to="/settings" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                         Settings
                       </Link>
+                      <button className={styles.logout}>LOGOUT</button>
                     </div>
                   )}
                 </div>

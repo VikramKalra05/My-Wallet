@@ -14,7 +14,7 @@
 }
 .sectionHeader{
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 10px;
+    padding: 7px;
     cursor: pointer;
     font-weight: 700;
 }
@@ -23,12 +23,12 @@
 }
 .accountsList{
     /* border: 1px solid pink; */
-    font-weight: 600;
+    font-weight: 500;
     color: red;
-    padding: 8px;
+    padding: 4px;
 }
 .accountsList div{
-    padding: 6px;
+    padding: 4px;
 }
 .accountsList div:hover{
     background-color: lightcoral;
@@ -38,15 +38,15 @@
     /* border: 1px solid orange; */
     font-weight: 600;
     color: green;
-    padding: 7px;
+    padding: 6px;
 }
 .categoriesList div{
-    padding: 3px;
+    padding: 2px;
 }
 .subCategory {
     padding-left: 15px;
-    margin-top: 5px;
-    padding: 5px 0;
+    margin-top: 3px;
+    padding: 4px 0;
     font-size: 15px;
     color: #555;
     cursor: pointer;
@@ -60,7 +60,7 @@
 
 .subCategory div {
     padding-left: 10px;
-    padding: 5px;
+    padding: 4px;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
 }
@@ -74,10 +74,10 @@
 .filtersList{
     color:blue;
     font-weight: 600;
-    padding: 7px;
+    padding: 4px;
 }
 .filtersList div{
-    padding: 5px;
+    padding: 4px;
 }
 .filtersList div:hover{
     background-color: rgb(135, 185, 243);

@@ -8,7 +8,7 @@ import categoriesData from "../utils/modalCategories";
 import AppContext from "../context/AppContext";
 import { displayDate } from "../dateConversions/displayDate";
 import { deleteTransaction } from "../utils/transactionUtils";
-
+import EditRecords from "./EditRecords";
 
 const Records = ({
   selectedCategory,
@@ -22,6 +22,8 @@ const Records = ({
   // const { records, setRecords } = useContext(AppContext);
   const [finalRecords, setFinalRecords] = useState([]);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   const handleDelete = async (id) => {
     // const updatedRecords = records.filter((record) => record.id !== id);
@@ -36,9 +38,9 @@ const Records = ({
     if (
       (!selectedCategory || selectedCategory.length === 0) &&
       (!selectedAccounts || selectedAccounts.length === 0) &&
-      (!selectedPaymentTypes || selectedPaymentTypes.length===0)&&
-      (!selectedRecordTypes || selectedRecordTypes.length===0)&&
-      (!selectedStatuses || selectedStatuses.length===0)
+      (!selectedPaymentTypes || selectedPaymentTypes.length === 0) &&
+      (!selectedRecordTypes || selectedRecordTypes.length === 0) &&
+      (!selectedStatuses || selectedStatuses.length === 0)
     )
       return true;
 
@@ -46,9 +48,9 @@ const Records = ({
     const subCategory =
       record.subCategory?.subCategoryName ||
       record.category?.subCategory?.subCategoryName;
-    const recordType=record.type?.typeName
-    const paymentType=record?.paymentType
-    const status=record?.status
+    const recordType = record.type?.typeName;
+    const paymentType = record?.paymentType;
+    const status = record?.status;
     const accountName = record?.account?.accountName;
 
     // console.log("bhal yo", selectedRecordTypes, recordType);
@@ -56,9 +58,9 @@ const Records = ({
     return (
       selectedCategory.includes(mainCategory) ||
       selectedCategory.includes(subCategory) ||
-      selectedAccounts.includes(accountName)||
+      selectedAccounts.includes(accountName) ||
       selectedPaymentTypes.includes(paymentType) ||
-      selectedRecordTypes.includes(recordType)||
+      selectedRecordTypes.includes(recordType) ||
       selectedStatuses.includes(status)
     );
   };
@@ -76,7 +78,14 @@ const Records = ({
 
   useEffect(() => {
     updateFinally();
-  }, [sortedRecords, selectedCategory, selectedAccounts,selectedPaymentTypes,selectedRecordTypes,selectedStatuses]);
+  }, [
+    sortedRecords,
+    selectedCategory,
+    selectedAccounts,
+    selectedPaymentTypes,
+    selectedRecordTypes,
+    selectedStatuses,
+  ]);
 
   // const finalRecords = [...(filteredRecords || [])].sort((a, b) => new Date(b.date) - new Date(a.date))
 
@@ -157,7 +166,16 @@ const Records = ({
                     >
                       {record?.type?.id === 2 ? "-" : null}₹{record?.amount}
                     </div>
-                  
+
+                    <button
+                      className={styles.edit}
+                      onClick={() => {
+                        setSelectedRecord(record);
+                        setShowEditModal(true);
+                      }}
+                    >
+                      <MdEdit size={20} />
+                    </button>
                     <button
                       className={styles.delete}
                       onClick={() => handleDelete(record?._id)}
@@ -167,10 +185,16 @@ const Records = ({
                   </div>
                 </div>
               </div>
-              
             );
           })}
         </div>
+      )}
+      {showEditModal && (
+        <EditRecords
+          selectedRecord={selectedRecord}
+          setShowEditModal={setShowEditModal}
+          fetchRecords={fetchRecords}
+        />
       )}
     </div>
   );

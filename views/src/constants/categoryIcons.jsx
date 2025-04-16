@@ -12,4 +12,4 @@ const categoryIcons={
     "Entertainment & Recreation":<FaFilm style={{ color: "#FF851B" }} />,
     "Miscellaneous":<FaTools style={{ color: "#999999" }} />,
 }
-export default categoryIcons
+export default categoryIcons 
