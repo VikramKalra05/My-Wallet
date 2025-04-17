@@ -1,12 +1,10 @@
 import { TESTING_URL } from "../ApiLinks"
 
-fetchAnalytics()
-
-const fetchAnalytics = async (periodType,  startDate, endDate) => {
+export const fetchAnalytics = async (periodType,  periodId) => {
     try {
-        const res = await fetch(`${TESTING_URL}/analytics?periodTypes=${periodType}&startDate=${startDate}&endDate=${endDate}`, 
+        const res = await fetch(`${TESTING_URL}/analytics/user?periodType=${periodType}&periodId=${periodId}`, 
             {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-type": "Application/json"
             },

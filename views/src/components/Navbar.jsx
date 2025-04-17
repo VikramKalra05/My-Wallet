@@ -60,6 +60,7 @@ const Navbar = () => {
               alt="Wallet Logo"
               className={styles.logoImg}
             />
+            <p>My Wallet</p>
           </div>
 
         <div className={styles.links}>

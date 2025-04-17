@@ -6,14 +6,16 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   const navigate = useNavigate()
 
-  navigate("/register");
+  // navigate("/register");
 
   return (
-    <div>
-     
-      <div className={styles.homeTitle}>My Wallet - A Smarter Way To Track Finances</div>
-      <p>Work in progress...</p>
-
+    <div className={styles.homePage}>
+      <div className={styles.homeHeader}>
+        <p className={styles.homeHeadingTitle}>TRACK.MANAGE.GROW</p>
+        <p className={styles.homeHeadingDesc}>From daily spending to long-term goals, 
+        we’ve got you covered.</p>
+        <button className={styles.homeBtn} onClick={() => navigate("/register")}>Get Started</button>
+      </div>
     </div>
   );
 };

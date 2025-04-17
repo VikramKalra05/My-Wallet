@@ -3,30 +3,96 @@ import styles from "../css/analytics.module.css";
 import { GiReceiveMoney } from "react-icons/gi";
 import { GiPayMoney } from "react-icons/gi";
 import { GiTakeMyMoney } from "react-icons/gi";
-import { PieChart } from "@mui/x-charts/PieChart";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { getAccounts } from "../utils/accountUtils";
+import { fetchAnalytics } from "../utils/analyticsUtils";
+import PieChartForAnalytics from "../components/PieChartForAnalytics";
+import BarChartForAnalytics from "../components/BarChartForAnalytics";
+
+const CATEGORY_COLOR_MAP = {
+  "Transportation": "#FF5733",
+  "Food & Drinks": "#FFB900",
+  "Vehicle Expenses": "#A83279",
+  "Housing & Utilities": "#0074D9",
+  "Personal & Wellness": "#FF69B4",
+  "Shopping": "#0074D9",
+  "Financial & Banking": "#6F42C1",
+  "Entertainment & Recreation": "#FF851B",
+  "Miscellaneous": "#999999"
+};
 
 const Analytics = () => {
-  const [totalBalance , setTotalBalance]=useState(0)
+  const [totalBalance, setTotalBalance] = useState(0);
+  const [analyticsData, setAnalyticsData] = useState({});
+  const [pieData, setPieData] = useState([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
+  const [barData, setBarData] = useState({ categories: [], values: [] })
 
-  useEffect(()=>{
-    const fetchAccounts=async()=>{
-      const accountsData=await getAccounts()
-      const accounts=accountsData?.accounts || []
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const accountsData = await getAccounts()
+      const accounts = accountsData?.accounts || []
       const total = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
       setTotalBalance(total)
       console.log(total);
     }
     fetchAccounts()
-  },[])
-  const expenseData = [
-    { id: 0, value: 1250, label: "Food", color: "#00bcd4" },
-    { id: 1, value: 900, label: "Travel", color: "#2196f3" },
-    { id: 2, value: 600, label: "Shopping", color: "#e91e63" },
-    { id: 3, value: 400, label: "Health", color: "#9c27b0" },
-    { id: 4, value: 300, label: "Entertainment", color: "#3f51b5" },
-  ];
+  }, []);
+
+  function formatMonth(monthString) {
+    // Create a new date object using the first day of the given month
+    const date = new Date(`${monthString}-01`);
+    
+    // Get the full month name (e.g., "April")
+    const options = { year: 'numeric', month: 'long' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  const handleFetchAnalytics = async () => {
+    setAnalyticsLoading(true)
+    const data = await fetchAnalytics("month", "2025-04") // hardcoded
+    console.log(data)
+
+    const analytics = data?.analyticsData[0];
+    setAnalyticsData(analytics);
+
+    if (analytics?.categoryBreakdown?.length) {
+      const breakdown = analytics.categoryBreakdown
+        .filter(cat => cat.categoryName !== "Income & Earnings")
+        .map(cat => ({
+          label: cat.categoryName,
+          value: cat.amount,
+          color: CATEGORY_COLOR_MAP[cat.categoryName] || "#ccc",
+        }));
+      console.log(breakdown)
+      setPieData(breakdown);
+
+      const top5 = [...breakdown]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
+
+      const barCategories = top5.map(item => item.label);
+      const barValues = top5.map(item => item.value);
+
+      setBarData({
+        categories: barCategories,
+        values: barValues,
+      });
+    }
+    setAnalyticsLoading(false)
+
+  }
+  useEffect(() => {
+    handleFetchAnalytics()
+  }, [])
+
+  // const expenseData = [
+  //   { id: 0, value: 1250, label: "Food", color: "#00bcd4" },
+  //   { id: 1, value: 900, label: "Travel", color: "#2196f3" },
+  //   { id: 2, value: 600, label: "Shopping", color: "#e91e63" },
+  //   { id: 3, value: 400, label: "Health", color: "#9c27b0" },
+  //   { id: 4, value: 300, label: "Entertainment", color: "#3f51b5" },
+  // ];
   // categories - array -> obj - categoryName, amount
 
   // top 5 categories -> filter by amount -> obj -> state []
@@ -49,20 +115,21 @@ const Analytics = () => {
         <div className={styles.header}>
           <p style={{ fontSize: "24px" }}>Analytics</p>
           <div>
-            <select className={styles.dateFilter}>
+            <p>{formatMonth(analyticsData?.periodId)}</p>
+            {/* <select className={styles.dateFilter}>
               <option>This Month</option>
               <option>This Week</option>
               <option>This Year</option>
-            </select>
+            </select> */}
           </div>
         </div>
         <div className={styles.moneydataDiv}>
           <div className={styles.innerDiv}>
             <div className={styles.heading}>
-              <GiReceiveMoney className={styles.iconIncome}  size={20} color="green" />
+              <GiReceiveMoney className={styles.iconIncome} size={20} color="green" />
               Total Income
             </div>
-            <div className={styles.money}>₹8888</div>
+            <div className={styles.money}>₹{analyticsData?.totalIncome || 0}</div>
           </div>
           <div className={styles.innerDiv}>
             <div className={styles.heading}>
@@ -70,12 +137,12 @@ const Analytics = () => {
               <GiPayMoney className={styles.iconExpense} size={20} color="red" />
               Total Expense
             </div>
-            <div className={styles.money}>₹8888</div>
+            <div className={styles.money}>₹{analyticsData?.totalExpense || 0}</div>
           </div>
           <div className={styles.innerDiv}>
             <div className={styles.heading}>
               {" "}
-              <GiTakeMyMoney className={styles.iconBalance}  size={20} color="orange" />
+              <GiTakeMyMoney className={styles.iconBalance} size={20} color="orange" />
               Current Balance
             </div>
             <div className={styles.money}>₹{totalBalance}</div>
@@ -85,68 +152,24 @@ const Analytics = () => {
         <div className={styles.graphsdiv}>
           <div className={styles.piecontainer}>
             <h2 className={styles.pietitle}>Expense Distribution</h2>
-              {/* Pie Chart */}
-              <PieChart
-              series={[
-                {
-                  data: expenseData,
-                  innerRadius: 40,
-                  outerRadius: 100,
-                  paddingAngle: 0,
-                  cornerRadius: 5,
-                  highlightScope: { faded: "none", highlighted: "item" },
-                  faded: { additionalRadius: 0 },
-                },
-              ]}
-              height={250}
-              legend={{
-                direction: "column",
-                position: { vertical: "middle", horizontal: "right" },
-                padding: 20,
-                itemMarkWidth: 20,
-                itemMarkHeight: 20,
-                markGap: 6,
-                itemGap: 10,
-                labelStyle: {
-                  fontSize: 14,
-                  fontWeight: 500,
-                },
-              }}
-              sx={{
-                margin: "auto",
-                width: "100%",
-                maxWidth: "500px",
-              }}
-            />
+            {/* Pie Chart */}
+            {/* <div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "20px",
+            }}> */}
+
+            {(!analyticsLoading && pieData.length > 0) &&
+              <PieChartForAnalytics pieData={pieData} />}
+            {/* </div> */}
           </div>
-  
+
 
           <div className={styles.barchartdiv}>
             <h3 className={styles.bartitle}>Top Expenses Categories</h3>
 
-            <BarChart
-              width={500}
-              height={250}
-              layout="horizontal"
-              series={[
-                { data: values, label: "Amount Spent", color: "#3f51b5" },
-              ]}
-              yAxis={[
-                {
-                  data: categories,
-                  scaleType: "band",
-                  tickLabelStyle: { width: 90, fontSize: 14 },
-                },
-              ]}
-              grid={{ horizontal: true }}
-              margin={{ top: 40, bottom: 30, left: 100, right: 30 }}
-              sx={{
-                ".MuiBarElement-root:nth-of-type(1)": { fill: "#26A69A" },
-                ".MuiBarElement-root:nth-of-type(2)": { fill: "#42A5F5" },
-                ".MuiBarElement-root:nth-of-type(3)": { fill: "#EF5350" },
-                ".MuiBarElement-root:nth-of-type(4)": { fill: "#FFA726" },
-              }}
-            />
+            {(!analyticsLoading && barData.categories.length > 0) && <BarChartForAnalytics barData={barData} />}
           </div>
         </div>
         <div className={styles.incomeExpenseChart}>
