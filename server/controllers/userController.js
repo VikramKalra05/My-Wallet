@@ -211,6 +211,11 @@ const loginUserController = async (req, res) => {
   }
 };
 
+const logoutUserController = async (req, res) => {
+  res.clearCookie("token");
+  res.status(200).send({ msg: "Logged out successfully" });
+}
+
 const resetPasswordController = async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
@@ -294,5 +299,6 @@ module.exports = {
   getAllUsers,
   updateUserDetails,
   resetPasswordController,
+  logoutUserController,
   deleteAccount,
 };

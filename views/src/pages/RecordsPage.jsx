@@ -14,12 +14,14 @@ const RecordsPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const { records, setRecords } = useContext(AppContext);
   const [sortedRecords, setSortedRecords] = useState(records); //for date sorting
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setSortedRecords(records);
   }, [records]);
 
   const fetchRecords = async () => {
+    setLoading(true);
     const fetchedRecords = await getAllTransactionsOfUser();
     setRecords(fetchedRecords);
     console.log(fetchedRecords);
@@ -57,6 +59,8 @@ const RecordsPage = () => {
           selectedStatuses={selectedStatuses}
           fetchRecords={fetchRecords}
           sortedRecords={sortedRecords}
+          loading={loading}
+          setLoading={setLoading}
         />
       </div>
     </div>

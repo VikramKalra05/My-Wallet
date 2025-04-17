@@ -9,6 +9,7 @@ import AppContext from "../context/AppContext";
 import { displayDate } from "../dateConversions/displayDate";
 import { deleteTransaction } from "../utils/transactionUtils";
 import EditRecords from "./EditRecords";
+import { Skeleton } from "@mui/material";
 
 const Records = ({
   selectedCategory,
@@ -18,12 +19,21 @@ const Records = ({
   selectedStatuses,
   fetchRecords,
   sortedRecords,
+  loading,
+  setLoading
 }) => {
-  // const { records, setRecords } = useContext(AppContext);
+  // const { records, setRecords } = useContext(AppContNext);
   const [finalRecords, setFinalRecords] = useState([]);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [zeroRecords, setZeroRecords] = useState(false);
+
+  // useEffect(() => {
+  //   if(finalRecords.length > 0){
+  //     setLoading(false);
+  //   }
+  // }, [finalRecords])
 
   const handleDelete = async (id) => {
     // const updatedRecords = records.filter((record) => record.id !== id);
@@ -33,6 +43,16 @@ const Records = ({
     await fetchRecords();
     // setRecords(updatedRecords);
   };
+
+  const renderSkeletons = () => {
+    return Array(8)
+        .fill()
+        .map((_, index) => (
+            <div key={index} className={styles.accountSkeleton}>
+                <Skeleton variant="rounded" height={"60px"} animation="wave"/>
+            </div>
+        ));
+} ;
 
   const isCategorySelected = (record) => {
     if (
@@ -69,11 +89,15 @@ const Records = ({
 
   const updateFinally = () => {
     const filteredRecords = sortedRecords?.filter(isCategorySelected) || [];
+    if(sortedRecords.length === 0){
+      setZeroRecords(true)
+    }
     setFinalRecords(
       [...(filteredRecords || [])].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       )
     );
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -99,9 +123,15 @@ const Records = ({
   return (
     <div className={styles.container}>
       {/* <p>Showing records for: <strong>{selectedCategory || "All Categories"}</strong> </p> */}
-      {finalRecords?.length === 0 ? (
+      {loading && (
+        <div className={styles.loadingContainer}>
+          {renderSkeletons()}
+        </div>
+      )}
+      {(!loading && finalRecords?.length === 0) && (
         <p>No Records Found</p>
-      ) : (
+      )}
+      {(!loading && finalRecords?.length > 0) && (
         <div className={styles.recordsContainer}>
           {finalRecords?.map((record, id) => {
             const currentDate = displayDate(record?.date);

@@ -15,6 +15,28 @@
     
 }
 
+.logoutBtn:hover{
+    background-color: #c0392b;
+    color: white;
+}
+
+.hoverDropdownBtn:hover{
+    background-color: #f1f1f1;
+}
+
+.profileIcon{
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    /* margin-right: 0.8rem; */
+}
+
 .navContainer {
     margin: auto;
     display: flex;
@@ -156,9 +178,6 @@
     color: black;
 }
 
-.dropdownItem:hover {
-    background: #f1f1f1;
-}
 .logout{
     padding: 10px;
     width:auto;
