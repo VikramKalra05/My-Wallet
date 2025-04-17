@@ -9,6 +9,7 @@ const {
   updateUserDetails,
   resetPasswordController,
   deleteAccount,
+  logoutUserController,
 } = require("../controllers/userController");
 const { auth } = require("../middleware/auth.middleware");
 const { uploadMiddleware } = require("../middleware/upload.middleware");
@@ -20,10 +21,7 @@ const userRouter = express.Router();
 userRouter.post("/register", registerUserController);
 userRouter.post("/login", loginUserController);
 userRouter.post("/reset-password", resetPasswordController);
-userRouter.post("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.status(200).send({ msg: "Logged out successfully" });
-});
+userRouter.get("/logout", auth, logoutUserController);
 userRouter.get("/dashboard", auth, getUserDashboard);
 userRouter.patch("/update", auth, uploadMiddleware, updateUserDetails);
 userRouter.delete("/delete", auth, deleteAccount);

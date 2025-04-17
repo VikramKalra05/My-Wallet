@@ -1,0 +1,5 @@
+.logoutPage{
+    /* border: 1px solid red; */
+    height: calc(100vh - 70px);
+    background-color: aqua;
+}

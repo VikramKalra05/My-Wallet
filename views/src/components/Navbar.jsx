@@ -7,12 +7,24 @@ import { FaAngleDown } from "react-icons/fa";
 import AppContext from "../context/AppContext";
 import AddRecords from "./AddRecords";
 
+const profileColors = [
+  "#ff3b30",
+  "#ff9500",
+  "#5856d6",
+  "#30b0c7",
+  "#af52de",
+  "#ff2d55",
+  "#34c759",
+  "#007aff",
+];
+
 const Navbar = () => {
   const { addRecords, setAddRecords } = useContext(AppContext);
-  const { userDetails } = useContext(AuthContext);
+  const {   userDetails } = useContext(AuthContext);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileRandomColor, setProfileRandomColor] = useState(false);
   const [showNav, setShowNav] = useState(true);
 
   const isHomePage = location.pathname === "/";
@@ -24,6 +36,19 @@ const Navbar = () => {
       setShowNav(true);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (profileRandomColor) {
+      setProfileRandomColor(true);
+    }
+  }, [profileRandomColor])
+
+  const handleCustomColor = (letter) => {
+    const firstLetter = letter.toUpperCase();
+    // Calculate an index based on the ASCII value of the first letter
+    const index = firstLetter.charCodeAt(0) % profileColors.length;
+    return profileColors[index];
+  }
 
   return (
     showNav && (
@@ -58,13 +83,27 @@ const Navbar = () => {
                     className={styles.profileContainer}
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                   >
-                    {userDetails.photo && (
+                    {
+                      profileRandomColor && (
+                        <div className={styles.icon}>
+                          <div 
+                            className={styles.profileIcon}
+                            style={{
+                              backgroundColor: handleCustomColor(userDetails?.name[0])
+                            }}
+                          >
+                            {userDetails?.name[0]}
+                          </div>
+                        </div>
+                      )
+                    }
+                    {!profileRandomColor && userDetails.photo && (
                       <div className={styles.icon}>
                         <img 
                           src={userDetails?.photo} 
                           onError={(e) => {
                             e.target.onerror = null;
-                            // e.target.src = '/default-avatar.png';
+                            setProfileRandomColor(true)
                           }}
                           alt="user" loading="lazy" />
                       </div>
@@ -74,10 +113,10 @@ const Navbar = () => {
                   </div>
                   {dropdownOpen && (
                     <div className={styles.dropdownMenu}>
-                      <Link to="/settings" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <Link to="/settings" className={`${styles.dropdownItem} ${styles.hoverDropdownBtn}`} onClick={() => setDropdownOpen(false)}>
                         Settings
                       </Link>
-                      <button className={styles.logout}>LOGOUT</button>
+                    <Link to="/logout" className={`${styles.dropdownItem} ${styles.logoutBtn}`} onTouchMoveCapture={(e) => e.target.style.backgroundColor = "red"} onClick={() => setDropdownOpen(false)}>Logout</Link>
                     </div>
                   )}
                 </div>

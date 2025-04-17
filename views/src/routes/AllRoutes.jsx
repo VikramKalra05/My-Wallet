@@ -10,6 +10,7 @@ import PrivateRoutes from './PrivateRoutes'
 import Analytics from "../pages/Analytics"
 import Accounts from "../pages/Accounts"
 import Settings from '../pages/Settings'
+import Logout from '../pages/Logout'
 
 const AllRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AllRoutes = () => {
         <Route path='/*' element={<BlankPage />} ></Route>
         <Route path='/login' element={<Login />} ></Route>
         <Route path='/register' element={<Register />} ></Route>
+        <Route path='/logout' element={<Logout />} ></Route>
         
         <Route element={<PrivateRoutes />}>
         <Route path="/accounts" element={<Accounts />} />

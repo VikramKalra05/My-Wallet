@@ -34,7 +34,7 @@ const AccountCard = ({ account, fetchAccounts }) => {
             className={styles.editbutton}
             onClick={() => setShowEditAccountModal(true)}
           >
-            <MdEdit size={18} />
+            <MdEdit size={18} /> 
           </button>
         </div>
         <div className={styles.delete}>
@@ -43,7 +43,7 @@ const AccountCard = ({ account, fetchAccounts }) => {
             {account?.balance}
           </h1>
           <button className={styles.deletebutton} onClick={()=>setShowConfirmModal(true)}>
-            <MdDelete size={18} />
+           <MdDelete size={18} /> 
           </button>
           {showConfirmModal && (
         <ConfirmationModal

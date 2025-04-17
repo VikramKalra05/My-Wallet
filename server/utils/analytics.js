@@ -27,6 +27,7 @@ function getPeriodInfo(transactionDate, type = "month") {
     };
   }
 }
+
 const updateAnalyticsDoc = async ({
   userId,
   category,
@@ -74,12 +75,12 @@ const updateAnalyticsDoc = async ({
         categoryBreakdown: [
           {
             categoryName: category,
-            amount: amount,
+            amount: type === "Expense" ? amount : 0,
             subcategories: subcategory
               ? [
                   {
                     subCategoryName: subcategory,
-                    amount: amount,
+                    amount: type === "Expense" ? amount : 0,
                   },
                 ]
               : [],
@@ -107,39 +108,41 @@ const updateAnalyticsDoc = async ({
         // If the category doesn't exist, add it
         doc.categoryBreakdown.push({
           categoryName: category,
-          amount: amount,
+          amount: type === "Expense" ? amount : 0,
           subCategories: subcategory
             ? [
                 {
                   subCategoryName: subcategory,
-                  amount: amount,
+                  amount: type === "Expense" ? amount: 0,
                 },
               ]
             : [],
         });
       } else {
         // If the category exists, update it
-        doc.categoryBreakdown[categoryIndex].amount += amount;
+        if (type === "Expense") {
+          doc.categoryBreakdown[categoryIndex].amount += amount;
 
-        // If subcategory is provided, handle it
-        if (subcategory) {
-          const subCategoryIndex = doc.categoryBreakdown[
-            categoryIndex
-          ].subCategories.findIndex(
-            (sub) => sub.subCategoryName === subcategory
-          );
+          // If subcategory is provided, handle it
+          if (subcategory) {
+            const subCategoryIndex = doc.categoryBreakdown[
+              categoryIndex
+            ].subCategories.findIndex(
+              (sub) => sub.subCategoryName === subcategory
+            );
 
-          if (subCategoryIndex === -1) {
-            // If the subcategory doesn't exist, add it
-            doc.categoryBreakdown[categoryIndex].subCategories.push({
-              subCategoryName: subcategory,
-              amount: amount,
-            });
-          } else {
-            // If the subcategory exists, update it
-            doc.categoryBreakdown[categoryIndex].subCategories[
-              subCategoryIndex
-            ].amount += amount;
+            if (subCategoryIndex === -1) {
+              // If the subcategory doesn't exist, add it
+              doc.categoryBreakdown[categoryIndex].subCategories.push({
+                subCategoryName: subcategory,
+                amount: type === "Expense" ? amount : 0,
+              });
+            } else {
+              // If the subcategory exists, update it
+              doc.categoryBreakdown[categoryIndex].subCategories[
+                subCategoryIndex
+              ].amount += amount;
+            }
           }
         }
       }
@@ -165,12 +168,12 @@ const updateAnalyticsForTransaction = async ({
   };
 
   try {
-    const extractDetails = (tx) => {
+    const extractDetails = (tx, periodType) => {
       if (!tx.date) {
         throw new Error("Transaction missing 'date' field");
       }
 
-      const period = getPeriodInfo(tx.date, "month");
+      const period = getPeriodInfo(tx.date, periodType);
 
       return {
         userId,
@@ -181,25 +184,30 @@ const updateAnalyticsForTransaction = async ({
         category: tx.category.categoryName,
         subcategory: tx?.category?.subCategory?.subCategoryName ?? null,
         amount: tx.amount,
-        type: tx.type.typeName,
+        type: tx.type.typeName
       };
     };
 
     if (operation === "create") {
-      await updateAnalyticsDoc(extractDetails(transaction));
+      for (const periodType of ["week", "month", "year"]) {
+        const details = extractDetails(transaction, periodType);
+        await updateAnalyticsDoc(details);
+      }
     } else if (operation === "delete") {
-      const reversed = extractDetails(transaction);
-      reversed.amount *= -1;
-      await updateAnalyticsDoc(reversed);
+      for (const periodType of ["week", "month", "year"]) {
+        const reversed = extractDetails(transaction, periodType);
+        reversed.amount *= -1;
+        await updateAnalyticsDoc(reversed);
+      }
     } else if (operation === "update") {
-      const reverseOld = extractDetails(oldTransaction);
-      reverseOld.amount *= -1;
-      await updateAnalyticsDoc(reverseOld);
-      await updateAnalyticsDoc(extractDetails(transaction));
-    } else {
-      results.success = false;
-      results.errors.push("Invalid operation type.");
-      console.error("Invalid analytics operation type:", operation);
+      for (const periodType of ["week", "month", "year"]) {
+        const reverseOld = extractDetails(oldTransaction, periodType);
+        reverseOld.amount *= -1;
+        await updateAnalyticsDoc(reverseOld);
+    
+        const updatedNew = extractDetails(transaction, periodType);
+        await updateAnalyticsDoc(updatedNew);
+      }
     }
 
     console.log(results);

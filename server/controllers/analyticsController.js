@@ -7,7 +7,7 @@ const getAnalytics = async (req, res) => {
   try {
     const { userId } = req.body.user;
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    const { startDate, endDate, periodType } = req.query;
+    const { startDate, endDate, periodType, periodId } = req.query;
 
     if (!periodType) {
       return res.status(400).json({ error: "periodType is required." });
@@ -39,8 +39,11 @@ const getAnalytics = async (req, res) => {
         end = moment.tz(zone).subtract(1, "month").endOf("month").toDate();
         break;
       case "month":
-        start = new Date(startDate);
-        end = new Date(endDate);
+        // start = new Date(startDate);
+        // end = new Date(endDate);
+        if (!periodId) {
+          return res.status(400).json({ error: "periodId is required for month" });
+        }
         break;
       case "lastYear":
         start = moment.tz(zone).subtract(1, "year").startOf("year").toDate();
@@ -148,17 +151,24 @@ const getAnalytics = async (req, res) => {
         endDate: end,
         granularity: "week",
       });
-    } else if (periodType === "month" || periodType === "lastMonth") {
+    } else if (periodType === "month"
+      //  || periodType === "lastMonth"
+      ) {
+        
       analyticsData = await AnalyticsModel.find({
-        userObjectId,
+        userId,
         periodType: "month",
-        periodId: { $gte: getMonthId(start), $lte: getMonthId(end) },
+        periodId: periodId,
+        // { $gte: getMonthId(start), $lte: getMonthId(end) },
       });
-    } else if (periodType === "year" || periodType === "lastYear") {
+      // console.log(analyticsData, periodId, periodType, userObjectId);
+    } else if (periodType === "year"
+      //  || periodType === "lastYear"
+      ) {
       analyticsData = await AnalyticsModel.find({
         userObjectId,
         periodType: "year",
-        periodId: { $gte: start.getFullYear(), $lte: end.getFullYear() },
+        periodId: periodId,
       });
     } else if (periodType === "custom") {
       // 🧠 Use dynamic granularity for custom range if needed later
