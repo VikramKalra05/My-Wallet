@@ -20,7 +20,7 @@ const Records = ({
   fetchRecords,
   sortedRecords,
   loading,
-  setLoading
+  setLoading,
 }) => {
   // const { records, setRecords } = useContext(AppContNext);
   const [finalRecords, setFinalRecords] = useState([]);
@@ -46,20 +46,20 @@ const Records = ({
     // setRecords(updatedRecords);
   };
   const handleConfirm = () => {
-    if(currentRecordId){
+    if (currentRecordId) {
       handleDelete(currentRecordId);
     }
     setShowConfirmModal(false);
   };
   const renderSkeletons = () => {
     return Array(8)
-        .fill()
-        .map((_, index) => (
-            <div key={index} className={styles.accountSkeleton}>
-                <Skeleton variant="rounded" height={"60px"} animation="wave"/>
-            </div>
-        ));
-} ;
+      .fill()
+      .map((_, index) => (
+        <div key={index} className={styles.accountSkeleton}>
+          <Skeleton variant="rounded" height={"60px"} animation="wave" />
+        </div>
+      ));
+  };
 
   const isCategorySelected = (record) => {
     if (
@@ -96,15 +96,15 @@ const Records = ({
 
   const updateFinally = () => {
     const filteredRecords = sortedRecords?.filter(isCategorySelected) || [];
-    if(sortedRecords.length === 0){
-      setZeroRecords(true)
+    if (sortedRecords.length === 0) {
+      setZeroRecords(true);
     }
     setFinalRecords(
       [...(filteredRecords || [])].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       )
     );
-    setLoading(false)
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -131,14 +131,10 @@ const Records = ({
     <div className={styles.container}>
       {/* <p>Showing records for: <strong>{selectedCategory || "All Categories"}</strong> </p> */}
       {loading && (
-        <div className={styles.loadingContainer}>
-          {renderSkeletons()}
-        </div>
+        <div className={styles.loadingContainer}>{renderSkeletons()}</div>
       )}
-      {(!loading && finalRecords?.length === 0) && (
-        <p>No Records Found</p>
-      )}
-      {(!loading && finalRecords?.length > 0) && (
+      {!loading && finalRecords?.length === 0 && <p>No Records Found</p>}
+      {!loading && finalRecords?.length > 0 && (
         <div className={styles.recordsContainer}>
           {finalRecords?.map((record, id) => {
             const currentDate = displayDate(record?.date);
@@ -216,18 +212,12 @@ const Records = ({
                     <button
                       className={styles.delete}
                       onClick={() => {
-                        setCurrentRecordId(record?._id)
-                        setShowConfirmModal(true)}}
+                        setCurrentRecordId(record?._id);
+                        setShowConfirmModal(true);
+                      }}
                     >
                       <MdDelete size={20} />
                     </button>
-                    {showConfirmModal && (
-                      <ConfirmationModal
-                        message="Are you sure you want to delete this record?"
-                        onConfirm={handleConfirm}
-                        onCancel={() => setShowConfirmModal(false)}
-                      />
-                    )}
                   </div>
                 </div>
               </div>
@@ -240,6 +230,13 @@ const Records = ({
           selectedRecord={selectedRecord}
           setShowEditModal={setShowEditModal}
           fetchRecords={fetchRecords}
+        />
+      )}
+      {showConfirmModal && (
+        <ConfirmationModal
+          message="Are you sure you want to delete this record?"
+          onConfirm={handleConfirm}
+          onCancel={() => setShowConfirmModal(false)}
         />
       )}
     </div>
