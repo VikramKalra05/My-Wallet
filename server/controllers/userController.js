@@ -233,7 +233,9 @@ const resetPasswordController = async (req, res) => {
     }
 
     if (newPassword === oldPassword) {
-      return res.status(400).json({ error: "New password must be different from old password" });
+      return res
+        .status(400)
+        .json({ error: "New password must be different from old password" });
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
@@ -255,31 +257,35 @@ const resetPasswordController = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const {
+      userId, // , password
+    } = req.body.user;
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
+    // if (!email) {
+    //   return res.status(400).json({ error: "Email is required" });
+    // }
 
     // Find user by email
-    const user = await UserModel.findOne({ email });
+    console.log(userId);
+    const user = await UserModel.findById(userId);
+    console.log(user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     // If the user has a password, verify it
-    if (user.password) {
-      if (!password) {
-        return res.status(400).json({ error: "Password is required" });
-      }
+    // if (user.password) {
+    //   if (!password) {
+    //     return res.status(400).json({ error: "Password is required" });
+    //   }
 
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ error: "Incorrect password" });
-      }
-    }
+    //   const isMatch = await bcrypt.compare(password, user.password);
+    //   if (!isMatch) {
+    //     return res.status(400).json({ error: "Incorrect password" });
+    //   }
+    // }
 
-    await UserModel.deleteOne({ email });
+    await user.deleteOne();
 
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {

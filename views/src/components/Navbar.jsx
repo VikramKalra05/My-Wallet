@@ -64,7 +64,7 @@ const Navbar = () => {
                           src={userDetails?.photo} 
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '/default-avatar.png';
+                            // e.target.src = '/default-avatar.png';
                           }}
                           alt="user" loading="lazy" />
                       </div>

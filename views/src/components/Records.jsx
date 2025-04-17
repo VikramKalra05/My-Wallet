@@ -5,10 +5,10 @@ import styles from "../css/records.module.css";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import categoriesData from "../utils/modalCategories";
-import AppContext from "../context/AppContext";
 import { displayDate } from "../dateConversions/displayDate";
 import { deleteTransaction } from "../utils/transactionUtils";
 import EditRecords from "./EditRecords";
+import ConfirmationModal from "./DeleteConfirmModal";
 
 const Records = ({
   selectedCategory,
@@ -21,9 +21,11 @@ const Records = ({
 }) => {
   // const { records, setRecords } = useContext(AppContext);
   const [finalRecords, setFinalRecords] = useState([]);
+  const [currentRecordId, setCurrentRecordId] = useState(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); //for asking to delete any record
 
   const handleDelete = async (id) => {
     // const updatedRecords = records.filter((record) => record.id !== id);
@@ -33,7 +35,12 @@ const Records = ({
     await fetchRecords();
     // setRecords(updatedRecords);
   };
-
+  const handleConfirm = () => {
+    if(currentRecordId){
+      handleDelete(currentRecordId);
+    }
+    setShowConfirmModal(false);
+  };
   const isCategorySelected = (record) => {
     if (
       (!selectedCategory || selectedCategory.length === 0) &&
@@ -178,10 +185,19 @@ const Records = ({
                     </button>
                     <button
                       className={styles.delete}
-                      onClick={() => handleDelete(record?._id)}
+                      onClick={() => {
+                        setCurrentRecordId(record?._id)
+                        setShowConfirmModal(true)}}
                     >
                       <MdDelete size={20} />
                     </button>
+                    {showConfirmModal && (
+                      <ConfirmationModal
+                        message="Are you sure you want to delete this record?"
+                        onConfirm={handleConfirm}
+                        onCancel={() => setShowConfirmModal(false)}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

@@ -92,3 +92,25 @@ export const updateUserDetails = async (formData) => {
     console.log("error at updating user details:", error);
   }
 };
+export const deleteUserDetails = async()=>{
+  try {
+    const res=await fetch(`${TESTING_URL}/user/delete`,{
+      method:"DELETE",
+      credentials:"include",
+      // headers:{
+      //   "Content-Type":"Application/json"
+      // }
+    })
+
+    if(res.ok) {
+      const data = await res.json();
+      return data
+    }else{
+      return null
+    }
+    
+  } catch (error) {
+    console.log(error);
+  }
+
+}

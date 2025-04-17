@@ -8,7 +8,9 @@ export const AppContextProvider = ({ children }) => {
   // const [editRecord ,setEditRecord]=useState(null)
 
   return (
-    <AppContext.Provider value={{ addRecords, setAddRecords, records, setRecords}}>
+    <AppContext.Provider
+      value={{ addRecords, setAddRecords, records, setRecords }}
+    >
       {children}
     </AppContext.Provider>
   );

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import AccountCard from "../components/AccountCard"
 import styles from "../css/accounts.module.css"
-import { createAccount } from "../utils/accountUtils";
 import { getAccounts } from "../utils/accountUtils";
 import AddAccountModal from "../components/AddAccountModal";
 
@@ -49,8 +48,8 @@ const Accounts = () => {
                     ))}
                 </div>
             </div>
-
         </div>
     )
 }
+
 export default Accounts

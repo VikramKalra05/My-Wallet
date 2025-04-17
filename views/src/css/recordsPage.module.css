@@ -4,7 +4,7 @@
     align-items: flex-start; /* Align items to the top */
     gap: 20px; /* Space between sidebar and records */
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: rgba(26, 26, 26, 0.911);;
     min-height: 100vh; /* Full screen height */
 }
 

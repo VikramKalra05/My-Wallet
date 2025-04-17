@@ -1,5 +1,5 @@
 .mainpage{
-    background-color: #f4f4f4;
+    background-color: rgba(26, 26, 26, 0.911);;
     min-height: 100vh;
 
 }
@@ -15,6 +15,7 @@
     /* gap:500px; */
     margin: auto;
     /* border: 1px solid; */
+    color:white;
 }
 
 .dateFilter{

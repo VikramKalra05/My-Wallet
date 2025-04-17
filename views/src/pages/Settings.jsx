@@ -7,6 +7,9 @@ import { FaPencilAlt } from "react-icons/fa";
 import { getCategories, updateSubCategory } from "../utils/categoryUtils";
 import categoryIcons from "../constants/categoryIcons";
 import { deleteSubCategory } from "../utils/categoryUtils";
+import ConfirmationModal from "../components/DeleteConfirmModal";
+import { deleteUserDetails } from "../utils/userUtils";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { userDetails, setUserDetails, handleFetchUserDetails } =
@@ -27,7 +30,26 @@ const Settings = () => {
   const [editedSubName, setEditedSubName] = useState("");
   const [originalSubName, setOriginalSubName] = useState("");
   const [formData, setFormData] = useState(null);
+  const navigate = useNavigate();
+  const [showConfirmModal, setShowConfirmModal] = useState(false); //modal for deletion
+  const [showConfirmModalForSubCategory, setShowConfirmModalForSubCategory] =
+    useState(false); //modal for deletion
+  const [currentSubId, setCurrentSubId] = useState(null);
 
+  const handleDeletion = async () => {
+    try {
+      const res = await deleteUserDetails();
+      if (res.message === "Account deleted successfully") {
+        return navigate("/");
+      }
+    } catch (error) {
+      alert("Something went wrong while deleting account");
+    }
+  };
+  const handleConfirm = async () => {
+    await handleDeletion();
+    setShowConfirmModal(false);
+  };
   const handleFileChange = (event) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedPfp(event.target.files[0]);
@@ -103,9 +125,9 @@ const Settings = () => {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (catId, subId) => {
+  const handleDelete = async (subId) => {
     try {
-      const res = await deleteSubCategory(catId, subId);
+      const res = await deleteSubCategory(activeCategoryId, subId);
       if (res) {
         console.log("subcategory deleted:", res);
 
@@ -118,6 +140,12 @@ const Settings = () => {
     } catch (error) {
       console.log("error");
     }
+  };
+  const handleConfirmation = () => {
+    if (currentSubId) {
+      handleDelete(currentSubId);
+    }
+    setShowConfirmModalForSubCategory(false);
   };
 
   const handleEditClick = (subId, currentName) => {
@@ -169,14 +197,14 @@ const Settings = () => {
           >
             Categories
           </button>
-          <button
+          {/* <button
             className={`${styles.tabButton} ${
               selectedTab === "labels" ? styles.activeTab : ""
             }`}
             onClick={() => setSelectedTab("labels")}
           >
             Labels
-          </button>
+          </button> */}
         </div>
 
         <div className={styles.settingMain}>
@@ -247,10 +275,27 @@ const Settings = () => {
                   </button>
                 </div>
                 <div className={styles.deleteBtnWrapper}>
-                  <button className={styles.deleteBtn}>
-                    <MdDelete className={styles.deleteicon} />
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => {
+                      setShowConfirmModal(true);
+                    }}
+                  >
+                    <MdDelete
+                      className={styles.deleteicon}
+                      onClick={() => {
+                        setShowConfirmModal(true);
+                      }}
+                    />
                     Delete Account
                   </button>
+                  {showConfirmModal && (
+                    <ConfirmationModal
+                      message="Are you sure you want to delete this account?"
+                      onConfirm={handleConfirm}
+                      onCancel={() => setShowConfirmModal(false)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -298,9 +343,10 @@ const Settings = () => {
                       {editingSubId !== sub._id && (
                         <button
                           className={styles.delete}
-                          onClick={() =>
-                            handleDelete(activeCategoryId, sub._id)
-                          }
+                          onClick={() => {
+                            setCurrentSubId(sub._id);
+                            setShowConfirmModalForSubCategory(true);
+                          }}
                         >
                           <MdDelete className={styles.delete} size={18} />
                         </button>
@@ -346,15 +392,23 @@ const Settings = () => {
                     </div>
                   </div>
                 ))}
+
+                {showConfirmModalForSubCategory && (
+                  <ConfirmationModal
+                    message="Are you sure you want to delete this subcategory?"
+                    onConfirm={handleConfirmation}
+                    onCancel={() => setShowConfirmModalForSubCategory(false)}
+                  />
+                )}
               </div>
             </div>
           )}
           {/* ✅ Added: Placeholder for Labels tab */}
-          {selectedTab === "labels" && (
+          {/* {selectedTab === "labels" && (
             <div className={styles.placeholderTab}>
               <h3>Label Settings</h3>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

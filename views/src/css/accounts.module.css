@@ -1,5 +1,5 @@
 .accounts{
-    background-color: #f3f3f3;
+    background-color:rgba(26, 26, 26, 0.911);
     width: 100%;
     min-height: 100vh;
     padding-top: 50px;
@@ -8,7 +8,7 @@
 }
 
 .accountsContainer{
-    /* border: 3px solid green; */
+    /* border: 6px solid wheat; */
     width: 90%;
     margin: auto;
     height: auto;
@@ -21,12 +21,15 @@
 
 .accountsList{
     /* display: flex; */
-    /* background-color: white; */
+    background-color:white;
+    border-radius: 10px;
+    padding: 20px;
     width: 80%;
     /* border: 5px solid red; */
     grid-template-columns: repeat(4,1fr);
     display:grid;
     gap:10px;
+   
 }
 .accountsForm{
     width:250px;
@@ -36,25 +39,25 @@
    
     align-items: center;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    background: white;
+    background:white;
     border-radius: 10px;
 
 }
 
 .accountCard{
     /* height: 200px; */
-background-color: white;
+/* Perfect for backgrounds or subtle themes */
+background-color:rgb(234, 252, 252); /* #BAF1E3 */
+
     align-items: center;
 border-radius: 10px;
 padding: 10px;
 width: 230px;
 height: 100px;
-    border: 1px solid #eeeeee;
+margin-bottom: 10px;
+    /* border: 1px solid #eeeeee; */
 }
-.accountCard:hover{
-    /* background-color:#6c757d; */
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-}
+
 
 /* .accountdata h1{
     font-size: 16px;
@@ -65,11 +68,12 @@ height: 100px;
     font-size: 18px;
     font-weight: 600;
     /* border: 1px solid red; */
+    color:rgb(20, 20, 20);
 }
 .accBalance{
     font-size: 20px;
     font-weight: 600;
-    color: #6c757d;
+    color: rgb(44, 62, 80);
 
 }
 
@@ -82,18 +86,19 @@ height: 100px;
     /* width:200px; */
     padding: 8px 35px;
     border-radius: 15px;
-    background: rgb(26, 171, 42);
+    background: rgb(31, 169, 132);
     border: 1px solid green;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 500;
     color:white;
+    border: none;
   
 }
 
 
 .formbutton:hover{
-    background-color: green;
+    background-color: rgb(116, 208, 148);
     color:white;
 }
  p{
@@ -124,7 +129,7 @@ height: 100px;
     background: none;
     border: none;
     cursor: pointer;
-    color: #e74c3c;
+    color: coral;
    
 }
 /*  add account Modal */

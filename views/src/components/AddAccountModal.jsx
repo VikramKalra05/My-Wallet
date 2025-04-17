@@ -6,7 +6,7 @@ import { RxCross2 } from "react-icons/rx";
 const AddAccountModal = ({accounts, setAccounts, showAddAccountModal, setShowAddAccountModal}) => {
     const [newAccountDetails, setNewAccountDetails] = useState({
         accountName: "",
-        balance: undefined
+        balance: ""
     })
     // implement add account
     // create a form to add account - account name and balance
