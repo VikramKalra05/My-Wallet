@@ -7,6 +7,7 @@ import { getAllTransactionsOfUser } from "../utils/transactionUtils";
 import { displayDate } from "../dateConversions/displayDate";
 import categoriesData from "../utils/modalCategories";
 
+
 const Dashboard = () => {
   const { userDetails } = useContext(AuthContext);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -139,7 +140,9 @@ const Dashboard = () => {
           </div>
           <div className={styles.secondhalf}>
             <div className={styles.bargraphDiv}>Bar graph</div>
-            <div className={styles.piechartDiv}>pie chart</div>
+            <div className={styles.piechartDiv}>
+              
+            </div>
           </div>
         </div>
       </div>

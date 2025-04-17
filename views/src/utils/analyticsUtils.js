@@ -21,6 +21,7 @@ export const fetchAnalytics = async (periodType,  periodId) => {
     }
 }
 
+
 // periodTypes =  today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth, last6Months, thisYear, lastYear, custom
 // range = day, week, month, year
 // custom = startDate, endDate
