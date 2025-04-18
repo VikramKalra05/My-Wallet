@@ -98,7 +98,7 @@ const Navbar = () => {
                         </div>
                       )
                     }
-                    {!profileRandomColor && userDetails.photo && (
+                    {!profileRandomColor && userDetails?.photo && (
                       <div className={styles.icon}>
                         <img 
                           src={userDetails?.photo} 

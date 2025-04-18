@@ -20,7 +20,10 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser()); // Add this to parse cookies
 app.use(cors({
-    origin: "http://localhost:3000",  // Your frontend's URL
+    origin:  [
+        "http://localhost:3000",
+        "https://my-wallet-frontend-liard.vercel.app"
+      ],  // Your frontend's URL
     credentials: true  // Allow cookies to be sent with requests
 }));
 app.use("/uploads", express.static("uploads")); 
