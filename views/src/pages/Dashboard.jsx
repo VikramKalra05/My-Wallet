@@ -6,7 +6,24 @@ import { getAccounts } from "../utils/accountUtils";
 import { getAllTransactionsOfUser } from "../utils/transactionUtils";
 import { displayDate } from "../dateConversions/displayDate";
 import categoriesData from "../utils/modalCategories";
+import PieChartForAnalytics from "../components/PieChartForAnalytics";
+import { fetchAnalytics } from "../utils/analyticsUtils";
+import IncomeExpenseBarChart from "../components/IncomeExpenseBarChart";
+import { FaSpinner } from "react-icons/fa";
+import {Link} from "react-router-dom"
+import { FiExternalLink } from "react-icons/fi";
 
+const CATEGORY_COLOR_MAP = {
+  Transportation: "#FF5733",
+  "Food & Drinks": "#FFB900",
+  "Vehicle Expenses": "#A83279",
+  "Housing & Utilities": "#0074D9",
+  "Personal & Wellness": "#FF69B4",
+  Shopping: "#0074D9",
+  "Financial & Banking": "#6F42C1",
+  "Entertainment & Recreation": "#FF851B",
+  Miscellaneous: "#999999",
+};
 
 const Dashboard = () => {
   const { userDetails } = useContext(AuthContext);
@@ -15,6 +32,35 @@ const Dashboard = () => {
 
   const [records, setRecords] = useState([]); // State to hold fetched records
   const [loading, setLoading] = useState(true);
+  const [pieData, setPieData] = useState([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+  const [analyticsData, setAnalyticsData] = useState({});
+
+  const handleFetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    const data = await fetchAnalytics("month", "2025-04"); // hardcoded
+    console.log(data);
+
+    const analytics = data?.analyticsData[0];
+    setAnalyticsData(analytics);
+
+    if (analytics?.categoryBreakdown?.length) {
+      const breakdown = analytics.categoryBreakdown
+        .filter((cat) => cat.categoryName !== "Income & Earnings")
+        .map((cat) => ({
+          label: cat.categoryName,
+          value: cat.amount,
+          color: CATEGORY_COLOR_MAP[cat.categoryName] || "#ccc",
+        }));
+      console.log(breakdown);
+      setPieData(breakdown);
+      setAnalyticsLoading(false);
+    }
+  };
+  useEffect(() => {
+    handleFetchAnalytics();
+  }, []);
 
   const fetchRecords = async () => {
     try {
@@ -42,7 +88,11 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <FaSpinner />
+      </div>
+    );
   }
 
   const getCategoryIcon = (categoryName) => {
@@ -53,7 +103,14 @@ const Dashboard = () => {
   return (
     <div className={styles.dashboardPage}>
       <div className={styles.midDiv}>
-        <div className={styles.welcomeMsg}>Welcome {userDetails?.name}!</div>
+        <div className={styles.welcomeMsg}>
+          <span className={styles.greeting}>Welcome</span>
+          <span className={styles.userName}>{userDetails?.name}😄</span>
+        </div>
+        <div className={styles.dashboardSubheading}>
+          Your money at a glance 💰
+        </div>
+
         <div className={styles.all4divs}>
           <div className={styles.firsthalf}>
             <div className={styles.accountsDiv}>
@@ -68,6 +125,7 @@ const Dashboard = () => {
                       <div className={styles.balance}>₹{account.balance}</div>
                     </div>
                   ))}
+                  {accounts.length < 5 && (
                 <div className={styles.button}>
                   <button
                     className={styles.addButton}
@@ -84,7 +142,9 @@ const Dashboard = () => {
                     />
                   )}
                 </div>
+                )}
               </div>
+            <Link className={styles.linkAccounts} to="/accounts">More Accounts <FiExternalLink/></Link>
             </div>
             {loading ? (
               <div>Loading...</div>
@@ -92,6 +152,7 @@ const Dashboard = () => {
               <div>No records found</div>
             ) : (
               <div className={styles.recordsContainer}>
+                <div style={{fontSize:"20px",fontWeight:"500",textDecoration:"underline"}}>Latest 5 Records  <Link className={styles.link} to="/records">More Records <FiExternalLink /></Link></div>
                 {records.map((record) => {
                   const currentDate = displayDate(record?.date);
                   // const prevDate =
@@ -131,17 +192,30 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
+                      
                       </div>
                     </div>
                   );
                 })}
+               
               </div>
             )}
           </div>
           <div className={styles.secondhalf}>
-            <div className={styles.bargraphDiv}>Bar graph</div>
-            <div className={styles.piechartDiv}>
-              
+            <div className={styles.bargraphDiv}>Income vs Expense Overview
+              {analyticsData && (
+                <IncomeExpenseBarChart
+                  data={{
+                    income: analyticsData.totalIncome,
+                    expense: analyticsData.totalExpense,
+                  }}
+                />
+              )}
+            </div>
+            <div className={styles.piechartDiv}>Expense By Category
+              {!analyticsLoading && pieData.length > 0 && (
+                <PieChartForAnalytics pieData={pieData} />
+              )}
             </div>
           </div>
         </div>

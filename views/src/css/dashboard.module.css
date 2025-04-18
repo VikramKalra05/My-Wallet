@@ -1,38 +1,81 @@
 .dashboardPage{
-    border:2px solid red;
+    /* border:2px solid red; */
     min-height: 100vh;
     background-color:rgba(26, 26, 26, 0.911) ;
 }
+.link{
+    color:teal;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 5px;
+    margin-left: 220px;
+ 
+}
+  .linkAccounts{
+    color:teal;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 5px;
+    font-weight: 600;
+    /* margin-top: 60px; */
+    /* border:10px solid; */
+
+  }
 .midDiv{
-    border:2px solid yellow;
+    /* border:2px solid yellow; */
     margin: auto;
     width: 80%;
     
 
 
 }
-.welcomeMsg{
-    border:2px solid green;
-    font-size: 24px;
-    font-weight: 700;
-    color:white;
-
+.welcomeMsg {
+    margin-top: 5px;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    /* text-align: center; */
+    
 }
+
+.greeting {
+    font-size: 33px; 
+    font-weight: 500;
+    color: rgb(250, 191, 81);  /* Green color for 'Welcome' */
+}
+
+
+.userName {
+    font-size: 35px;  /* Larger font size for the user's name */
+    font-weight: 500;
+    color:rgb(244, 214, 160);  /* Red color for the user's name */
+    text-transform: capitalize;  /* Ensures the first letter of each name part is uppercase */
+  }
+  .dashboardSubheading {
+    margin-top: 0.5rem;
+    font-size: 27px;
+    font-weight: 400;
+    color:rgb(112, 204, 116); /* soft dark gray for a clean look */
+    text-align: center;
+    font-style: italic;
+    letter-spacing: 0.5px;
+    border-bottom:5px solid burlywood;
+  }
+  
 .all4divs{
-    border:2px solid pink;
+    /* border:2px solid pink; */
     padding: 10px;
     display: grid;
     grid-template-rows: repeat(2,1fr);
     align-items: center;
     margin: auto;
     width:90%;
+    margin-top: 20px;
     
    
     /* margin-top: 30px; */
     
 }
 .firsthalf{
-    border:2px solid red;
+    /* border:2px solid red; */
     display: flex;
     /* justify-content: space-around; */
     align-items: center;
@@ -44,9 +87,9 @@
     /* border:2px solid blue; */
     background-color: white;
     width:40%;
-    min-height: 350px;
+    min-height: 430px;
     border-radius: 10px;
-    padding: 5px;
+    padding: 15px;
     margin: auto;
 }
 .mine{
@@ -61,9 +104,12 @@
 .heading{
     /* border:2px solid yellow; */
     color:black;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 500;
     margin-top:2px;
+    text-align: center;
+    text-decoration: underline;
+
 }
 .button{
     display: flex;
@@ -72,7 +118,7 @@
 }
 .addButton{
     /* margin-top: 8px; */
-    padding:6px;
+    padding:7px;
     display: flex;
     margin-bottom: 12px;
     width: 200px;
@@ -85,6 +131,7 @@
     color:white;
     font-size: 20px;
     height:54px;
+    margin-top: 20px;
 }
 .data{
     /* border:2px solid red; */
@@ -99,6 +146,9 @@
     border-radius: 10px;
     height: 45px;
     align-items: center;
+    margin-top: 20px;
+    /* margin-bottom: 20px; */
+    gap:10px;
 
 }
 .data:hover{
@@ -138,7 +188,7 @@
 
     cursor: pointer;    
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 5px;
+    margin-top: 15px;
     
 }
 .recordsItem:hover{
@@ -184,31 +234,39 @@
 
 }
 .secondhalf{
-    border:2px solid orange;
+    /* border:2px solid orange; */
     display: flex;
     /* justify-content: space-around; */
     align-items: center;
-    width: 95%;
+    width: 97%;
     gap:20px;
 
 
 }
 .bargraphDiv{
-    border:2px solid purple;
+    /* border:2px solid purple; */
     width: 50%;
-    min-height: 400px;
+    min-height: 270px;
     border-radius: 10px;
-    padding: 5px;
+    padding: 15px;
+    background-color: rgb(234, 252, 252);
+    font-size: 20px;
+    font-weight: 500;
 
-
+    text-decoration: underline;
 
 }
 .piechartDiv{
-    border:2px solid gold;
+    /* border:2px solid gold; */
     width: 50%;
-    min-height: 400px;
+    min-height: 270px;
     border-radius: 10px;
-    padding: 5px;
+    padding: 15px;
+    background-color:rgb(234, 252, 252);
+    font-size: 20px;
+    font-weight: 500;
+    text-decoration: underline;
+
 
 
 

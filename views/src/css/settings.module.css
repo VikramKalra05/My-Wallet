@@ -1,5 +1,5 @@
 .settingsPage {
-    background-color: #f4f4f4;
+    background-color:  rgba(26, 26, 26, 0.911);;
     width: 100%;
     min-height: 93vh;
     padding-top: 50px;
@@ -44,7 +44,7 @@
     text-align: center;
     background-color: #20b9b4; /* teal */
     /* border: none; */
-    border: 1px solid white;
+    border: 1px solid ;
     color:white;
     font-weight: 600;
     font-size: 14px;
@@ -307,6 +307,7 @@
   
   .subName{
     /* border: 3px solid yellow; */
+    color:white;
     display: flex;
     /* justify-content: space-between; */
     align-items: center;
