@@ -30,7 +30,10 @@
 
 }
 .welcomeMsg {
-    margin-top: 5px;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     /* text-align: center; */
     

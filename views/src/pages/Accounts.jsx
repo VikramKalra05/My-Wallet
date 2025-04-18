@@ -54,7 +54,7 @@ const Accounts = () => {
             </div> */}
             <div className={styles.accountsContainer}>
                 <div className={styles.accountsForm}>
-                    <p>Create new account</p>
+                    <p  style={{textAlign:"center"}}>Create new account</p>
                     <div style={{
                         margin: "auto"
                     }}>
