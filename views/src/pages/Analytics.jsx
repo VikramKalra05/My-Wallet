@@ -5,7 +5,7 @@ import { GiPayMoney } from "react-icons/gi";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { getAccounts } from "../utils/accountUtils";
-import { fetchAnalytics } from "../utils/analyticsUtils";
+import { fetchAnalytics, fetchAnalyticsLast6Months } from "../utils/analyticsUtils";
 import PieChartForAnalytics from "../components/PieChartForAnalytics";
 import BarChartForAnalytics from "../components/BarChartForAnalytics";
 
@@ -24,6 +24,7 @@ const CATEGORY_COLOR_MAP = {
 const Analytics = () => {
   const [totalBalance, setTotalBalance] = useState(0);
   const [analyticsData, setAnalyticsData] = useState({});
+  const [incomeExpenseDataBar, setIncomeExpenseDataBar] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
   const [barData, setBarData] = useState({ categories: [], values: [] })
@@ -42,7 +43,7 @@ const Analytics = () => {
   function formatMonth(monthString) {
     // Create a new date object using the first day of the given month
     const date = new Date(`${monthString}-01`);
-    
+
     // Get the full month name (e.g., "April")
     const options = { year: 'numeric', month: 'long' };
     return date.toLocaleDateString('en-US', options);
@@ -82,8 +83,27 @@ const Analytics = () => {
     setAnalyticsLoading(false)
 
   }
+
+  const handleFetchLast6Months = async () => {
+    try {
+      const data = await fetchAnalyticsLast6Months();
+      console.log(data);
+      // setAnalyticsData6Months(data);
+      const formattedData = data?.map((item) => ({
+        month: formatMonth(item.month).split(" ")[0], // "October 2024" → "October"
+        income: item.totalIncome,
+        expense: item.totalExpense,
+      }));
+      console.log(formattedData)
+      setIncomeExpenseDataBar(formattedData);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     handleFetchAnalytics()
+    handleFetchLast6Months()
   }, [])
 
   // const expenseData = [
@@ -101,14 +121,14 @@ const Analytics = () => {
   const values = [1250, 1200, 800, 400];
 
   // array of objects -> month, income , expense
-  const incomeExpenseData = [
-    { month: "Nov", income: 5000, expense: 3200 },
-    { month: "Dec", income: 6200, expense: 4000 },
-    { month: "Jan", income: 7000, expense: 4500 },
-    { month: "Feb", income: 6800, expense: 3900 },
-    { month: "Mar", income: 7200, expense: 5000 },
-    { month: "Apr", income: 7500, expense: 5300 },
-  ];
+  // const incomeExpenseData = [
+  //   { month: "Nov", income: 5000, expense: 3200 },
+  //   { month: "Dec", income: 6200, expense: 4000 },
+  //   { month: "Jan", income: 7000, expense: 4500 },
+  //   { month: "Feb", income: 6800, expense: 3900 },
+  //   { month: "Mar", income: 7200, expense: 5000 },
+  //   { month: "Apr", income: 7500, expense: 5300 },
+  // ];
   return (
     <div className={styles.mainpage}>
       <div className={styles.middle}>
@@ -176,31 +196,33 @@ const Analytics = () => {
           <h3 className={styles.chartHeading}>
             Income vs Expense (Last 6 Months)
           </h3>
-          <BarChart
-            className={styles.barr}
-            width={500}
-            height={250}
-            xAxis={[
-              {
-                scaleType: "band",
-                data: incomeExpenseData.map((item) => item.month),
-              },
-            ]}
-            series={[
-              {
-                data: incomeExpenseData.map((item) => item.income),
-                label: "Income",
-                color: "#4caf50",
-              },
-              {
-                data: incomeExpenseData.map((item) => item.expense),
-                label: "Expense",
-                color: "#f44336",
-              },
-            ]}
-            margin={{ top: 30, bottom: 40, left: 50, right: 20 }}
-            grid={{ vertical: true }}
-          />
+          {incomeExpenseDataBar && (
+            <BarChart
+              className={styles.barr}
+              width={500}
+              height={250}
+              xAxis={[
+                {
+                  scaleType: "band",
+                  data: incomeExpenseDataBar.map((item) => item.month),
+                },
+              ]}
+              series={[
+                {
+                  data: incomeExpenseDataBar.map((item) => item.income),
+                  label: "Income",
+                  color: "#4caf50",
+                },
+                {
+                  data: incomeExpenseDataBar.map((item) => item.expense),
+                  label: "Expense",
+                  color: "#f44336",
+                },
+              ]}
+              margin={{ top: 30, bottom: 40, left: 50, right: 20 }}
+              grid={{ vertical: true }}
+            />
+          )}
         </div>
       </div>
     </div>

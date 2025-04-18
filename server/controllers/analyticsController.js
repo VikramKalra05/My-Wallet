@@ -196,6 +196,76 @@ const getAllAnalytics = async (req, res) => { // temp
   }
 }
 
+const getLast6MonthsAnalytics = async (req, res) => {
+  try {
+    const { userId } = req.body.user;
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const zone = "Asia/Kolkata";
+
+    const monthsData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = moment.tz(zone).subtract(i, "months").startOf("month").toDate();
+      const monthEnd = moment.tz(zone).subtract(i, "months").endOf("month").toDate();
+      const monthId = getMonthId(monthStart);
+
+      // Try finding precomputed data
+      let monthDoc = await AnalyticsModel.findOne({
+        userId,
+        periodType: "month",
+        periodId: monthId,
+      });
+
+      if (!monthDoc) {
+        // If not found, calculate from TransactionModel
+        const agg = await TransactionModel.aggregate([
+          {
+            $match: {
+              userId: userObjectId,
+              date: { $gte: monthStart, $lte: monthEnd },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalIncome: {
+                $sum: {
+                  $cond: [{ $eq: ["$type.typeName", "Income"] }, "$amount", 0],
+                },
+              },
+              totalExpense: {
+                $sum: {
+                  $cond: [{ $eq: ["$type.typeName", "Expense"] }, "$amount", 0],
+                },
+              },
+            },
+          },
+        ]);
+
+        const fallback = agg[0] || { totalIncome: 0, totalExpense: 0 };
+
+        monthsData.push({
+          month: monthId,
+          totalIncome: fallback.totalIncome,
+          totalExpense: fallback.totalExpense,
+        });
+      } else {
+        monthsData.push({
+          month: monthId,
+          totalIncome: monthDoc.totalIncome || 0,
+          totalExpense: monthDoc.totalExpense || 0,
+        });
+      }
+    }
+
+    res.status(200).json({ data: monthsData });
+  } catch (error) {
+    console.error("Error fetching 6-month analytics:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 // Helper to get week ID like "2025-W15"
 const getWeekId = (date) => {
   const d = new Date(
@@ -216,5 +286,6 @@ const getMonthId = (date) => {
 
 module.exports = {
   getAnalytics,
-  getAllAnalytics
+  getAllAnalytics,
+  getLast6MonthsAnalytics,
 };
