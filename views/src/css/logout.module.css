@@ -1,5 +1,12 @@
 .logoutPage{
     /* border: 1px solid red; */
-    height: calc(100vh - 70px);
-    background-color: aqua;
+    height: 94vh;
+    background-color: #2f2f2f;
+    text-align: center;
+    margin-top: -30px;
+    color: white;
+}
+
+.logoutPage>h1{
+    padding-top: 50px;
 }

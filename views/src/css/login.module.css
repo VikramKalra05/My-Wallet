@@ -217,6 +217,10 @@
   width: 150px;
 }
 
+.navigateToLoginPage{
+  text-align: center;
+}
+
 .navigateToLoginPage>p>a{
   color: #1163d6;
   font-weight: 700;

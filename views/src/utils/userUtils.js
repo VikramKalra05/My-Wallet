@@ -23,12 +23,16 @@ export const loginUser = async (credentials) => {
 
 export const logoutUser = async () => {
   try {
-    const res = await fetch(`${TESTING_URL}/auth/logout`);
+    const res = await fetch(`${TESTING_URL}/user/logout`, {
+      credentials: "include"
+    });
 
     if (res.ok) {
       const data = await res.json();
       console.log(`User logged out succesfully`);
       return data;
+    }else{
+      return null
     }
   } catch (error) {
     console.log("error at logout:", error);

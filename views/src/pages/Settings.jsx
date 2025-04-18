@@ -12,7 +12,7 @@ import { deleteUserDetails } from "../utils/userUtils";
 import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
-  const { userDetails, setUserDetails, handleFetchUserDetails } =
+  const { userDetails, setUserDetails, handleFetchUserDetails, setIsAuthenticated } =
     useContext(AuthContext);
   const [selectedPfp, setSelectedPfp] = useState(null);
   const [photo, setPhoto] = useState(userDetails?.photo);
@@ -24,6 +24,13 @@ const Settings = () => {
   const [categories, setCategories] = useState([]);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const activeCategoryRef = useRef(null);
+  const [nameInput, setNameInput] = useState(userDetails?.name || "");
+  const [emailInput, setEmailInput] = useState(userDetails?.email || "");
+
+  useEffect(() => {
+    setNameInput(userDetails?.name || "");
+    setEmailInput(userDetails?.email || "");
+  }, [userDetails]);
 
   // ✅ Track which subcategory is being edited
   const [editingSubId, setEditingSubId] = useState(null);
@@ -40,6 +47,9 @@ const Settings = () => {
     try {
       const res = await deleteUserDetails();
       if (res.message === "Account deleted successfully") {
+        // clear cookie = token
+        setUserDetails({})
+        setIsAuthenticated(null)
         return navigate("/");
       }
     } catch (error) {
@@ -66,9 +76,12 @@ const Settings = () => {
   };
 
   const uploadFile = async () => {
-    if (selectedPfp) {
       const formdataNew = new FormData();
-      formdataNew.append("photo", selectedPfp);
+      if (selectedPfp) {
+        formdataNew.append("photo", selectedPfp);
+      }
+      if (nameInput !== userDetails.name) formdataNew.append("name", nameInput);
+    if (emailInput !== userDetails.email) formdataNew.append("email", emailInput);
 
       // If you need to send name, email, etc., add them here:
       for (let pair of formdataNew.entries()) {
@@ -76,7 +89,7 @@ const Settings = () => {
       }
 
       setFormData(formdataNew);
-    }
+    
   };
 
   const handleSaveAccChanges = async () => {
@@ -182,17 +195,15 @@ const Settings = () => {
         {/* ✅ Added: Tab bar to switch between different setting sections */}
         <div className={styles.tabBar}>
           <button
-            className={`${styles.tabButton} ${
-              selectedTab === "profile" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${selectedTab === "profile" ? styles.activeTab : ""
+              }`}
             onClick={() => setSelectedTab("profile")}
           >
             Profile Settings
           </button>
           <button
-            className={`${styles.tabButton} ${
-              selectedTab === "categories" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${selectedTab === "categories" ? styles.activeTab : ""
+              }`}
             onClick={() => setSelectedTab("categories")}
           >
             Categories
@@ -250,11 +261,15 @@ const Settings = () => {
                 <div className={styles.inputGrid}>
                   <div className={styles.inputGroup}>
                     <label>Name</label>
-                    <input type="text" placeholder="Enter your name" />
+                    <input type="text" placeholder="Enter your name"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                    />
                   </div>
                   <div className={styles.inputGroup}>
                     <label>Email</label>
-                    <input type="email" placeholder="Enter your email" />
+                    <input type="email" placeholder="Enter your email"  value={emailInput}
+    onChange={(e) => setEmailInput(e.target.value)}/>
                   </div>
                   <div className={styles.inputGroup}>
                     <label>Password</label>
@@ -309,11 +324,10 @@ const Settings = () => {
                   <div
                     key={cat._id}
                     onClick={() => setActiveCategoryId(cat._id)}
-                    className={`${styles.categoryTab} ${
-                      activeCategoryId === cat._id
+                    className={`${styles.categoryTab} ${activeCategoryId === cat._id
                         ? styles.categoryTabActive
                         : ""
-                    }`}
+                      }`}
                   >
                     {categoryIcons[cat.categoryName]}
                     <span>{cat.categoryName}</span>
@@ -331,8 +345,8 @@ const Settings = () => {
                     <div className={styles.subName}>
                       {
                         categoryIcons[
-                          categories.find((cat) => cat._id === activeCategoryId)
-                            ?.categoryName
+                        categories.find((cat) => cat._id === activeCategoryId)
+                          ?.categoryName
                         ]
                       }
 

@@ -3,12 +3,12 @@
     height: 100vh;
     padding: 50px 0;  
     background: linear-gradient(to bottom, #000000, #891489); /* Black to indigo-purple */
-    border: 1px solid red; 
+    /* border: 1px solid red;  */
 }
 
 .homeHeader{
     width: 50%;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     margin: auto;
     text-align: center;
 }
@@ -23,7 +23,7 @@
     font-size: 22px;
     font-weight: 600;
     color: #00ffff;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     width: 60%;
     margin: auto;
 }
