@@ -37,8 +37,11 @@ authRouter.get(
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // res.redirect("https://my-wallet-frontend-liard.vercel.app/dashboard"); // Redirect user after login
-    res.redirect("http://localhost:3000/dashboard"); // Redirect user after login
+    if (process.env.NODE_ENV === "production") {
+      res.redirect("https://my-wallet-frontend-liard.vercel.app/dashboard");
+    } else {
+      res.redirect("http://localhost:3000/dashboard");
+    }
   }
 );
 
