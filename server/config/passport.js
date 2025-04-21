@@ -10,8 +10,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // callbackURL: 'http://my-wallet-gamma-eight.vercel.app/api/v1/auth/google/callback',
-      callbackURL: "http://localhost:8080/api/v1/auth/google/callback",
+      callbackURL: process.env.NODE_ENV === "production" ? "https://my-wallet-gamma-eight.vercel.app/api/v1/auth/google/callback" : "http://localhost:8080/api/v1/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       // Code to handle user authentication and retrieval
