@@ -94,7 +94,7 @@ const Analytics = () => {
         income: item.totalIncome,
         expense: item.totalExpense,
       }));
-      console.log(formattedData)
+      console.log("yo bar graph data ",formattedData)
       setIncomeExpenseDataBar(formattedData);
 
     } catch (error) {
@@ -171,7 +171,7 @@ const Analytics = () => {
 
         <div className={styles.graphsdiv}>
           <div className={styles.piecontainer}>
-            <h2 className={styles.pietitle}>Expense Distribution</h2>
+            <h2 className={styles.pietitle}>Expense By Categories</h2>
             {/* Pie Chart */}
             {/* <div style={{
               display: "flex",
