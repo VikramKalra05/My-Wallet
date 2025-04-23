@@ -26,8 +26,9 @@
 .leftSection {
     display: flex;
     align-items: center;
-    flex: 2.5; 
+    flex: 3.5; 
     gap: 12px;
+    /* border: 1px solid black; */
 }
 
 .date {
@@ -41,7 +42,10 @@
 .category {
     font-size: 16px;
     font-weight: bold;
-    flex-grow: 1;
+    display: flex;
+    flex: 2.5;
+    /* border: 1px solid red; */
+
 }
 
 .middleSection {
@@ -50,13 +54,17 @@
     flex: 3; 
     gap: 12px;
     justify-content: flex-start;
+    /* border: 1px solid black; */
+
 }
 
 .accountName {
     font-size: 14px;
-    flex: 1;
+    flex: 0.6;
     color: black;
     font-weight: 400;
+    /* border: 1px solid purple; */
+    
 }
 
 .paymentStatus {
@@ -75,7 +83,7 @@
 .note {
     font-size: 14px;
     color: #6c757d;
-    flex: 2;
+    flex: 1.5;
     text-align: left;
 }
 .payee{

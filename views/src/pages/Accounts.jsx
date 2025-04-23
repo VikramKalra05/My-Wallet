@@ -70,7 +70,7 @@ const Accounts = () => {
                     )}
 
                     {!loading && !error && accounts?.length === 0 && (
-                        <div className={styles.noAccountsMsg}>No accounts found 🫥</div>
+                        <div className={styles.noAccountsMsg}>No accounts Found 🫥</div>
                     )}
 
                     {/* map accounts */}

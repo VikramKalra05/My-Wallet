@@ -133,7 +133,7 @@ const Records = ({
       {loading && (
         <div className={styles.loadingContainer}>{renderSkeletons()}</div>
       )}
-      {!loading && finalRecords?.length === 0 && <p>No Records Found</p>}
+      {!loading && finalRecords?.length === 0 && <p style={{color:"white"}}>No Records Found 🫥</p>}
       {!loading && finalRecords?.length > 0 && (
         <div className={styles.recordsContainer}>
           {finalRecords?.map((record, id) => {

@@ -3,24 +3,42 @@
     min-height: 100vh;
     background-color:rgba(26, 26, 26, 0.911) ;
 }
+.headingWrapper{
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: space-between;
+}
+.divlinkrecord{
+    /* border: 1px solid; */
+
+}
 .link{
     color:teal;
     text-decoration: none;
     font-size: 20px;
     padding: 5px;
-    margin-left: 220px;
+    font-weight: 600;
  
 }
+.accheading{
+    display: flex;
+    justify-content: space-between;
+}
   .linkAccounts{
-    color:teal;
-    text-decoration: none;
     font-size: 20px;
     padding: 5px;
     font-weight: 600;
-    /* margin-top: 60px; */
     /* border:10px solid; */
-
+    /* margin-top: 70px; */
+    /* margin-left: 250px; */
+    align-self: flex-end;
+    /* top:0; */
   }
+  .linkacc{
+    color:teal;
+    text-decoration: none;
+  }
+  
 .midDiv{
     /* border:2px solid yellow; */
     margin: auto;
@@ -88,7 +106,7 @@
 }
 .accountsDiv{
     /* border:2px solid blue; */
-    background-color: white;
+    background-color:rgb(234, 252, 252);
     width:40%;
     min-height: 430px;
     border-radius: 10px;
@@ -114,14 +132,17 @@
     text-decoration: underline;
 
 }
-.button{
+/* .button{
     display: flex;
-    justify-content: center;
+    justify-content: center; 
     align-items: center;
-}
+    border: 1px solid;
+
+} */
 .addButton{
     /* margin-top: 8px; */
     padding:7px;
+    /* margin-left: auto; */
     display: flex;
     margin-bottom: 12px;
     width: 200px;
@@ -173,10 +194,11 @@
 }
 .recordsContainer{
     width: 55%;
-    min-height: 350px;
+    min-height: 430px;
     border-radius: 10px;
     padding: 15px;
-    background-color: #f8f9fa;
+    background-color:rgb(234, 252, 252);
+    
     /* border:5px solid black; */
 }
 .recordsItem{
@@ -242,7 +264,7 @@
     /* justify-content: space-around; */
     align-items: center;
     width: 97%;
-    gap:20px;
+    gap:30px;
 
 
 }

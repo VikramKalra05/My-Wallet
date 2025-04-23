@@ -375,6 +375,13 @@ const Settings = () => {
                             value={editedSubName}
                             onChange={(e) => setEditedSubName(e.target.value)}
                             className={styles.editInput}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault(); // prevent accidental form submission
+                                handleSaveEdit(activeCategoryId, sub._id);
+                              }
+                            }
+                          }
                           />
                           <button
                             className={styles.saveButton}

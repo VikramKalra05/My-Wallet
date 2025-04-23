@@ -107,14 +107,31 @@ const Dashboard = () => {
           <span className={styles.greeting}>Welcome</span>
           <span className={styles.userName}>{userDetails?.name}😄</span>
         </div>
-        <div className={styles.dashboardSubheading}>
+        {/* <div className={styles.dashboardSubheading}>
           Your money at a glance 💰
-        </div>
+        </div> */}
 
         <div className={styles.all4divs}>
           <div className={styles.firsthalf}>
+          {loading ? (
+              <div>Loading...</div>
+            ) : accounts.length === 0 ? (
+              <>
+              <div className={styles.accountsDiv}><div style={{fontWeight:"500",fontSize:"20px",alignItems:"center",display:"flex",justifyContent:"center"}}>No accounts found</div>
+              <div className={styles.linkAccounts} style={{
+                textAlign: "center",
+                alignItems:"center"
+              }}>
+              <Link className={styles.linkacc} style={{justifyContent:"center",alignItems:"center",display:"flex",margin:"auto",gap:"5px"}} to="/accounts">Create new account <FiExternalLink/></Link></div>
+              </div>
+              </>
+            ) : (
             <div className={styles.accountsDiv}>
-              <p className={styles.heading}>Top 5 accounts</p>
+              <div className={styles.accheading}>
+              <div className={styles.heading}>Top 5 accounts</div>
+              <div className={styles.linkAccounts}>
+              <Link className={styles.linkacc} to="/accounts">Go to Accounts <FiExternalLink/></Link></div>
+              </div>
               <div className={styles.mine}>
                 {[...accounts]
                   .sort((a, b) => b.balance - a.balance)
@@ -126,7 +143,7 @@ const Dashboard = () => {
                     </div>
                   ))}
                   {accounts.length < 5 && (
-                <div className={styles.button}>
+                <div>
                   <button
                     className={styles.addButton}
                     onClick={() => setShowAddAccountModal(true)}
@@ -143,16 +160,20 @@ const Dashboard = () => {
                   )}
                 </div>
                 )}
+              
               </div>
-            <Link className={styles.linkAccounts} to="/accounts">More Accounts <FiExternalLink/></Link>
+         
             </div>
+            )}
             {loading ? (
               <div>Loading...</div>
             ) : records.length === 0 ? (
-              <div>No records found</div>
+              <div className={styles.recordsContainer}><div style={{fontWeight:"500",fontSize:"20px",alignItems:"center",display:"flex",justifyContent:"center"}}>No records found</div></div>
             ) : (
               <div className={styles.recordsContainer}>
-                <div style={{fontSize:"20px",fontWeight:"500",textDecoration:"underline"}}>Latest 5 Records  <Link className={styles.link} to="/records">More Records <FiExternalLink /></Link></div>
+                <div className={styles.headingWrapper}>
+                <div style={{fontSize:"20px",fontWeight:"500",textDecoration:"underline"}}>Latest 5 Records</div> <div className={styles.divlinkrecord}> <Link className={styles.link} to="/records">Go to Records <FiExternalLink /></Link></div>
+                </div>
                 {records.map((record) => {
                   const currentDate = displayDate(record?.date);
                   // const prevDate =
@@ -202,7 +223,12 @@ const Dashboard = () => {
             )}
           </div>
           <div className={styles.secondhalf}>
-            <div className={styles.bargraphDiv}>Income vs Expense Overview
+          {loading ? (
+              <div>Loading...</div>
+            ) : records.length === 0 ? (
+              <div className={styles.bargraphDiv}><div style={{fontWeight:"500",fontSize:"20px",alignItems:"center",display:"flex",justifyContent:"center"}}>Create records to get an overview of income vs expense</div></div>
+            ) : (
+            <div className={styles.bargraphDiv}>Income vs Expense Overview  (This Month)
               {analyticsData && (
                 <IncomeExpenseBarChart
                   data={{
@@ -212,11 +238,18 @@ const Dashboard = () => {
                 />
               )}
             </div>
-            <div className={styles.piechartDiv}>Expense By Category
+              )}
+               {loading ? (
+              <div>Loading...</div>
+            ) : records.length === 0 ? (
+              <div className={styles.piechartDiv}><div style={{fontWeight:"500",fontSize:"20px",alignItems:"center",display:"flex",justifyContent:"center"}}>Create records to get expense distribution by categories</div></div>
+            ) : (
+            <div className={styles.piechartDiv}>Expense By Category (This Month)
               {!analyticsLoading && pieData.length > 0 && (
                 <PieChartForAnalytics pieData={pieData} />
               )}
             </div>
+            )}
           </div>
         </div>
       </div>
