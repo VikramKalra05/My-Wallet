@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext, useAuth } from "../context/AuthContext";
 import WALLETLOGO from "../assets/walletLogo.svg";
@@ -20,12 +20,13 @@ const profileColors = [
 
 const Navbar = () => {
   const { addRecords, setAddRecords } = useContext(AppContext);
-  const {   userDetails } = useContext(AuthContext);
+  const { userDetails } = useContext(AuthContext);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileRandomColor, setProfileRandomColor] = useState(false);
   const [showNav, setShowNav] = useState(true);
+  const dropDownRef = useRef(null);
 
   const isHomePage = location.pathname === "/";
 
@@ -50,6 +51,20 @@ const Navbar = () => {
     return profileColors[index];
   }
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropDownRef.current && !dropDownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropDownRef])
+
   return (
     showNav && (
       <nav className={styles.navbar}>
@@ -63,23 +78,23 @@ const Navbar = () => {
             <p>My Wallet</p>
           </div>
 
-        <div className={styles.links}>
-          {isHomePage && !isAuthenticated ? (
-            <>
-              <Link to="/login" className={styles.link}>Login</Link>
-              <Link to="/register" className={styles.link}>Register</Link>
-            </>
-          ) : isAuthenticated ? (
-            <>
-              <Link to="/dashboard" className={styles.link}>Dashboard</Link>
-              <Link to="/accounts" className={styles.link}>Accounts</Link>
-              <Link to="/records" className={styles.link}>Records</Link>
-              <Link to="/analytics" className={styles.link}>Analytics</Link>
-              <div>
-                <button className={styles.button} onClick={() => setAddRecords(true)}>+ Record</button>
-                {addRecords && <AddRecords />}
-              </div>
-              <div className={styles.profileSection}>
+          <div className={styles.links}>
+            {isHomePage && !isAuthenticated ? (
+              <>
+                <Link to="/login" className={styles.link}>Login</Link>
+                <Link to="/register" className={styles.link}>Register</Link>
+              </>
+            ) : isAuthenticated ? (
+              <>
+                <Link to="/dashboard" className={styles.link}>Dashboard</Link>
+                <Link to="/accounts" className={styles.link}>Accounts</Link>
+                <Link to="/records" className={styles.link}>Records</Link>
+                <Link to="/analytics" className={styles.link}>Analytics</Link>
+                <div>
+                  <button className={styles.button} onClick={() => setAddRecords(true)}>+ Record</button>
+                  {addRecords && <AddRecords />}
+                </div>
+                <div className={styles.profileSection}>
                   <div
                     className={styles.profileContainer}
                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -87,7 +102,7 @@ const Navbar = () => {
                     {
                       profileRandomColor && (
                         <div className={styles.icon}>
-                          <div 
+                          <div
                             className={styles.profileIcon}
                             style={{
                               backgroundColor: handleCustomColor(userDetails?.name[0])
@@ -100,8 +115,8 @@ const Navbar = () => {
                     }
                     {!profileRandomColor && userDetails?.photo && (
                       <div className={styles.icon}>
-                        <img 
-                          src={userDetails?.photo} 
+                        <img
+                          src={userDetails?.photo}
                           onError={(e) => {
                             e.target.onerror = null;
                             setProfileRandomColor(true)
@@ -113,11 +128,11 @@ const Navbar = () => {
                     <FaAngleDown />{" "}
                   </div>
                   {dropdownOpen && (
-                    <div className={styles.dropdownMenu}>
+                    <div className={styles.dropdownMenu} ref={dropDownRef}>
                       <Link to="/settings" className={`${styles.dropdownItem} ${styles.hoverDropdownBtn}`} onClick={() => setDropdownOpen(false)}>
                         Settings
                       </Link>
-                    <Link to="/logout" className={`${styles.dropdownItem} ${styles.logoutBtn}`} onTouchMoveCapture={(e) => e.target.style.backgroundColor = "red"} onClick={() => setDropdownOpen(false)}>Logout</Link>
+                      <Link to="/logout" className={`${styles.dropdownItem} ${styles.logoutBtn}`} onTouchMoveCapture={(e) => e.target.style.backgroundColor = "red"} onClick={() => setDropdownOpen(false)}>Logout</Link>
                     </div>
                   )}
                 </div>

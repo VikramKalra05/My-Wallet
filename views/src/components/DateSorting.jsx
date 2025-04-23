@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import styles from "../css/datefilter.module.css";
 import { FaAngleDown } from "react-icons/fa";
 import AppContext from "../context/AppContext";
@@ -7,6 +7,7 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
   const {records} = useContext(AppContext);
   const [dateFilter, setDateFilter] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
+  const dateSortingRef = useRef(null);
 
   const filterLabels = {
     all: "All Records",
@@ -125,6 +126,20 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
 
   }, [sortedRecords]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dateSortingRef.current && !dateSortingRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dateSortingRef]);
+
   return (
     <div>
       <div style={{ position: "absolute" }}>
@@ -136,7 +151,7 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
         </button>
 
         {isOpen && (
-          <div className={styles.dropdownMenu}>
+          <div className={styles.dropdownMenu} ref={dateSortingRef}>
             <div className={styles.firsthalf}>
               {["all", "last7days", "lastMonth", "lastYear"].map((filter) => (
                 <div
