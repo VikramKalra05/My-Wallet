@@ -6,20 +6,18 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import { AuthContextProvider } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
-import  {AppContextProvider } from "./context/AppContext";
+import { AppContextProvider } from "./context/AppContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
-    
     <ThemeContextProvider>
       <AuthContextProvider>
-      <AppContextProvider>
-        <App />
-      </AppContextProvider>
-    </AuthContextProvider>
+        <AppContextProvider>
+          <App />
+        </AppContextProvider>
+      </AuthContextProvider>
     </ThemeContextProvider>
-   
   </BrowserRouter>
 );
 

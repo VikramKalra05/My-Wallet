@@ -7,6 +7,7 @@ const { CategoryModel } = require("../models/categoryModel");
 const { UserModel } = require("../models/userModel");
 
 const authRouter = express.Router();
+const isProduction = process.env.NODE_ENV === "production";
 
 // Google Auth Route
 authRouter.get(
@@ -32,12 +33,12 @@ authRouter.get(
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents XSS attacks
-      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: "None", // Prevents CSRF attacks
+      secure: isProduction, // only true in production
+      sameSite: isProduction ? "None" : "Lax", // use Lax on localhost
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    if (process.env.NODE_ENV === "production") {
+    if (isProduction) {
       res.redirect("https://my-wallet-frontend-liard.vercel.app/dashboard");
     } else {
       res.redirect("http://localhost:3000/dashboard");
@@ -50,8 +51,8 @@ authRouter.get("/logout", (req, res) => {
   // Clear the JWT token cookie
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Strict",
+    secure: isProduction,
+    sameSite: isProduction ? "None" : "Lax",
     maxAge: 0, // This ensures the cookie is deleted
   });
 

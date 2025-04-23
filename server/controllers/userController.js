@@ -144,6 +144,7 @@ const registerUserController = async (req, res) => {
 
 const loginUserController = async (req, res) => {
   const data = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
 
   var isEmailLogin = false;
 
@@ -194,8 +195,8 @@ const loginUserController = async (req, res) => {
 
         res.cookie("token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production", // Set to true only if using HTTPS
-          sameSite: "None",
+          secure: isProduction,
+          sameSite: isProduction ? "None" : "Lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -215,7 +216,7 @@ const loginUserController = async (req, res) => {
 const logoutUserController = async (req, res) => {
   res.clearCookie("token");
   res.status(200).send({ msg: "Logged out successfully" });
-}
+};
 
 const resetPasswordController = async (req, res) => {
   try {
