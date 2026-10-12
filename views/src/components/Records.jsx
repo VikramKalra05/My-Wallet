@@ -96,7 +96,7 @@ const Records = ({
 
   const updateFinally = () => {
     const filteredRecords = sortedRecords?.filter(isCategorySelected) || [];
-    if (sortedRecords.length === 0) {
+    if ((sortedRecords || []).length === 0) {
       setZeroRecords(true);
     }
     setFinalRecords(

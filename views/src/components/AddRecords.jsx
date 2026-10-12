@@ -62,7 +62,7 @@ const [displayDate, setDisplayDate] = useState(initialDisplayDate);
   // console.log("initially",displayDate);
 
   const addNewRecord = (newRecord) => {
-    setRecords((prevRecords) => [...prevRecords, newRecord]);
+    setRecords((prevRecords) => [...(prevRecords || []), newRecord]);
   };
 
   const handleDateChange = (e) => {
@@ -88,8 +88,7 @@ const [displayDate, setDisplayDate] = useState(initialDisplayDate);
   }
   const fetchRecords=async ()=>{
       const fetchedRecords=await getAllTransactionsOfUser()
-      setRecords(fetchedRecords) 
-      console.log(fetchedRecords);
+      setRecords(fetchedRecords || [])
      }
 
 

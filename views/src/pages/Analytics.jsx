@@ -5,7 +5,7 @@ import { GiPayMoney } from "react-icons/gi";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { getAccounts } from "../utils/accountUtils";
-import { fetchAnalytics, fetchAnalyticsLast6Months } from "../utils/analyticsUtils";
+import { fetchAnalytics, fetchAnalyticsLast6Months, getCurrentMonthPeriodId } from "../utils/analyticsUtils";
 import PieChartForAnalytics from "../components/PieChartForAnalytics";
 import BarChartForAnalytics from "../components/BarChartForAnalytics";
 
@@ -33,7 +33,7 @@ const Analytics = () => {
     const fetchAccounts = async () => {
       const accountsData = await getAccounts()
       const accounts = accountsData?.accounts || []
-      const total = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+      const total = accounts.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
       setTotalBalance(total)
       console.log(total);
     }
@@ -41,20 +41,22 @@ const Analytics = () => {
   }, []);
 
   function formatMonth(monthString) {
-    // Create a new date object using the first day of the given month
-    const date = new Date(`${monthString}-01`);
+    if (!monthString || !/^\d{4}-\d{2}$/.test(monthString)) return "";
 
-    // Get the full month name (e.g., "April")
+    const [year, month] = monthString.split("-").map(Number);
+    // Local date from the parts: parsing "2026-10-01" as an ISO string would
+    // be UTC midnight and roll back a month west of UTC
+    const date = new Date(year, month - 1, 1);
+
     const options = { year: 'numeric', month: 'long' };
     return date.toLocaleDateString('en-US', options);
   }
 
   const handleFetchAnalytics = async () => {
     setAnalyticsLoading(true)
-    const data = await fetchAnalytics("month", "2025-04") // hardcoded
-    console.log(data)
+    const data = await fetchAnalytics("month", getCurrentMonthPeriodId())
 
-    const analytics = data?.analyticsData[0];
+    const analytics = data?.analyticsData?.[0];
     setAnalyticsData(analytics);
 
     if (analytics?.categoryBreakdown?.length) {
@@ -135,7 +137,7 @@ const Analytics = () => {
         <div className={styles.header}>
           <p style={{ fontSize: "24px" }}>Analytics</p>
           <div>
-            <p>{formatMonth(analyticsData?.periodId)}</p>
+            <p>{formatMonth(analyticsData?.periodId) || formatMonth(getCurrentMonthPeriodId())}</p>
             {/* <select className={styles.dateFilter}>
               <option>This Month</option>
               <option>This Week</option>

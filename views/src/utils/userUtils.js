@@ -1,8 +1,9 @@
 import { TESTING_URL } from "../ApiLinks";
+import { apiFetch } from "./http";
 
 export const loginUser = async (credentials) => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/login`, {
+    const res = await apiFetch(`${TESTING_URL}/user/login`, {
       method: "POST",
       headers: {
         "Content-type": "Application/json",
@@ -23,7 +24,7 @@ export const loginUser = async (credentials) => {
 
 export const logoutUser = async () => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/logout`, {
+    const res = await apiFetch(`${TESTING_URL}/user/logout`, {
       credentials: "include"
     });
 
@@ -41,12 +42,13 @@ export const logoutUser = async () => {
 
 export const registerUser = async (credentials) => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/register`, {
+    const res = await apiFetch(`${TESTING_URL}/user/register`, {
       method: "POST",
       headers: {
         "Content-type": "Application/json",
       },
       body: JSON.stringify(credentials),
+      credentials: "include",
     });
 
     if (res.ok) {
@@ -61,7 +63,7 @@ export const registerUser = async (credentials) => {
 
 export const getUserDetails = async () => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/dashboard`, {
+    const res = await apiFetch(`${TESTING_URL}/user/dashboard`, {
       method: "GET",
       headers: {
         "Content-type": "Application/json",
@@ -81,7 +83,7 @@ export const getUserDetails = async () => {
 
 export const updateUserDetails = async (formData) => {
   try {
-    const res = await fetch(`${TESTING_URL}/user/update`, {
+    const res = await apiFetch(`${TESTING_URL}/user/update`, {
       method: "PATCH",
       body: formData,
       credentials: "include",
@@ -98,7 +100,7 @@ export const updateUserDetails = async (formData) => {
 };
 export const deleteUserDetails = async()=>{
   try {
-    const res=await fetch(`${TESTING_URL}/user/delete`,{
+    const res=await apiFetch(`${TESTING_URL}/user/delete`,{
       method:"DELETE",
       credentials:"include",
       // headers:{

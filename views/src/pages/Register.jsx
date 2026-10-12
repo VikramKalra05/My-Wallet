@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../css/login.module.css";
 import EMAILICON from "../assets/emailIcon.svg";
@@ -36,14 +36,19 @@ const Register = () => {
 
   const handleRegisterUser = async () => {
     setLoading(true)
-    if (!userFormDetails) {
-      console.log("Fill in the details");
+    if (
+      !userFormDetails.name.trim() ||
+      !userFormDetails.email.trim() ||
+      !userFormDetails.password ||
+      !userFormDetails.confirmedPassword
+    ) {
+      alert("Please fill in all the fields");
       setLoading(false);
       return;
     }
     
     if(userFormDetails.password !== userFormDetails.confirmedPassword){
-      console.log("Fill in the same password");
+      alert("Passwords do not match");
       setLoading(false);
       return;
     }
@@ -51,20 +56,21 @@ const Register = () => {
     const res = await registerUser(userFormDetails);
     
     if (res?.msg === "User has been registered") {
-      console.log("Register Successful");
-      // setLoading(false);
-      navigate("/dashboard")
-      // alert("Login Successful");
+      // Register does not create a session, so send the user to login instead
+      // of /dashboard (which would immediately bounce them back here)
+      alert("Registered successfully. Please log in.");
+      navigate("/login")
     } else {
-      // console.log("error aeee", res);
-      alert("Register Failed");
+      alert(res?.msg || res?.err || "Register Failed");
     }
     setLoading(false);
-    // }
   };
-  if(isAuthenticated){
-    navigate("/dashboard")
-  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleEmailFocus = () => {
     emailInputRef.current?.focus();

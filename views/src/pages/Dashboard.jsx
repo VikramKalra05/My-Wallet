@@ -7,7 +7,7 @@ import { getAllTransactionsOfUser } from "../utils/transactionUtils";
 import { displayDate } from "../dateConversions/displayDate";
 import categoriesData from "../utils/modalCategories";
 import PieChartForAnalytics from "../components/PieChartForAnalytics";
-import { fetchAnalytics } from "../utils/analyticsUtils";
+import { fetchAnalytics, getCurrentMonthPeriodId } from "../utils/analyticsUtils";
 import IncomeExpenseBarChart from "../components/IncomeExpenseBarChart";
 import { FaSpinner } from "react-icons/fa";
 import {Link} from "react-router-dom"
@@ -39,11 +39,10 @@ const Dashboard = () => {
 
   const handleFetchAnalytics = async () => {
     setAnalyticsLoading(true);
-    const data = await fetchAnalytics("month", "2025-04"); // hardcoded
-    console.log(data);
+    const data = await fetchAnalytics("month", getCurrentMonthPeriodId());
 
-    const analytics = data?.analyticsData[0];
-    setAnalyticsData(analytics);
+    const analytics = data?.analyticsData?.[0];
+    setAnalyticsData(analytics || { totalIncome: 0, totalExpense: 0 });
 
     if (analytics?.categoryBreakdown?.length) {
       const breakdown = analytics.categoryBreakdown
@@ -53,10 +52,9 @@ const Dashboard = () => {
           value: cat.amount,
           color: CATEGORY_COLOR_MAP[cat.categoryName] || "#ccc",
         }));
-      console.log(breakdown);
       setPieData(breakdown);
-      setAnalyticsLoading(false);
     }
+    setAnalyticsLoading(false);
   };
   useEffect(() => {
     handleFetchAnalytics();
@@ -66,20 +64,20 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const fetchedRecords = await getAllTransactionsOfUser();
-      console.log("blah", fetchedRecords);
-      const sortedRecords = fetchedRecords.sort(
+      const sortedRecords = [...(fetchedRecords || [])].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       );
       setRecords(sortedRecords.slice(0, 5)); // Only the latest 5 records
       setLoading(false);
     } catch (error) {
       console.error("Error fetching records:", error);
+      setRecords([]);
       setLoading(false);
     }
   };
   const fetchAccounts = async () => {
     const res = await getAccounts();
-    setAccounts(res?.accounts);
+    setAccounts(res?.accounts || []);
   };
 
   useEffect(() => {

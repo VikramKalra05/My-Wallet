@@ -1,8 +1,9 @@
 import { TESTING_URL } from "../ApiLinks";
+import { apiFetch } from "./http";
 
 export const getCategories = async () => {
   try {
-    const res = await fetch(`${TESTING_URL}/category`, {
+    const res = await apiFetch(`${TESTING_URL}/category`, {
       credentials: "include",
     });
 
@@ -18,7 +19,7 @@ export const getCategories = async () => {
 
 export const updateSubCategory = async (catId, subId, subcategory) => {
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${TESTING_URL}/category/update/${catId}/${subId}`,
       {
         method: "PATCH",
@@ -42,7 +43,7 @@ export const updateSubCategory = async (catId, subId, subcategory) => {
 
 export const deleteSubCategory = async (catId,subId) => {
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${TESTING_URL}/category/delete/${catId}/${subId}`,
       {
         method: "DELETE",
@@ -66,7 +67,7 @@ export const deleteSubCategory = async (catId,subId) => {
 
 export const addSubcategory=async(subcategory,catId)=>{
     try {
-        const res=await fetch(`${TESTING_URL}/category/create/${catId}`,{
+        const res=await apiFetch(`${TESTING_URL}/category/create/${catId}`,{
             method:"POST",
             headers:{
                 "Content-type":"Application/json",

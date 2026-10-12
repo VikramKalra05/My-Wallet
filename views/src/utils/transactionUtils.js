@@ -1,8 +1,9 @@
 import {TESTING_URL} from "../ApiLinks"
+import { apiFetch } from "./http"
 
 export const createTransaction = async (transaction) => {
     try {
-        const res = await fetch(`${TESTING_URL}/transaction/create`, {
+        const res = await apiFetch(`${TESTING_URL}/transaction/create`, {
             method: "POST",
             headers: {
                 "Content-type": "Application/json"
@@ -24,7 +25,7 @@ export const createTransaction = async (transaction) => {
 
 export const deleteTransaction = async (transactionId) => {
     try {
-        const res = await fetch(`${TESTING_URL}/transaction/delete`, {
+        const res = await apiFetch(`${TESTING_URL}/transaction/delete`, {
             method: "DELETE",
             headers: {
                 "Content-type": "Application/json"
@@ -46,7 +47,7 @@ export const deleteTransaction = async (transactionId) => {
 
 export const updateTransaction = async (transaction) => {
     try {
-        const res = await fetch(`${TESTING_URL}/transaction/update`, {
+        const res = await apiFetch(`${TESTING_URL}/transaction/update`, {
             method: "PATCH",
             headers: {
                 "Content-type": "Application/json"
@@ -68,7 +69,7 @@ export const updateTransaction = async (transaction) => {
 
 export const getAllTransactionsOfUser = async (credentials) => {
     try {
-        const res = await fetch(`${TESTING_URL}/transaction/total-transactions`, {
+        const res = await apiFetch(`${TESTING_URL}/transaction/total-transactions`, {
             method: "GET",
             headers: {
                 "Content-type": "Application/json"

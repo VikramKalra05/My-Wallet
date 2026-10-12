@@ -1,8 +1,9 @@
 import { TESTING_URL } from "../ApiLinks"
+import { apiFetch } from "./http"
 
 export const createAccount = async (account) => {
     try{
-        const res = await fetch(`${TESTING_URL}/account/create`, {
+        const res = await apiFetch(`${TESTING_URL}/account/create`, {
             method: "POST",
             headers: {
                 "Content-type" : "Application/json"
@@ -27,7 +28,7 @@ export const createAccount = async (account) => {
 export const deleteAccount = async (account) => {
     console.log(account);
     try{
-        const res = await fetch(`${TESTING_URL}/account/delete`, {
+        const res = await apiFetch(`${TESTING_URL}/account/delete`, {
             method: "DELETE",
             headers: {
                 "Content-type" : "Application/json"
@@ -51,7 +52,7 @@ export const deleteAccount = async (account) => {
 
 export const getAccounts=async()=>{
     try{
-        const res=await fetch(`${TESTING_URL}/account/all`,{
+        const res=await apiFetch(`${TESTING_URL}/account/all`,{
         method :"GET",
         headers:{
             "Content-type":"Application/json"
@@ -70,7 +71,7 @@ export const getAccounts=async()=>{
 
 export const editAccount=async(account)=>{
     try{
-        const res=await fetch(`${TESTING_URL}/account/update`,{
+        const res=await apiFetch(`${TESTING_URL}/account/update`,{
         method :"PATCH",
         headers:{
             "Content-type":"Application/json"

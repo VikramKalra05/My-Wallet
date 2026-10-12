@@ -36,7 +36,6 @@ const Settings = () => {
   const [editingSubId, setEditingSubId] = useState(null);
   const [editedSubName, setEditedSubName] = useState("");
   const [originalSubName, setOriginalSubName] = useState("");
-  const [formData, setFormData] = useState(null);
   const navigate = useNavigate();
   const [showConfirmModal, setShowConfirmModal] = useState(false); //modal for deletion
   const [showConfirmModalForSubCategory, setShowConfirmModalForSubCategory] =
@@ -75,39 +74,33 @@ const Settings = () => {
     }
   };
 
-  const uploadFile = async () => {
+  const handleSaveAccChanges = async () => {
+    try {
+      // Built here from the current inputs: it used to be built only when a
+      // photo was picked, so name/email edits were silently dropped
       const formdataNew = new FormData();
       if (selectedPfp) {
         formdataNew.append("photo", selectedPfp);
       }
-      if (nameInput !== userDetails.name) formdataNew.append("name", nameInput);
-    if (emailInput !== userDetails.email) formdataNew.append("email", emailInput);
-
-      // If you need to send name, email, etc., add them here:
-      for (let pair of formdataNew.entries()) {
-        console.log(pair[0], pair[1]); // Logs key-value pairs
+      if (nameInput && nameInput !== userDetails?.name) {
+        formdataNew.append("name", nameInput);
+      }
+      if (emailInput && emailInput !== userDetails?.email) {
+        formdataNew.append("email", emailInput);
       }
 
-      setFormData(formdataNew);
-    
-  };
-
-  const handleSaveAccChanges = async () => {
-    try {
-      if (formData) {
-        console.log(formData);
-        await updateUserDetails(formData);
-        await handleFetchUserDetails();
+      if ([...formdataNew.entries()].length === 0) {
+        return; // nothing changed
       }
+
+      await updateUserDetails(formdataNew);
+      await handleFetchUserDetails();
+      setSelectedPfp(null);
     } catch (error) {
       console.log(error);
       // toast
     }
   };
-
-  useEffect(() => {
-    uploadFile();
-  }, [selectedPfp]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

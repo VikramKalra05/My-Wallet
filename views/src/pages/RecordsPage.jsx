@@ -23,8 +23,7 @@ const RecordsPage = () => {
   const fetchRecords = async () => {
     setLoading(true);
     const fetchedRecords = await getAllTransactionsOfUser();
-    setRecords(fetchedRecords);
-    console.log(fetchedRecords);
+    setRecords(fetchedRecords || []);
   };
 
   useEffect(() => {
