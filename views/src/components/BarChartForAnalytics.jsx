@@ -1,40 +1,59 @@
-import { BarChart } from '@mui/x-charts'
-import React from 'react'
+import { BarChart } from "@mui/x-charts/BarChart";
+import { blueberryTwilightPaletteLight } from "@mui/x-charts/colorPalettes";
+import React from "react";
+
+/* SVG <text> can't reliably ellipsize on its own, so long category names are
+   cut here — the chart's left margin only has to fit this many characters. */
+const MAX_LABEL_LENGTH = 14;
+const LABEL_BOX_WIDTH = 100;
+
+const truncateLabel = (label) =>
+  label.length > MAX_LABEL_LENGTH
+    ? `${label.slice(0, MAX_LABEL_LENGTH - 1)}…`
+    : label;
 
 const BarChartForAnalytics = ({ barData }) => {
-    return (
-        <BarChart
-            width={600}
-            height={250}
-            layout="horizontal"
-            series={[
-                { data: barData.values, label: "Amount Spent", color: "#3f51b5" },
-            ]}
-            yAxis={[
-                {
-                    data: barData.categories,
-                    scaleType: "band",
-                    tickLabelStyle: {
-                        fontSize: 14,
-                        overflow: "visible",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                        width: 100
-                    },
-                },
-            ]}
-            grid={{ horizontal: true }}
-            margin={{ top: 40, bottom: 30, left: 200, right: 30 }}
-            sx={{
+  const labels = barData.categories.map(truncateLabel);
+  // Per-bar colours come from the palette Analytics passes down; cycle MUI's
+  // default palette only as a safety net so no bar ever renders uncoloured.
+  const colors = barData.colors?.length
+    ? barData.colors
+    : labels.map(
+        (_, index) =>
+          blueberryTwilightPaletteLight[index % blueberryTwilightPaletteLight.length]
+      );
 
-                ".MuiBarElement-root:nth-of-type(1)": { fill: "#26A69A" },
-                ".MuiBarElement-root:nth-of-type(2)": { fill: "#42A5F5" },
-                ".MuiBarElement-root:nth-of-type(3)": { fill: "#EF5350" },
-                ".MuiBarElement-root:nth-of-type(4)": { fill: "#FFA726" },
-                // ".MuiBarElement-root:nth-of-type(5)": { fill: "#FFA726" },
-            }}
-        />
-    )
-}
+  return (
+    // No width prop: the chart fills its container and tracks resizes itself.
+    <BarChart
+      height={250}
+      layout="horizontal"
+      // A single-series legend swatch would show the wrong colour — each bar
+      // gets its own hue through the axis colour scale instead.
+      legend={{ hidden: true }}
+      series={[
+        { data: barData.values, label: "Amount spent" },
+      ]}
+      yAxis={[
+        {
+          data: labels,
+          scaleType: "band",
+          // One colour per bar from the palette array (replaces the old
+          // nth-of-type CSS hacks that left the 5th bar on MUI's default).
+          colorMap: { type: "ordinal", values: labels, colors },
+          tickLabelStyle: {
+            fontSize: 13,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            width: LABEL_BOX_WIDTH,
+          },
+        },
+      ]}
+      grid={{ horizontal: true }}
+      margin={{ top: 14, bottom: 28, left: 115, right: 24 }}
+    />
+  );
+};
 
-export default BarChartForAnalytics
+export default BarChartForAnalytics;

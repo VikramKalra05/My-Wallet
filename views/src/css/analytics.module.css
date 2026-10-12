@@ -1,147 +1,191 @@
-.mainpage{
-    background-color: rgba(26, 26, 26, 0.911);;
-    min-height: 100vh;
+/* Analytics — light layout. Colour/surfaces come from index.css tokens. */
 
-}
-.middle{
-    width: 70%;
-    margin: auto;
-    /* border: 1px solid red; */
-    
-}
-.header{
-    display: flex;
-    justify-content: space-between;
-    /* gap:500px; */
-    margin: auto;
-    /* border: 1px solid; */
-    color:white;
+.header {
+  min-width: 0;
+  margin-bottom: 20px;
 }
 
-.dateFilter{
-    padding: 12px;
-    font-size: 16px;
-    margin-top: 20px;
-
-    
-}
-.moneydataDiv{
-    display: flex;
-    margin-top: 20px;
-    justify-content: space-between;
-    /* flex-wrap: wrap;
-    gap:20px; */
-}
-.innerDiv:hover{
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    
-}
-.innerDiv{
-    border:0px solid;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    padding: 20px;
-    background-color: white;
-    /* height: 10px; */
-    width: 180px;
-    text-align: center;
-    
-}
-.iconExpense{
-    /* border: 1px solid red; */
-    border-radius: 4px;
-    padding: 5px;
-    background-color: rgb(250, 174, 144);
-}
-.iconIncome{
-    /* border: 1px solid red; */
-    border-radius: 4px;
-    padding: 5px;
-    background-color: lightgreen;
-}.iconBalance{
-    /* border: 1px solid red; */
-    border-radius: 4px;
-    padding: 5px;
-    background-color: rgb(245, 245, 166);
-}
-.heading{
-    margin-bottom: 10px;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-.money{
-    /* padding: 10px; */
-    font-size: 20px;
-    font-weight: 500;
-
-}
-.graphsdiv{
-    /* border: 1px solid; */
-    display: flex;
-    justify-content: space-between;
-    margin-top: 40px;
-    /* gap:10px; */
+.title {
+  font-size: var(--fs-3xl);
+  letter-spacing: -0.02em;
 }
 
-.piecontainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 40%;
-
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+.subtitle {
+  min-width: 0;
+  margin: 2px 0 0;
+  font-size: var(--fs-base);
+  color: var(--muted);
 }
-  
-  .pietitle {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-align: center;
-    
+
+/* ------------------------------ summary ------------------------------ */
+.summaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  min-width: 0;
+}
+
+.summaryCard {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px;
+}
+
+.summaryLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.summaryChip {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-md);
+}
+
+.chipIncome {
+  background-color: var(--brand-soft);
+  color: var(--income);
+}
+
+.chipExpense {
+  background-color: var(--danger-soft);
+  color: var(--expense);
+}
+
+.chipBalance {
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.summaryValue {
+  font-size: var(--fs-2xl);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.valueIncome {
+  color: var(--income);
+}
+
+.valueExpense {
+  color: var(--expense);
+}
+
+.valueBalance {
+  color: var(--text);
+}
+
+/* ------------------------------- errors ------------------------------ */
+/* .form-error supplies the colours; this only lays out message + Retry. */
+.errorRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+}
+
+.errorText {
+  min-width: 0;
+}
+
+.errorBanner {
+  margin-bottom: 16px;
+}
+
+/* ------------------------------- panels ------------------------------ */
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  min-width: 0;
+  margin-top: 20px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px;
+}
+
+.panelWide {
+  margin-top: 20px;
+}
+
+/* Loading/empty blocks stretch and centre inside cards of any height. */
+.panel > :global(.state-block) {
+  flex: 1;
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 14px;
+}
+
+.panelHead > div {
+  min-width: 0;
+}
+
+.panelSub {
+  margin: 2px 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted-2);
+}
+
+/* Charts size themselves from this box — never let it widen the page. */
+.chartBox {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ----------------------------- responsive ---------------------------- */
+@media (max-width: 900px) {
+  .chartGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
-  
-.barchartdiv{
-    width: auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    /* margin-top: 30px; */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    /* padding-left: 60px; */
-          
 }
-.bartitle{
-    font-size: 20px;
-    font-weight: bold;
-    /* margin-bottom: 10px; */
-    text-align: center;
-    margin-top: 0px;
 
+@media (max-width: 560px) {
+  .title {
+    font-size: var(--fs-2xl);
+  }
+
+  .summaryRow {
+    gap: 12px;
+  }
+
+  .summaryCard {
+    flex: 1 1 100%;
+    padding: 14px 16px;
+  }
+
+  .chartGrid {
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .panelWide {
+    margin-top: 14px;
+  }
 }
-.incomeExpenseChart {
-    margin-top: 40px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-  }
-  
-  .chartHeading {
-    font-weight: bold;
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .barr{
-    
-  }
-  
