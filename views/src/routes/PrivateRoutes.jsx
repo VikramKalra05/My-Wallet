@@ -1,14 +1,12 @@
-import { Navigate, Outlet } from 'react-router-dom';
-// import Cookies from 'js-cookie';
+import { Navigate, Outlet, Link } from 'react-router-dom';
 import '../css/privateRoutes.css';
 import { useState, useEffect } from 'react';
 import { TESTING_URL } from '../ApiLinks';
 
 const PrivateRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);  // Default to null (unknown state)
-  const [showModal, setShowModal] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
-    
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -21,7 +19,6 @@ const PrivateRoutes = () => {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
-          setShowModal(true);
           setTimeout(() => {
             setShouldRedirect(true);
           }, 5000);
@@ -29,7 +26,6 @@ const PrivateRoutes = () => {
       } catch (error) {
         console.error('Error checking authentication:', error);
         setIsAuthenticated(false);
-        setShowModal(true);
         setTimeout(() => {
           setShouldRedirect(true);
         }, 5000);
@@ -45,10 +41,10 @@ const PrivateRoutes = () => {
 
   if (isAuthenticated === null) {
     return (
-        <div className="loading-container">
-            <div className="spinner"></div>
-            <p className="loading-text">Please wait...</p>
-        </div>
+      <div className="state-block" role="status">
+        <div className="spinner" />
+        <p className="state-block__title">Please wait…</p>
+      </div>
     );
   }
 
@@ -60,10 +56,20 @@ const PrivateRoutes = () => {
   // Show modal while waiting to redirect
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
-        <h2 className="text-xl font-bold mb-4">Authentication Required</h2>
+      <div
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-required-title"
+      >
+        <h2 id="auth-required-title" className="modal-title">
+          Authentication Required
+        </h2>
         <p>Please log in to access this page.</p>
-        <p className="text-sm text-gray-500 mt-2">Redirecting to login page...</p>
+        <p className="modal-hint">Redirecting to login page...</p>
+        <Link to="/login" className="btn btn--primary">
+          Go to login
+        </Link>
       </div>
     </div>
   );

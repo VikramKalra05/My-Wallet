@@ -1,21 +1,21 @@
-import React, { useContext, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "../css/login.module.css";
 import EMAILICON from "../assets/emailIcon.svg";
 import PASSWORDICON from "../assets/passwordIcon.svg";
 import WALLETLOGO from "../assets/walletLogo.svg";
 import GOOGLEICON from "../assets/Login-Page/googleIcon.png";
-import LOADINGGIF from "../assets/Login-Page/loadingAnimation.gif";
-// import LOGINLEFTHALFIMG from "../assets/Login-Page/loginLeftHalfImage.svg";
 import { loginUser } from "../utils/userUtils";
 import { TESTING_URL } from "../ApiLinks";
 import { AuthContext, useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const emailInputRef = useRef(null);
-  const passwordInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  // Register hands us a success note via navigation state.
+  const [notice, setNotice] = useState(location.state?.notice || "");
   const [userFormDetails, setUserFormDetails] = useState({
     email: "",
     password: "",
@@ -23,16 +23,27 @@ const Login = () => {
   const { isAuthenticated } = useAuth();
   const { setIsAuthenticated } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleUserDetails = (e) => {
+    setNotice("");
     setUserFormDetails({
       ...userFormDetails,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleLoginUser = async () => {
-    if (!userFormDetails) {
-      console.log("Fill in the details");
+  const handleLoginUser = async (e) => {
+    e.preventDefault();
+    setError("");
+    setNotice("");
+
+    if (!userFormDetails.email.trim() || !userFormDetails.password) {
+      setError("Fill in the details");
       return;
     }
 
@@ -42,25 +53,12 @@ const Login = () => {
 
     if (res?.token) {
       window.localStorage.setItem("token", res.token);
-      console.log("Login Successful");
       setIsAuthenticated(true);
       navigate("/dashboard");
     } else {
-      alert("Login Failed");
+      setError("Login Failed");
     }
     setLoading(false);
-  };
-
-  if (isAuthenticated) {
-    navigate("/dashboard")
-  }
-
-  const handleEmailFocus = () => {
-    emailInputRef.current?.focus();
-  };
-
-  const handlePasswordFocus = () => {
-    passwordInputRef.current?.focus();
   };
 
   const handleGoogleSignIn = () => {
@@ -69,80 +67,95 @@ const Login = () => {
 
   return (
     <div className={styles.loginPage}>
-      <div className={styles.loginLogo}>
-        <img src={WALLETLOGO} alt="logo" />
-      </div>
-      <div className={styles.loginRightHalf}>
-        <div className={styles.loginBoxOuter}>
-          <div className={styles.loginHeader}>
-            <p className={styles.loginTitle}>Welcome Back</p>
-            <p className={styles.loginSubtitle}>
-              Enter your credentials to access your account.
-            </p>
+      <section className={styles.loginCard}>
+        <header className={styles.loginHeader}>
+          <div className={styles.loginLogo}>
+            <img src={WALLETLOGO} alt="My Wallet" />
           </div>
-          <div className={styles.loginBox}>
-            <div className={styles.inputBoxes} onClick={handleEmailFocus}>
-              <img src={EMAILICON} alt="email" id={styles.emailIcon} />
+          <h1 className={styles.loginTitle}>Welcome Back</h1>
+          <p className={styles.loginSubtitle}>
+            Enter your credentials to access your account.
+          </p>
+        </header>
+
+        <form className={styles.loginForm} onSubmit={handleLoginUser} noValidate>
+          <div className="field">
+            <label className="field__label" htmlFor="login-email">
+              Email
+            </label>
+            <div className={styles.inputWrap}>
+              <img src={EMAILICON} alt="" className={styles.inputIcon} />
               <input
-                type="text"
+                id="login-email"
+                className={`field__input ${styles.inputWithIcon}`}
+                type="email"
                 name="email"
-                ref={emailInputRef}
+                required
+                autoComplete="email"
                 placeholder="Enter your email"
                 value={userFormDetails.email}
-                onChange={(e) => handleUserDetails(e)}
+                onChange={handleUserDetails}
               />
             </div>
-            <div className={styles.inputBoxes} onClick={handlePasswordFocus}>
-              <img src={PASSWORDICON} alt="email" />
+          </div>
+
+          <div className="field">
+            <label className="field__label" htmlFor="login-password">
+              Password
+            </label>
+            <div className={styles.inputWrap}>
+              <img src={PASSWORDICON} alt="" className={styles.inputIcon} />
               <input
-                ref={passwordInputRef}
+                id="login-password"
+                className={`field__input ${styles.inputWithIcon}`}
                 type="password"
                 name="password"
+                required
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={userFormDetails.password}
-                onChange={(e) => handleUserDetails(e)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleLoginUser();
-                  }
-                }}
+                onChange={handleUserDetails}
               />
             </div>
-            {/* <div className={styles.forgetPassBtn}>
-              <p>Forgot Password?</p>
-            </div> */}
-            {loading ? (
-              <div className={styles.loadingDiv}>
-                <img src={LOADINGGIF} alt="" />
-              </div>
-            ) : (
-              <button
-                className={`${styles.loginBtn} ${styles.disabledBtn}`}
-                onClick={handleLoginUser}
-              >
-                Sign in
-              </button>
-            )}
-            <div className={styles.orText}>
-              <p>or</p>
+          </div>
+
+          {notice && (
+            <div className={styles.formNotice} role="status">
+              {notice}
             </div>
-            <button
-              className={`${styles.googleSignInBtn} ${styles.disabledBtn}`}
-              onClick={handleGoogleSignIn}
-            >
-              <div>
-                <img src={GOOGLEICON} alt="" className={styles.googleIcon} />
-                Sign in with Google
-              </div>
-            </button>
+          )}
+          {error && (
+            <div className="form-error" role="alert">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className={`btn btn--primary btn--block ${styles.submitBtn}`}
+            disabled={loading}
+          >
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+
+          <div className={styles.orText} aria-hidden="true">
+            <span>or</span>
           </div>
-          <div className={styles.navigateToLoginPage}>
-            <p>
-              New here? <Link to="/register">Register</Link>
-            </p>
-          </div>
-        </div>
-      </div>
+
+          <button
+            type="button"
+            className={`btn btn--secondary btn--block ${styles.googleBtn}`}
+            onClick={handleGoogleSignIn}
+          >
+            <img src={GOOGLEICON} alt="" className={styles.googleIcon} />
+            Sign in with Google
+          </button>
+        </form>
+
+        <p className={styles.loginFooter}>
+          New here? <Link to="/register">Create an account</Link>
+        </p>
+      </section>
     </div>
   );
 };

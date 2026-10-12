@@ -1,12 +1,35 @@
-.logoutPage{
-    /* border: 1px solid red; */
-    height: 94vh;
-    background-color: #2f2f2f;
-    text-align: center;
-    margin-top: -30px;
-    color: white;
+/* ------------------------------------------------------------------
+   Logout — centered status card on the light app background.
+------------------------------------------------------------------- */
+
+.logoutPage {
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px 56px;
 }
 
-.logoutPage>h1{
-    padding-top: 50px;
+.logoutCard {
+  width: min(440px, calc(100vw - 32px));
+  padding: 10px;
+}
+
+.logoutStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.logoutStatus > h1 {
+  margin: 0;
+}
+
+.logoutStatus > p {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .logoutPage {
+    padding: 28px 16px 40px;
+  }
 }

@@ -1,20 +1,22 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import styles from "../css/logout.module.css"
+import { Link, useNavigate } from "react-router-dom";
+import styles from "../css/logout.module.css";
 import { AuthContext } from "../context/AuthContext";
 import { logoutUser } from "../utils/userUtils";
-import { useNavigate } from "react-router-dom"
+
+const INITIAL_DELAY_MS = 3000;
+const RETRY_DELAY_MS = 3000;
+const MAX_ATTEMPTS = 3;
 
 const Logout = () => {
-    const { setUserDetails, setIsAuthenticated } = useContext(AuthContext)
+    const { setUserDetails, setIsAuthenticated } = useContext(AuthContext);
     const navigate = useNavigate();
     const retryTimeout = useRef(null);
     const countdownInterval = useRef(null);
     const attemptsRef = useRef(0);
-    
+
     const [retrying, setRetrying] = useState(false);
     const [countdown, setCountdown] = useState(3);
-
-    const MAX_ATTEMPTS = 3;
 
     const clearTimers = () => {
         clearTimeout(retryTimeout.current);
@@ -32,8 +34,8 @@ const Logout = () => {
         const res = await logoutUser();
 
         // Either the server logged us out, or the token is already dead
-        // (401) / the network failed. Clear local state either way after a
-        // couple of retries instead of looping forever.
+        // (401) / the network failed. Clear local state either way after
+        // a couple of retries instead of looping forever.
         if (res || attemptsRef.current >= MAX_ATTEMPTS - 1) {
             finishLogout();
             return;
@@ -41,7 +43,7 @@ const Logout = () => {
 
         attemptsRef.current += 1;
         setRetrying(true);
-        setCountdown(5);
+        setCountdown(3);
         clearInterval(countdownInterval.current);
         countdownInterval.current = setInterval(() => {
             setCountdown((prev) => {
@@ -53,32 +55,43 @@ const Logout = () => {
             });
         }, 1000);
 
-        // Retry logout after 5 seconds
+        // Retry logout after a few seconds
         retryTimeout.current = setTimeout(() => {
             handleLogout();
-        }, 5000);
+        }, RETRY_DELAY_MS);
     };
 
     useEffect(() => {
         const timer = setTimeout(() => {
             handleLogout();
-        }, 3000); // 3 seconds delay
+        }, INITIAL_DELAY_MS);
 
         return () => {
             clearTimeout(timer);
             clearTimers();
         };
-    }, [])
+    }, []);
 
     return (
         <div className={styles.logoutPage}>
-            <h1>Logging you out...</h1>
-            {retrying && countdown > 0 && (
-                <p>Retrying in {countdown}...</p>
-            )}
+            <div className={`card ${styles.logoutCard}`}>
+                <div className="state-block">
+                    <div className="spinner" aria-hidden="true" />
+                    <div className={styles.logoutStatus} role="status">
+                        <h1 className="state-block__title">Signing you out…</h1>
+                        {retrying && countdown > 0 && (
+                            <p className="state-block__text">
+                                Retrying in {countdown}…
+                            </p>
+                        )}
+                    </div>
+                    <Link to="/login" className="btn btn--secondary">
+                        Go to login
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 };
-
 
 export default Logout;

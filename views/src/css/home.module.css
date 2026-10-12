@@ -1,41 +1,132 @@
-.homePage{
-    width: 100%;
-    height: 100vh;
-    padding: 50px 0;  
-    background: linear-gradient(to bottom, #000000, #891489); /* Black to indigo-purple */
-    /* border: 1px solid red;  */
+/* ------------------------------------------------------------------
+   Home / landing hero — light background, soft teal accent shapes,
+   token-driven type scale. Navbar is white, so nothing here depends
+   on a dark bar behind it.
+------------------------------------------------------------------- */
+
+.homePage {
+  position: relative;
+  overflow: hidden;
+  padding: 44px 0 64px;
+  background: radial-gradient(
+    720px 320px at 50% -140px,
+    var(--brand-soft),
+    transparent 70%
+  );
 }
 
-.homeHeader{
-    width: 50%;
-    /* border: 1px solid red; */
-    margin: auto;
-    text-align: center;
+/* Soft teal glow drifting off the bottom-right corner. */
+.homePage::after {
+  content: "";
+  position: absolute;
+  right: -140px;
+  bottom: -160px;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--brand-soft),
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
-.homeHeadingTitle{
-    font-size: 48px;
-    font-weight: 600;
-    color: white;
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
-.homeHeadingDesc{
-    font-size: 22px;
-    font-weight: 600;
-    color: #00ffff;
-    /* border: 1px solid red; */
-    width: 60%;
-    margin: auto;
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 36px 0 12px;
+  text-align: center;
 }
 
-.homeBtn{
-    /* border: 1px solid white; */
-    color: white;
-    font-size: 22px;
-    font-weight: 600;
-    padding: 10px 50px;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 30px;
-    background-color: #3dc9a4;
+.heroTitle {
+  margin: 0;
+  font-size: clamp(28px, 6vw, var(--fs-4xl));
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.dot {
+  color: var(--brand);
+}
+
+.heroSubtitle {
+  max-width: 560px;
+  margin: 0;
+  font-size: clamp(16px, 2.4vw, var(--fs-lg));
+  color: var(--muted);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.featureRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 52px;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 22px 20px;
+}
+
+.featureIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+  border-radius: var(--r-md);
+  background-color: var(--brand-soft);
+  color: var(--brand);
+}
+
+.featureTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 650;
+  color: var(--text);
+}
+
+.featureText {
+  margin: 0;
+  font-size: var(--fs-base);
+  color: var(--muted);
+}
+
+@media (max-width: 768px) {
+  .featureRow {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 560px) {
+  .homePage {
+    padding: 32px 0 48px;
+  }
+
+  .hero {
+    padding: 24px 0 8px;
+  }
 }
