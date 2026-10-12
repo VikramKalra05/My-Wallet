@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
@@ -23,15 +26,14 @@
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
     "mongoose": "^8.8.0",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^2.4.0",
     "multer-storage-cloudinary": "^4.0.0",
-    "node": "^22.11.0",
     "nodemailer": "^6.9.16",
-    "nodemon": "^3.1.7",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
-    "@vercel/node": "^3.2.24"
+    "@vercel/node": "^3.2.24",
+    "nodemon": "^3.1.7"
   }
 }
