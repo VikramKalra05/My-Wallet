@@ -1,14 +1,16 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import styles from "../css/addrecords.module.css";
 import Select from "react-select";
 import AppContext from "../context/AppContext";
 import { getAccounts } from "../utils/accountUtils";
 import AddAccountModal from "./AddAccountModal";
 import { RxCross2 } from "react-icons/rx";
-import { createTransaction, getAllTransactionsOfUser } from "../utils/transactionUtils";
+import {
+  createTransaction,
+  getAllTransactionsOfUser,
+} from "../utils/transactionUtils";
 import { getCategories } from "../utils/categoryUtils";
 import categoryIcons from "../constants/categoryIcons";
-
 
 const AddRecords = () => {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -23,54 +25,52 @@ const AddRecords = () => {
   const [category, setCategory] = useState(null);
   const [subCategory, setSubCategory] = useState(null);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  //   const [time, setTime]=useState(new Date().toLocaleTimeString([],{ hour: '2-digit', minute: '2-digit' }))
+
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const accountSelectRef = useRef(null);
 
   useEffect(() => {
-    setAccountId(accounts[0]?._id)
-  }, [accounts])
+    setAccountId(accounts[0]?._id);
+  }, [accounts]);
+
+  // Move focus into the modal on open; Escape closes it.
+  useEffect(() => {
+    accountSelectRef.current?.focus();
+  }, []);
 
   useEffect(() => {
-    const fetchCategories = async () => {  
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setAddRecords(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
       try {
         const res = await getCategories();
         if (res) {
           setCategories(res);
-        } 
+        }
       } catch (error) {
         console.error(error);
       }
     };
-  
+
     fetchCategories();
   }, []);
-  
-  
 
-  // const [selectedDate, setSelectedDate] = useState(
-  //   new Date().toISOString().split("T")[0]
-  // ); // ISO format (yyyy-mm-dd)
   const today = new Date();
-const initialDate = today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // 'YYYY-MM-DD'
-const initialDisplayDate = today.toLocaleDateString("en-IN", { month: "long", day: "numeric", timeZone: "Asia/Kolkata" });
+  const initialDate = today.toLocaleDateString("en-CA", {
+    timeZone: "Asia/Kolkata",
+  }); // 'YYYY-MM-DD'
 
-const [selectedDate, setSelectedDate] = useState(initialDate);
-const [displayDate, setDisplayDate] = useState(initialDisplayDate);
-
-  // const [displayDate, setDisplayDate] = useState(
-  //   new Date().toLocaleDateString("en-IN", { month: "long", day: "numeric" })
-  // ); // Display format "Month Day"
-  // console.log("initially",displayDate);
-
-  const addNewRecord = (newRecord) => {
-    setRecords((prevRecords) => [...(prevRecords || []), newRecord]);
-  };
+  const [selectedDate, setSelectedDate] = useState(initialDate);
 
   const handleDateChange = (e) => {
-    const newDate = new Date(e.target.value);
     setSelectedDate(e.target.value); // Keeps the date in ISO format (yyyy-mm-dd)
-    // setDisplayDate(
-    //   newDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })
-    // ); // Formats to "March 25"
   };
 
   const [time, setTime] = useState(() => {
@@ -80,28 +80,20 @@ const [displayDate, setDisplayDate] = useState(initialDisplayDate);
     ).padStart(2, "0")}`;
   });
 
-  function getTimeStampFromDateandTime(dateStr,timeStr){
-    const combined = `${dateStr}T${timeStr}:00`
-    const date= new Date(combined)
-    console.log("get current time", combined);
-    return (date.getTime())
+  function getTimeStampFromDateandTime(dateStr, timeStr) {
+    const combined = `${dateStr}T${timeStr}:00`;
+    const date = new Date(combined);
+    return date.getTime();
   }
-  const fetchRecords=async ()=>{
-      const fetchedRecords=await getAllTransactionsOfUser()
-      setRecords(fetchedRecords || [])
-     }
 
+  const fetchRecords = async () => {
+    const fetchedRecords = await getAllTransactionsOfUser();
+    setRecords(fetchedRecords || []);
+  };
 
-useEffect(() => {
-  setDate(getTimeStampFromDateandTime(selectedDate,time))
-  const newDate = new Date(`${selectedDate}T${time}`);
-  console.log("updated", newDate);
-  setDisplayDate(
-    newDate.toLocaleDateString("en-IN", { month: "long", day: "numeric", timeZone: "Asia/Kolkata" })
-  );
-}, [selectedDate, time]);
-console.log("bruhhh:",displayDate)
-
+  useEffect(() => {
+    setDate(getTimeStampFromDateandTime(selectedDate, time));
+  }, [selectedDate, time]);
 
   const [payee, setPayee] = useState("");
   const [note, setNote] = useState("");
@@ -109,68 +101,66 @@ console.log("bruhhh:",displayDate)
   const [paymentStatus, setPaymentStatus] = useState("Cleared");
 
   const handleSubmit = async () => {
-    console.log(accountId);
     if (!amount || !category || !accountId) {
-      alert("Please fill all the required fields!");
+      setFormError("Please fill all the required fields.");
       return;
     }
-    console.log("Sending Category ID:", category?.value);
-    console.log("Sending SubCategory ID:", subCategory?.value);
-    
-    var newRecord = {
-      type: {id: recordType},
-      amount,
-      accountId,
-      category: {
-        id: category?.value,
-        subCategory: {
-          id: subCategory?.value,
-        }
-      },
-      payee,
-      date,
-      note,
-      paymentType,
-      status: paymentStatus,
-    };
-    await createTransaction(newRecord)
-    // addNewRecord(newRecord);
-    setAddRecords(false);
-    await fetchRecords()
-    console.log(newRecord);
+    setFormError("");
+    setSaving(true);
+    try {
+      const newRecord = {
+        type: { id: recordType },
+        amount,
+        accountId,
+        category: {
+          id: category?.value,
+          subCategory: {
+            id: subCategory?.value,
+          },
+        },
+        payee,
+        date,
+        note,
+        paymentType,
+        status: paymentStatus,
+      };
+      await createTransaction(newRecord);
+      setAddRecords(false);
+      await fetchRecords();
+    } catch (err) {
+      setFormError("Could not save the record. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
-  
+
   const categoryOptions = categories?.map((cat) => ({
     value: cat._id,
     label: cat.categoryName, // Label should be a string
     icon: categoryIcons[cat.categoryName],
-  }))
+  }));
   const selectedCategory = categories.find((cat) => cat._id === category?.value);
-  const categoryIcon = categoryIcons[selectedCategory?.categoryName] 
+  const categoryIcon = categoryIcons[selectedCategory?.categoryName];
 
   const filteredSubcategories =
     categories.find((cat) => cat._id === category?.value)?.subCategories || [];
 
-  const handleCategoryChange = (selectedCategory) => {
-    console.log(selectedCategory);
-    setCategory(selectedCategory);
+  const handleCategoryChange = (selected) => {
+    setCategory(selected);
     setSubCategory(null);
   };
 
-  const handleSubCategoryChange = (selectedSubCategory) => {
-    console.log(selectedSubCategory);
-    setSubCategory(selectedSubCategory);
+  const handleSubCategoryChange = (selected) => {
+    setSubCategory(selected);
   };
 
   //filter subcategory based on selected category...using find here bcause find compares with a single word also from category and displays subcategory accordingly
-  
-    
-    const subcategoryOptions = filteredSubcategories.map((sub) => ({
+
+  const subcategoryOptions = filteredSubcategories.map((sub) => ({
     value: sub._id,
     label: sub.subCategoryName,
     icon: categoryIcon,
   }));
-  console.log("options", subcategoryOptions)
 
   const customSingleValue = ({ data }) => {
     return (
@@ -186,9 +176,11 @@ console.log("bruhhh:",displayDate)
           overflow: "hidden",
         }}
       >
-        <div style={{
-          fontSize: "18px",
-        }}>
+        <div
+          style={{
+            fontSize: "18px",
+          }}
+        >
           {data?.icon}
         </div>
         <p
@@ -206,6 +198,7 @@ console.log("bruhhh:",displayDate)
       </div>
     );
   };
+
   const customOption = ({ data, innerRef, innerProps }) => (
     <div
       ref={innerRef}
@@ -218,8 +211,21 @@ console.log("bruhhh:",displayDate)
         cursor: "pointer",
       }}
     >
-      <span style={{ fontSize: "18px", alignItems: "center", display: "flex" }}>{data?.icon}</span>
-      <span style={{ fontSize: "16px", textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{data.label}</span>
+      <span
+        style={{ fontSize: "18px", alignItems: "center", display: "flex" }}
+      >
+        {data?.icon}
+      </span>
+      <span
+        style={{
+          fontSize: "16px",
+          textWrap: "nowrap",
+          textOverflow: "ellipsis",
+          overflow: "hidden",
+        }}
+      >
+        {data.label}
+      </span>
     </div>
   );
 
@@ -229,44 +235,73 @@ console.log("bruhhh:",displayDate)
     setAccounts(data.accounts);
     setAccLoading(false);
   };
+
   useEffect(() => {
-    if(accounts.length===0)
-    handleFetchAccounts();
+    if (accounts.length === 0) handleFetchAccounts();
   }, []);
-
-
-  // console.log(accountId);  
 
   return (
     <div className={styles.modalOverlay} onClick={() => setAddRecords(false)}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h3>ADD RECORD</h3>
-        <button
-          onClick={() => setAddRecords(false)}
-          className={styles.closeButton}
-        >
-          <RxCross2 />
-        </button>
-
-        <div className={styles.recordTypeToggle}>
+      <div
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-record-title"
+      >
+        <div className={styles.modalHeader}>
+          <h3 id="add-record-title" className={styles.modalTitle}>
+            Add record
+          </h3>
           <button
-            className={recordType === 1 ? styles.activeInc : ""}
-            onClick={() => setRecordType(1)}
+            type="button"
+            onClick={() => setAddRecords(false)}
+            className={styles.closeButton}
+            aria-label="Close"
           >
-            Income
-          </button>
-          <button
-            className={recordType === 2 ? styles.activeExp : ""}
-            onClick={() => setRecordType(2)}
-          >
-            Expense
+            <RxCross2 />
           </button>
         </div>
-        <div className={styles.upperhalf}>
-          <div className={styles.accamt}>
-            <div className={styles.inputGroup}>
-              <label>Account</label>
+
+        <div className={styles.modalBody}>
+          {formError && (
+            <div className="form-error" role="alert">
+              {formError}
+            </div>
+          )}
+
+          <div
+            className={styles.recordTypeToggle}
+            role="group"
+            aria-label="Record type"
+          >
+            <button
+              type="button"
+              className={recordType === 1 ? styles.activeInc : ""}
+              aria-pressed={recordType === 1}
+              onClick={() => setRecordType(1)}
+            >
+              Income
+            </button>
+            <button
+              type="button"
+              className={recordType === 2 ? styles.activeExp : ""}
+              aria-pressed={recordType === 2}
+              onClick={() => setRecordType(2)}
+            >
+              Expense
+            </button>
+          </div>
+
+          <div className={styles.formGrid}>
+            <div className="field">
+              <label className="field__label" htmlFor="add-account">
+                Account
+              </label>
               <select
+                id="add-account"
+                ref={accountSelectRef}
+                className="field__input"
                 value={accountId}
                 onChange={(e) => {
                   const selectedValue = e.target.value;
@@ -284,44 +319,42 @@ console.log("bruhhh:",displayDate)
                 )}
                 {accounts?.map((account, id) => {
                   return (
-                    <option
-                      key={id}
-                      value={account._id}
-                    >
+                    <option key={id} value={account._id}>
                       {account?.accountName}
                     </option>
                   );
                 })}
-                <option style={{ fontWeight: "600" }} value="add_account">+ Add Account
-                </option>
+                <option value="add_account">+ Add Account</option>
               </select>
               {showAddAccountModal && (
-                <AddAccountModal accounts={accounts} setAccounts={setAccounts}
+                <AddAccountModal
+                  accounts={accounts}
+                  setAccounts={setAccounts}
                   showAddAccountModal={showAddAccountModal}
                   setShowAddAccountModal={setShowAddAccountModal}
                 />
               )}
             </div>
 
-            <div className={`${styles.inputGroup} ${styles.titleInput}`}>
-              <label>Amount</label>
+            <div className="field">
+              <label className="field__label" htmlFor="add-amount">
+                Amount
+              </label>
               <input
+                id="add-amount"
+                className="field__input"
                 type="number"
+                min="0.01"
+                step="any"
+                inputMode="decimal"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                >
-
-                {/* {recordType === 1 ? (<IoMdAdd />) : recordType === 2 ? (<FaMinus />) : null} */}
-                </input>
+              />
             </div>
 
-
-          </div>
-
-          <div className={styles.category}>
-            <div className={styles.inputGroup}>
-              <label>Category</label>
+            <div className="field">
+              <label className="field__label">Category</label>
               <Select
                 options={categoryOptions}
                 value={category}
@@ -336,13 +369,11 @@ console.log("bruhhh:",displayDate)
               />
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Subcategory</label>
+            <div className="field">
+              <label className="field__label">Subcategory</label>
               <Select
                 options={subcategoryOptions}
-                value={
-                  subCategory
-                }
+                value={subCategory}
                 onChange={handleSubCategoryChange}
                 components={{
                   SingleValue: customSingleValue,
@@ -353,45 +384,40 @@ console.log("bruhhh:",displayDate)
                 className={styles.reactSelect}
               />
             </div>
-          </div>
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-            margin:"auto",
-            // border:"1px solid red",
-            width: "250px"
-          }}>
 
-
-          </div>
-        </div>
-
-        <div className={styles.lowerhalf}>
-          <div className={styles.dateTimeWrapper}>
-            <div className={styles.inputGroup}>
-              <label>Date</label>
+            <div className="field">
+              <label className="field__label" htmlFor="add-date">
+                Date
+              </label>
               <input
+                id="add-date"
+                className="field__input"
                 type="date"
                 value={selectedDate}
                 onChange={handleDateChange}
-              ></input>
+              />
             </div>
-            <div className={styles.inputGroup}>
-              <label>Time</label>
+
+            <div className="field">
+              <label className="field__label" htmlFor="add-time">
+                Time
+              </label>
               <input
+                id="add-time"
+                className="field__input"
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-              ></input>
+              />
             </div>
-          </div>
 
-          <div className={styles.payees}>
-            <div className={styles.inputGroup}>
-              <label>Payment Type</label>
+            <div className="field">
+              <label className="field__label" htmlFor="add-payment-type">
+                Payment Type
+              </label>
               <select
+                id="add-payment-type"
+                className="field__input"
                 value={paymentType}
                 onChange={(e) => setPaymentType(e.target.value)}
               >
@@ -404,9 +430,13 @@ console.log("bruhhh:",displayDate)
               </select>
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Payment Status</label>
+            <div className="field">
+              <label className="field__label" htmlFor="add-payment-status">
+                Payment Status
+              </label>
               <select
+                id="add-payment-status"
+                className="field__input"
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value)}
               >
@@ -414,12 +444,14 @@ console.log("bruhhh:",displayDate)
                 <option>Pending</option>
               </select>
             </div>
-          </div>
 
-          <div className={styles.note}>
-            <div className={styles.inputGroup}>
-              <label>Payee</label>
+            <div className={`field ${styles.fieldFull}`}>
+              <label className="field__label" htmlFor="add-payee">
+                Payee
+              </label>
               <input
+                id="add-payee"
+                className="field__input"
                 type="text"
                 value={payee}
                 onChange={(e) => setPayee(e.target.value)}
@@ -427,20 +459,32 @@ console.log("bruhhh:",displayDate)
               />
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Note</label>
+            <div className={`field ${styles.fieldFull}`}>
+              <label className="field__label" htmlFor="add-note">
+                Note
+              </label>
               <textarea
+                id="add-note"
+                className="field__input"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add a note"
-              ></textarea>
+                rows={3}
+              />
             </div>
           </div>
         </div>
 
-        <button className={styles.addButton} onClick={handleSubmit}>
-          ADD RECORD
-        </button>
+        <div className={styles.modalFooter}>
+          <button
+            type="button"
+            className="btn btn--primary btn--block"
+            onClick={handleSubmit}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Add record"}
+          </button>
+        </div>
       </div>
     </div>
   );

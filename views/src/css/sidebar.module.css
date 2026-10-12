@@ -1,112 +1,168 @@
-/* Sidebar.module.css */
+/* Sidebar: one card with grouped, collapsible filter sections. */
 .sidebar {
-    width: 250px;
-    background: white;
-    padding: 16px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    margin-left: 50px;
-}
-.clickingCategory{
-    cursor: pointer;
-    /* font-weight: 400; */
-    /* color:#10b981; */
-}
-.sectionHeader{
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 7px;
-    cursor: pointer;
-    font-weight: 700;
-}
-.sectionHeader:hover{
-    color: gray;
-}
-.accountsList{
-    /* border: 1px solid pink; */
-    font-weight: 500;
-    color: red;
-    padding: 4px;
-}
-.accountsList div{
-    padding: 4px;
-}
-.accountsList div:hover{
-    background-color: lightcoral;
-    color: white;
-}
-.categoriesList{
-    /* border: 1px solid orange; */
-    font-weight: 600;
-    color: green;
-    padding: 6px;
-}
-.categoriesList div{
-    padding: 2px;
-}
-.subCategory {
-    padding-left: 15px;
-    margin-top: 3px;
-    padding: 4px 0;
-    font-size: 15px;
-    color: #555;
-    cursor: pointer;
-    margin-left: 25px;
-    /* color: #10b981; */
-    font-weight: 600;
-    color: #f1c40f;
-    font-weight: 600;
-
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.subCategory div {
-    padding-left: 10px;
-    padding: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+.cardTitle {
+  padding: 12px 14px 0;
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
-.subCategory div:hover {
-    color: white;
-    background-color: #f1c40f; /* Yellow highlight */
-    border-radius: 5px;
+.section {
+  border-top: 1px solid var(--border);
 }
 
-.filtersList{
-    color:blue;
-    font-weight: 600;
-    padding: 4px;
-}
-.filtersList div{
-    padding: 4px;
-}
-.filtersList div:hover{
-    background-color: rgb(135, 185, 243);
-}
-.addButton {
-    background-color: #10b981;
-    color: white;
-    padding: 10px;
-    width: 95%;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 8px;
-    font-size: 16px; /* Ensures good readability */
-    font-weight: 500;
-    
-    
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
 }
 
-/* Hover effect */
-.addButton:hover {
-    background-color: #0e9e6e; /* Darker green on hover */
-    transform: scale(1.05); /* Slight pop effect */
+.sectionLabel {
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.15s ease;
 }
 
-/* Active (click) effect */
-.addButton:active {
-    background-color: #0c7a58; /* Even darker green when clicked */
-    transform: scale(0.98); /* Slight press-down effect */
+.sectionHeader:hover .sectionLabel {
+  color: var(--brand-strong);
 }
 
+.chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--muted-2);
+  transition: transform 0.15s ease;
+}
 
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px 8px;
+}
+
+/* Selectable row: the whole label toggles the checkbox. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.rowChecked,
+.rowChecked:hover {
+  background: var(--brand-soft);
+}
+
+.rowChecked .rowLabel {
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.rowChecked .checkbox {
+  color: var(--brand-strong);
+}
+
+/* Real checkbox, visually hidden — label text still toggles it. */
+.nativeCheckbox {
+  position: absolute;
+  left: 8px;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nativeCheckbox:focus-visible + .checkbox {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.checkbox {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--brand);
+}
+
+.checkboxOff {
+  color: var(--muted-2);
+}
+
+.rowLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.rowWrap {
+  display: flex;
+  align-items: center;
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--muted-2);
+  cursor: pointer;
+}
+
+.expandBtn:hover {
+  color: var(--brand);
+}
+
+.subRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px 8px 32px;
+}

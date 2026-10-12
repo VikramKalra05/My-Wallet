@@ -1,23 +1,60 @@
-/* recordsPage.module.css */
-.container {
-    display: flex;  /* Align Sidebar & Records side by side */
-    align-items: flex-start; /* Align items to the top */
-    gap: 20px; /* Space between sidebar and records */
-    padding: 20px;
-    background-color: rgba(26, 26, 26, 0.911);
-    min-height: 100vh; /* Full screen height */
+/* RecordsPage layout: filter sidebar + records list.
+   The app shell (.app-main) already offsets the 60px navbar and .page
+   provides vertical rhythm — no 100vh / navbar padding here. */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-/* Sidebar takes a fixed width */
-.sidebar {
-    flex-shrink: 0;
-    width: 370px;
-    margin-top: 70px;
+.pageTitle {
+  font-size: var(--fs-2xl);
 }
 
-/* Records take the remaining space */
-.recordsContent {
-    flex: 1; /* Takes remaining space */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.sidebarCol {
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 360px;
+  position: sticky;
+  top: calc(var(--nav-h) + 16px);
+}
+
+.recordsCol {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sidebarCol {
+    position: static;
+    width: 100%;
     min-width: 0;
-    margin-top: 70px;
+    max-width: none;
+  }
+
+  .recordsCol {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .layout {
+    gap: 12px;
+  }
 }

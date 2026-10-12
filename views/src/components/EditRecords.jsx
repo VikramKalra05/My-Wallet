@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "../css/addrecords.module.css";
 import Select from "react-select";
 import AddAccountModal from "./AddAccountModal";
@@ -16,6 +16,10 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
   const [categoryOption, setCategoryOption] = useState(null);
   const [subCategoryOption, setSubCategoryOption] = useState(null);
   const [account, setAccount] = useState(selectedRecord.account);
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const accountSelectRef = useRef(null);
+  const didFocusRef = useRef(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -35,8 +39,6 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
 
   useEffect(() => {
     if (selectedRecord && accounts.length > 0) {
-      console.log("selectedRecord:", selectedRecord);
-      console.log("accounts:", accounts);
       const dateObj = new Date(selectedRecord.date);
       const date = dateObj.toISOString().split("T")[0];
       const time = `${String(dateObj.getHours()).padStart(2, "0")}:${String(
@@ -82,38 +84,61 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
     }
   }, [selectedRecord, categories]);
 
+  // Escape closes the modal.
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setShowEditModal(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Move focus to the first field once, when the record has loaded.
+  useEffect(() => {
+    if (updatedRecord && !didFocusRef.current) {
+      didFocusRef.current = true;
+      accountSelectRef.current?.focus();
+    }
+  }, [updatedRecord]);
+
   const handleSubmit = async () => {
     if (!updatedRecord.amount || !categoryOption || !updatedRecord.accountId) {
-      alert("Please fill all required fields.");
+      setFormError("Please fill all the required fields.");
       return;
     }
+    setFormError("");
+    setSaving(true);
+    try {
+      const combinedDate = new Date(
+        `${updatedRecord.date}T${updatedRecord.time}:00`
+      );
 
-    const combinedDate = new Date(
-      `${updatedRecord.date}T${updatedRecord.time}:00`
-    );
+      const finalData = {
+        id: updatedRecord._id,
+        type: { id: updatedRecord.type.id },
+        amount: updatedRecord.amount,
+        accountId: account.accountId,
+        category: {
+          id: categoryOption.value,
+          subCategory: subCategoryOption?.value
+            ? { id: subCategoryOption.value }
+            : undefined,
+        },
+        payee: updatedRecord.payee,
+        date: combinedDate.getTime(),
+        note: updatedRecord.note,
+        paymentType: updatedRecord.paymentType,
+        status: updatedRecord.status,
+      };
 
-    const finalData = {
-      id: updatedRecord._id,
-      type: { id: updatedRecord.type.id },
-      amount: updatedRecord.amount,
-      accountId: account.accountId,
-      category: {
-        id: categoryOption.value,
-        subCategory: subCategoryOption?.value
-          ? { id: subCategoryOption.value }
-          : undefined,
-      },
-      payee: updatedRecord.payee,
-      date: combinedDate.getTime(),
-      note: updatedRecord.note,
-      paymentType: updatedRecord.paymentType,
-      status: updatedRecord.status,
-    };
-    console.log("FINAL DATA TO PATCH:", finalData);
-
-    await updateTransaction(finalData);
-    await fetchRecords();
-    setShowEditModal(false);
+      await updateTransaction(finalData);
+      await fetchRecords();
+      setShowEditModal(false);
+    } catch (err) {
+      setFormError("Could not save the changes. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const categoryOptions = categories.map((cat) => ({
@@ -167,6 +192,7 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
       </div>
     );
   };
+
   const customOption = ({ data, innerRef, innerProps }) => (
     <div
       ref={innerRef}
@@ -179,7 +205,9 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
         cursor: "pointer",
       }}
     >
-      <span style={{ fontSize: "18px", alignItems: "center", display: "flex" }}>
+      <span
+        style={{ fontSize: "18px", alignItems: "center", display: "flex" }}
+      >
         {data?.icon}
       </span>
       <span
@@ -202,40 +230,70 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
       className={styles.modalOverlay}
       onClick={() => setShowEditModal(false)}
     >
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h3>EDIT RECORD</h3>
-        <button
-          onClick={() => setShowEditModal(false)}
-          className={styles.closeButton}
-        >
-          <RxCross2 />
-        </button>
-
-        <div className={styles.recordTypeToggle}>
+      <div
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-record-title"
+      >
+        <div className={styles.modalHeader}>
+          <h3 id="edit-record-title" className={styles.modalTitle}>
+            Edit record
+          </h3>
           <button
-            className={updatedRecord.type.id === 1 ? styles.activeInc : ""}
-            onClick={() =>
-              setUpdatedRecord({ ...updatedRecord, type: { id: 1 } })
-            }
+            type="button"
+            onClick={() => setShowEditModal(false)}
+            className={styles.closeButton}
+            aria-label="Close"
           >
-            Income
-          </button>
-          <button
-            className={updatedRecord.type.id === 2 ? styles.activeExp : ""}
-            onClick={() =>
-              setUpdatedRecord({ ...updatedRecord, type: { id: 2 } })
-            }
-          >
-            Expense
+            <RxCross2 />
           </button>
         </div>
 
-        <div className={styles.upperhalf}>
-          {/* Account and Amount */}
-          <div className={styles.accamt}>
-            <div className={styles.inputGroup}>
-              <label>Account</label>
+        <div className={styles.modalBody}>
+          {formError && (
+            <div className="form-error" role="alert">
+              {formError}
+            </div>
+          )}
+
+          <div
+            className={styles.recordTypeToggle}
+            role="group"
+            aria-label="Record type"
+          >
+            <button
+              type="button"
+              className={updatedRecord.type.id === 1 ? styles.activeInc : ""}
+              aria-pressed={updatedRecord.type.id === 1}
+              onClick={() =>
+                setUpdatedRecord({ ...updatedRecord, type: { id: 1 } })
+              }
+            >
+              Income
+            </button>
+            <button
+              type="button"
+              className={updatedRecord.type.id === 2 ? styles.activeExp : ""}
+              aria-pressed={updatedRecord.type.id === 2}
+              onClick={() =>
+                setUpdatedRecord({ ...updatedRecord, type: { id: 2 } })
+              }
+            >
+              Expense
+            </button>
+          </div>
+
+          <div className={styles.formGrid}>
+            <div className="field">
+              <label className="field__label" htmlFor="edit-account">
+                Account
+              </label>
               <select
+                id="edit-account"
+                ref={accountSelectRef}
+                className="field__input"
                 value={account.accountId}
                 onChange={(e) => {
                   if (e.target.value === "add-new") {
@@ -258,26 +316,30 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 </option>
                 {accounts.map((acc) => {
                   if (acc._id === account.accountId) {
-                    console.log(acc._id);
-                    return;
+                    return null;
                   }
-                  
+
                   return (
                     <option key={acc._id} value={acc._id}>
                       {acc.accountName}
                     </option>
                   );
                 })}
-                <option value="add-new" style={{ fontWeight: "bold" }}>
-                  + Add Account
-                </option>
+                <option value="add-new">+ Add Account</option>
               </select>
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Amount</label>
+            <div className="field">
+              <label className="field__label" htmlFor="edit-amount">
+                Amount
+              </label>
               <input
+                id="edit-amount"
+                className="field__input"
                 type="number"
+                min="0.01"
+                step="any"
+                inputMode="decimal"
                 value={updatedRecord.amount}
                 onChange={(e) =>
                   setUpdatedRecord({
@@ -287,12 +349,9 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 }
               />
             </div>
-          </div>
 
-          {/* Category and Subcategory */}
-          <div className={styles.category}>
-            <div className={styles.inputGroup}>
-              <label>Category</label>
+            <div className="field">
+              <label className="field__label">Category</label>
               <Select
                 options={categoryOptions}
                 value={categoryOption}
@@ -308,8 +367,9 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 className={styles.reactSelect}
               />
             </div>
-            <div className={styles.inputGroup}>
-              <label>Subcategory</label>
+
+            <div className="field">
+              <label className="field__label">Subcategory</label>
               <Select
                 options={subcategoryOptions}
                 value={subCategoryOption}
@@ -322,15 +382,14 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 className={styles.reactSelect}
               />
             </div>
-          </div>
-        </div>
 
-        {/* Date, Time, Payee, Note, Payment Info */}
-        <div className={styles.lowerhalf}>
-          <div className={styles.dateTimeWrapper}>
-            <div className={styles.inputGroup}>
-              <label>Date</label>
+            <div className="field">
+              <label className="field__label" htmlFor="edit-date">
+                Date
+              </label>
               <input
+                id="edit-date"
+                className="field__input"
                 type="date"
                 value={updatedRecord.date}
                 onChange={(e) =>
@@ -338,9 +397,14 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 }
               />
             </div>
-            <div className={styles.inputGroup}>
-              <label>Time</label>
+
+            <div className="field">
+              <label className="field__label" htmlFor="edit-time">
+                Time
+              </label>
               <input
+                id="edit-time"
+                className="field__input"
                 type="time"
                 value={updatedRecord.time}
                 onChange={(e) =>
@@ -348,12 +412,14 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 }
               />
             </div>
-          </div>
 
-          <div className={styles.payees}>
-            <div className={styles.inputGroup}>
-              <label>Payment Type</label>
+            <div className="field">
+              <label className="field__label" htmlFor="edit-payment-type">
+                Payment Type
+              </label>
               <select
+                id="edit-payment-type"
+                className="field__input"
                 value={updatedRecord.paymentType}
                 onChange={(e) =>
                   setUpdatedRecord({
@@ -371,9 +437,13 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
               </select>
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Payment Status</label>
+            <div className="field">
+              <label className="field__label" htmlFor="edit-payment-status">
+                Payment Status
+              </label>
               <select
+                id="edit-payment-status"
+                className="field__input"
                 value={updatedRecord.status}
                 onChange={(e) =>
                   setUpdatedRecord({
@@ -386,12 +456,14 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 <option>Pending</option>
               </select>
             </div>
-          </div>
 
-          <div className={styles.note}>
-            <div className={styles.inputGroup}>
-              <label>Payee</label>
+            <div className={`field ${styles.fieldFull}`}>
+              <label className="field__label" htmlFor="edit-payee">
+                Payee
+              </label>
               <input
+                id="edit-payee"
+                className="field__input"
                 type="text"
                 value={updatedRecord.payee}
                 onChange={(e) =>
@@ -399,21 +471,34 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
                 }
               />
             </div>
-            <div className={styles.inputGroup}>
-              <label>Note</label>
+
+            <div className={`field ${styles.fieldFull}`}>
+              <label className="field__label" htmlFor="edit-note">
+                Note
+              </label>
               <textarea
+                id="edit-note"
+                className="field__input"
                 value={updatedRecord.note}
                 onChange={(e) =>
                   setUpdatedRecord({ ...updatedRecord, note: e.target.value })
                 }
+                rows={3}
               />
             </div>
           </div>
         </div>
 
-        <button className={styles.addButton} onClick={handleSubmit}>
-          SAVE
-        </button>
+        <div className={styles.modalFooter}>
+          <button
+            type="button"
+            className="btn btn--primary btn--block"
+            onClick={handleSubmit}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
 
         {showAddAccountModal && (
           <AddAccountModal

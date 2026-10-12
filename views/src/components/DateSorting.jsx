@@ -4,7 +4,7 @@ import { FaAngleDown } from "react-icons/fa";
 import AppContext from "../context/AppContext";
 
 const DateSorting = ({ sortedRecords, setSortedRecords }) => {
-  const {records} = useContext(AppContext);
+  const { records } = useContext(AppContext);
   const [dateFilter, setDateFilter] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
   const dateSortingRef = useRef(null);
@@ -67,7 +67,8 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     thisYear: () => {
       const startOfYear = getStartOfYear();
       return records?.filter(
-        (record) => new Date(record.date).getFullYear() === startOfYear.getFullYear()
+        (record) =>
+          new Date(record.date).getFullYear() === startOfYear.getFullYear()
       );
     },
 
@@ -80,7 +81,7 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     },
 
     lastMonth: () => {
-      // Improved: Ensure the range is the exact last month
+      // Ensure the range is the exact last month
       const startOfLastMonth = new Date();
       startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1, 1);
       startOfLastMonth.setHours(0, 0, 0, 0);
@@ -96,7 +97,7 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     },
 
     lastYear: () => {
-      // Improved: Ensure the range is the exact last year
+      // Ensure the range is the exact last year
       const startOfLastYear = new Date();
       startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1, 0, 1);
       startOfLastYear.setHours(0, 0, 0, 0);
@@ -112,23 +113,25 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     },
   };
 
-  const handleDateFilterChange = async (filter) => {
+  const handleDateFilterChange = (filter) => {
     setDateFilter(filter);
-    console.log("filter", filterFunctions[filter]());
     setSortedRecords(filterFunctions[filter]());
     setIsOpen(false);
   };
-  
+
   // Applying "all" filter by default whenever records change
   useEffect(() => {
     setSortedRecords(filterFunctions["all"]());
     setIsOpen(false);
-
   }, [sortedRecords]);
 
+  // Click-outside: ref wraps BOTH trigger and menu, so the trigger can close it.
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dateSortingRef.current && !dateSortingRef.current.contains(event.target)) {
+      if (
+        dateSortingRef.current &&
+        !dateSortingRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -138,53 +141,78 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dateSortingRef]);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const renderOption = (filter) => (
+    <div
+      key={filter}
+      role="option"
+      aria-selected={dateFilter === filter}
+      tabIndex={0}
+      onClick={() => handleDateFilterChange(filter)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleDateFilterChange(filter);
+        }
+      }}
+      className={`${styles.filterOption} ${
+        dateFilter === filter ? styles.activeFilter : ""
+      }`}
+    >
+      {filterLabels[filter]}
+    </div>
+  );
 
   return (
-    <div>
-      <div style={{ position: "absolute" }}>
-        <button onClick={() => setIsOpen(!isOpen)} className={styles.dropdownButton}>
-          {filterLabels[dateFilter] || "All Records"}
-          <span className={`${styles.arrow} ${isOpen ? styles.open : ""}`}>
-            <FaAngleDown color="green" />
-          </span>
-        </button>
+    <div className={styles.wrapper} ref={dateSortingRef}>
+      <button
+        type="button"
+        className={styles.dropdownButton}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {filterLabels[dateFilter] || "All Records"}
+        <span
+          className={`${styles.arrow} ${isOpen ? styles.open : ""}`}
+          aria-hidden="true"
+        >
+          <FaAngleDown />
+        </span>
+      </button>
 
-        {isOpen && (
-          <div className={styles.dropdownMenu} ref={dateSortingRef}>
-            <div className={styles.firsthalf}>
-              {["all", "last7days", "lastMonth", "lastYear"].map((filter) => (
-                <div
-                  key={filter}
-                  onClick={() => handleDateFilterChange(filter)}
-                  className={`${styles.filterOption} ${
-                    dateFilter === filter ? styles.activeFilter : ""
-                  }`}
-                >
-                  {filterLabels[filter]}
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.lasthalf}>
-              {["today", "thisWeek", "thisMonth", "thisYear"].map((filter) => (
-                <div
-                  key={filter}
-                  onClick={() => handleDateFilterChange(filter)}
-                  className={`${styles.filterOption} ${
-                    dateFilter === filter ? styles.activeFilter : ""
-                  }`}
-                >
-                  {filterLabels[filter]}
-                </div>
-              ))}
-            </div>
+      {isOpen && (
+        <div
+          className={styles.dropdownMenu}
+          role="listbox"
+          aria-label="Filter records by date"
+        >
+          <div className={styles.firsthalf} role="group" aria-label="Overall ranges">
+            {["all", "last7days", "lastMonth", "lastYear"].map(renderOption)}
           </div>
-        )}
-      </div>
+
+          <div className={styles.lasthalf} role="group" aria-label="Period ranges">
+            {["today", "thisWeek", "thisMonth", "thisYear"].map(renderOption)}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default DateSorting;
-

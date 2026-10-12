@@ -1,15 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-// import { records as initialRecords } from "../utils/dummydata";
+import React, { useEffect, useState } from "react";
 import styles from "../css/records.module.css";
-// import {deleteIcon} from "@chakra-ui/icons"
-import { MdDelete } from "react-icons/md";
-import { MdEdit } from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
 import categoriesData from "../utils/modalCategories";
 import { displayDate } from "../dateConversions/displayDate";
 import { deleteTransaction } from "../utils/transactionUtils";
 import EditRecords from "./EditRecords";
 import ConfirmationModal from "./DeleteConfirmModal";
-import { Skeleton } from "@mui/material";
 
 const Records = ({
   selectedCategory,
@@ -22,43 +18,23 @@ const Records = ({
   loading,
   setLoading,
 }) => {
-  // const { records, setRecords } = useContext(AppContNext);
   const [finalRecords, setFinalRecords] = useState([]);
   const [currentRecordId, setCurrentRecordId] = useState(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false); //for asking to delete any record
-  const [zeroRecords, setZeroRecords] = useState(false);
-
-  // useEffect(() => {
-  //   if(finalRecords.length > 0){
-  //     setLoading(false);
-  //   }
-  // }, [finalRecords])
 
   const handleDelete = async (id) => {
-    // const updatedRecords = records.filter((record) => record.id !== id);
-    // api call to delete the record
-    // fetch records AGAIN
     await deleteTransaction(id);
     await fetchRecords();
-    // setRecords(updatedRecords);
   };
+
   const handleConfirm = () => {
     if (currentRecordId) {
       handleDelete(currentRecordId);
     }
     setShowConfirmModal(false);
-  };
-  const renderSkeletons = () => {
-    return Array(8)
-      .fill()
-      .map((_, index) => (
-        <div key={index} className={styles.accountSkeleton}>
-          <Skeleton variant="rounded" height={"60px"} animation="wave" />
-        </div>
-      ));
   };
 
   const isCategorySelected = (record) => {
@@ -80,8 +56,6 @@ const Records = ({
     const status = record?.status;
     const accountName = record?.account?.accountName;
 
-    // console.log("bhal yo", selectedRecordTypes, recordType);
-
     return (
       selectedCategory.includes(mainCategory) ||
       selectedCategory.includes(subCategory) ||
@@ -92,13 +66,8 @@ const Records = ({
     );
   };
 
-  // const dateFilteredRecords = applyDateFilter(filteredRecords || []);
-
   const updateFinally = () => {
     const filteredRecords = sortedRecords?.filter(isCategorySelected) || [];
-    if ((sortedRecords || []).length === 0) {
-      setZeroRecords(true);
-    }
     setFinalRecords(
       [...(filteredRecords || [])].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
@@ -118,22 +87,28 @@ const Records = ({
     selectedStatuses,
   ]);
 
-  // const finalRecords = [...(filteredRecords || [])].sort((a, b) => new Date(b.date) - new Date(a.date))
-
   const getCategoryIcon = (categoryName) => {
     const category = categoriesData.find((cat) => cat.name === categoryName);
     return category ? category.icon : null;
   };
 
-  console.log("sortedRecords", sortedRecords);
-  console.log("finalRecords", finalRecords);
   return (
     <div className={styles.container}>
-      {/* <p>Showing records for: <strong>{selectedCategory || "All Categories"}</strong> </p> */}
       {loading && (
-        <div className={styles.loadingContainer}>{renderSkeletons()}</div>
+        <div className="state-block" role="status">
+          <div className="spinner" aria-hidden="true" />
+          <p className="state-block__text">Loading records…</p>
+        </div>
       )}
-      {!loading && finalRecords?.length === 0 && <p style={{color:"white"}}>No Records Found 🫥</p>}
+      {!loading && finalRecords?.length === 0 && (
+        <div className="state-block">
+          <p className="state-block__title">No records found</p>
+          <p className="state-block__text">
+            Filters may be hiding some results — try clearing or adjusting
+            them.
+          </p>
+        </div>
+      )}
       {!loading && finalRecords?.length > 0 && (
         <div className={styles.recordsContainer}>
           {finalRecords?.map((record, id) => {
@@ -141,7 +116,11 @@ const Records = ({
             const prevDate =
               id > 0 ? displayDate(finalRecords[id - 1].date) : null;
             const showDateHeader = currentDate !== prevDate;
-            // console.log(record);
+            const isExpense = record?.type?.id === 2;
+            const isPending = record?.status === "Pending";
+            const categoryName =
+              record?.category?.subCategory?.subCategoryName ||
+              record?.category?.categoryName;
             return (
               <div key={record._id}>
                 {showDateHeader && (
@@ -153,54 +132,55 @@ const Records = ({
                   <div className={styles.leftSection}>
                     <div className={styles.icon}>
                       {getCategoryIcon(record?.category?.categoryName)}
-                      {/* {record?.category?.categoryName} */}
                     </div>
 
-                    {/* <div className={styles.time}>{record.time}</div> */}
-
-                    {record?.category?.subCategory?.subCategoryName ? (
-                      <div className={styles.category}>
-                        {" "}
-                        {record?.category?.subCategory?.subCategoryName}
-                      </div>
-                    ) : (
-                      <div className={styles.category}>
-                        {" "}
-                        {record?.category?.categoryName}
-                      </div>
-                    )}
-                    <div className={styles.accountName}>
+                    <div className={styles.category} title={categoryName}>
+                      {categoryName}
+                    </div>
+                    <div
+                      className={styles.accountName}
+                      title={record?.account?.accountName}
+                    >
                       {record?.account?.accountName}
                     </div>
                   </div>
                   <div className={styles.middleSection}>
-                    <div className={styles.paymentType}>
+                    <div
+                      className={styles.paymentType}
+                      title={record?.paymentType}
+                    >
                       {record?.paymentType}
                     </div>
                     <div
-                      className={styles.paymentStatus}
-                      style={{
-                        color: record?.status === "Pending" ? "red" : "green",
-                      }}
+                      className={`${styles.paymentStatus} ${
+                        isPending
+                          ? styles["status--pending"]
+                          : styles["status--cleared"]
+                      }`}
                     >
                       {record?.status}
                     </div>
-                    {/* <div className={styles.payee}>{record?.paymentType}</div> */}
-                    <div className={styles.payee}>{record?.payee}</div>
-                    {/* <div> {record.accountId}</div> */}
-                    <div className={styles.note}>{record?.note}</div>
+                    <div className={styles.payee} title={record?.payee}>
+                      {record?.payee}
+                    </div>
+                    <div className={styles.note} title={record?.note}>
+                      {record?.note}
+                    </div>
                   </div>
                   <div className={styles.rightSection}>
                     <div
-                      className={styles.amount}
-                      style={{
-                        color: record?.type?.id === 2 ? "red" : "green",
-                      }}
+                      className={`${styles.amount} ${
+                        isExpense
+                          ? styles["amount--expense"]
+                          : styles["amount--income"]
+                      }`}
                     >
-                      {record?.type?.id === 2 ? "-" : null}₹{record?.amount}
+                      {isExpense ? "-" : null}₹{record?.amount}
                     </div>
 
                     <button
+                      type="button"
+                      aria-label="Edit record"
                       className={styles.edit}
                       onClick={() => {
                         setSelectedRecord(record);
@@ -210,6 +190,8 @@ const Records = ({
                       <MdEdit size={20} />
                     </button>
                     <button
+                      type="button"
+                      aria-label="Delete record"
                       className={styles.delete}
                       onClick={() => {
                         setCurrentRecordId(record?._id);
