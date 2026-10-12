@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from "../css/accounts.module.css";
 import { deleteAccount } from "../utils/accountUtils";
 import EditAccountModal from "./EditAccountModal";
@@ -9,13 +9,16 @@ import ConfirmationModal from "./DeleteConfirmModal";
 const AccountCard = ({ account, fetchAccounts }) => {
   const [showEditAccountModal, setShowEditAccountModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
+  const accountName = account?.accountName;
 
   const handleDelete = async () => {
     try {
+      setDeleteError(false);
       await deleteAccount({ id: account._id });
       fetchAccounts();
     } catch (error) {
-      alert("Something went wrong while deleting account");
+      setDeleteError(true);
     }
   };
   const handleConfirm = () => {
@@ -23,45 +26,53 @@ const AccountCard = ({ account, fetchAccounts }) => {
     setShowConfirmModal(false);
   };
   return (
-    <div className={styles.accountCard}>
-      <div className={styles.accountdata}>
-        <div className={styles.edit}>
-          <h1 className={styles.accName}>
-            {/* <span style={{ fontWeight: "bolder" }}>Account name:</span> */}
-            {account?.accountName}
-          </h1>
+    <article className={styles.accountCard}>
+      <div className={styles.cardTop}>
+        <h3 className={styles.accName}>{accountName}</h3>
+        <div className={styles.cardActions}>
           <button
-            className={styles.editbutton}
+            type="button"
+            className={styles.cardActionBtn}
+            aria-label={`Edit ${accountName}`}
             onClick={() => setShowEditAccountModal(true)}
           >
-            <MdEdit size={18} /> 
+            <MdEdit size={18} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={`${styles.cardActionBtn} ${styles.cardActionBtn__danger}`}
+            aria-label={`Delete ${accountName}`}
+            onClick={() => setShowConfirmModal(true)}
+          >
+            <MdDelete size={18} aria-hidden="true" />
           </button>
         </div>
-        <div className={styles.delete}>
-          <h1 className={styles.accBalance}>
-            {/* <span style={{ fontWeight: "bolder" }}>Balance:</span>₹ */}₹
-            {account?.balance}
-          </h1>
-          <button className={styles.deletebutton} onClick={()=>setShowConfirmModal(true)}>
-           <MdDelete size={18} /> 
-          </button>
-          {showConfirmModal && (
+      </div>
+      <p className={styles.accBalance}>₹{account?.balance}</p>
+      {account?.accountType && (
+        <p className={styles.accType}>{account.accountType}</p>
+      )}
+      {deleteError && (
+        <p className="field__error" role="alert">
+          Couldn't delete this account. Try again.
+        </p>
+      )}
+
+      {showConfirmModal && (
         <ConfirmationModal
           message="Are you sure you want to delete this account?"
           onConfirm={handleConfirm}
           onCancel={() => setShowConfirmModal(false)}
         />
       )}
-        </div>
-        {showEditAccountModal && (
-          <EditAccountModal
-            account={account}
-            fetchAccounts={fetchAccounts}
-            setShowEditAccountModal={setShowEditAccountModal}
-          />
-        )}
-      </div>
-    </div>
+      {showEditAccountModal && (
+        <EditAccountModal
+          account={account}
+          fetchAccounts={fetchAccounts}
+          setShowEditAccountModal={setShowEditAccountModal}
+        />
+      )}
+    </article>
   );
 };
 
