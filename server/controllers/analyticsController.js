@@ -138,7 +138,7 @@ const getAnalytics = async (req, res) => {
       const weekId = getWeekId(start); // e.g., "2025-W14"
 
       const analyticsDoc = await AnalyticsModel.findOne({
-        userObjectId,
+        userId,
         periodType: "week",
         periodId: weekId,
       });
@@ -166,7 +166,7 @@ const getAnalytics = async (req, res) => {
       //  || periodType === "lastYear"
       ) {
       analyticsData = await AnalyticsModel.find({
-        userObjectId,
+        userId,
         periodType: "year",
         periodId: periodId,
       });
@@ -187,9 +187,10 @@ const getAnalytics = async (req, res) => {
   }
 };
 
-const getAllAnalytics = async (req, res) => { // temp
+const getAllAnalytics = async (req, res) => {
   try {
-    const analytics = await AnalyticsModel.find();
+    const { userId } = req.body.user;
+    const analytics = await AnalyticsModel.find({ userId });
     res.status(200).json({ analytics });
   } catch (error) {
     res.status(500).json({ msg: "Something went wrong while getting analytics", error });
@@ -266,22 +267,19 @@ const getLast6MonthsAnalytics = async (req, res) => {
 };
 
 
-// Helper to get week ID like "2025-W15"
+// Helper to get week ID like "2025-W15" (ISO week, app timezone)
+const APP_TZ = "Asia/Kolkata";
+
 const getWeekId = (date) => {
-  const d = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-  );
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-  return `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, "0")}`;
+  if (!date || isNaN(date.getTime())) return null;
+  return moment.tz(date, APP_TZ).format("GGGG-[W]WW");
 };
 
-// Helper for month ID like "2025-04"
+// Helper for month ID like "2025-04" (app timezone, so it matches the ids
+// written by utils/analytics.js instead of being one month off in UTC)
 const getMonthId = (date) => {
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  return `${date.getUTCFullYear()}-${month}`;
+  if (!date || isNaN(date.getTime())) return null;
+  return moment.tz(date, APP_TZ).format("YYYY-MM");
 };
 
 module.exports = {

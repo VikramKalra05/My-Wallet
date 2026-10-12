@@ -25,7 +25,9 @@ const auth = async (req, res, next) => {
         // });
 
     } catch (error) {
-        res.status(400).send({"err": `Token is invalid or expired: ${error}`});
+        // 401 (not 400) so clients can distinguish "session expired" from a
+        // bad request and log the user out
+        res.status(401).send({ err: "Token is invalid or expired" });
     }
 }
 

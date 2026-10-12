@@ -49,8 +49,10 @@
   };
 
   const getAllTransactions = async (req, res) => {
+    const { userId } = req.body.user;
+
     try {
-      const transactions = await TransactionModel.find();
+      const transactions = await TransactionModel.find({ userId });
 
       res.json({
         msg: `Total ${transactions.length} transactions`,
@@ -61,6 +63,14 @@
         .status(400)
         .send({ error: `Error in fetching total transaction, ${error}` });
     }
+  };
+
+  // Balance effect of a transaction on its account:
+  // Expense -> decreases balance, Income -> increases, anything else -> no change
+  const balanceDelta = (typeName, amount) => {
+    if (typeName === "Expense") return -amount;
+    if (typeName === "Income") return amount;
+    return 0;
   };
 
   const createTransaction = async (req, res) => {
@@ -78,68 +88,85 @@
     } = req.body;
     const { userId } = req.body.user;
 
-    if (
-      !amount ||
-      !date ||
-      !type.id ||
-      // || !category?.id
-      !accountId
-    ) {
-      return res.status(400).send({
-        error: `Missing required fields: title, amount, category.id, type.id, date, accountId`,
-      });
-    }
+    try {
+      const amountValue = Number(amount);
 
-    if (!TYPE[type.id]) {
-      return res.status(400).json({ error: "Invalid type ID" });
-    }
-
-    const categoryId = new mongoose.Types.ObjectId(category?.id);
-
-    const categoryDoc = await CategoryModel.findOne({ _id: categoryId, userId });
-
-    if (!categoryDoc) {
-      return res.status(400).json({ error: "Invalid category ID" });
-    }
-
-    let subCategoryDetails = null;
-
-    if (category?.subCategory?.id) {
-      const subCategoryId = new mongoose.Types.ObjectId(
-        category?.subCategory?.id
-      );
-
-      const subCategory = categoryDoc.subCategories.id(subCategoryId);
-      if (!subCategory) {
-        return res.status(400).json({ error: "Invalid subCategory ID" });
+      if (
+        !date ||
+        !type?.id ||
+        !accountId ||
+        !Number.isFinite(amountValue) ||
+        amountValue <= 0
+      ) {
+        return res.status(400).send({
+          error: `Missing or invalid fields: amount (must be a positive number), date, type.id, accountId`,
+        });
       }
 
-      subCategoryDetails = {
-        id: subCategoryId,
-        subCategoryName: subCategory?.subCategoryName,
+      if (!TYPE[type.id]) {
+        return res.status(400).json({ error: "Invalid type ID" });
+      }
+
+      if (!mongoose.isValidObjectId(category?.id)) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
+
+      const categoryId = new mongoose.Types.ObjectId(category?.id);
+
+      const categoryDoc = await CategoryModel.findOne({
+        _id: categoryId,
+        userId,
+      });
+
+      if (!categoryDoc) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
+
+      let subCategoryDetails = null;
+
+      if (category?.subCategory?.id) {
+        if (!mongoose.isValidObjectId(category.subCategory.id)) {
+          return res.status(400).json({ error: "Invalid subCategory ID" });
+        }
+
+        const subCategoryId = new mongoose.Types.ObjectId(
+          category?.subCategory?.id
+        );
+
+        const subCategory = categoryDoc.subCategories.id(subCategoryId);
+        if (!subCategory) {
+          return res.status(400).json({ error: "Invalid subCategory ID" });
+        }
+
+        subCategoryDetails = {
+          id: subCategoryId,
+          subCategoryName: subCategory?.subCategoryName,
+        };
+      }
+
+      const categoryDetails = {
+        id: categoryId,
+        categoryName: categoryDoc?.categoryName,
+        subCategory: subCategoryDetails,
       };
-    }
 
-    const categoryDetails = {
-      id: categoryId,
-      categoryName: categoryDoc?.categoryName,
-      subCategory: subCategoryDetails,
-    };
+      const typeDetails = {
+        id: type.id,
+        typeName: TYPE[type.id],
+      };
 
-    const typeDetails = {
-      id: type.id,
-      typeName: TYPE[type.id],
-    };
+      if (!mongoose.isValidObjectId(accountId)) {
+        return res.status(400).json({ error: "Account does not exist" });
+      }
 
-    const account = await AccountModel.findOne({ _id: accountId, userId });
+      const account = await AccountModel.findOne({ _id: accountId, userId });
 
-    if (!account) {
-      return res.status(400).json({ error: "Account does not exist" });
-    }
+      if (!account) {
+        return res.status(400).json({ error: "Account does not exist" });
+      }
 
-    try {
       const transaction = new TransactionModel({
-        amount,
+        amount: amountValue,
         date,
         type: typeDetails,
         category: categoryDetails,
@@ -155,20 +182,18 @@
         },
       });
 
-      await AccountModel.findByIdAndUpdate(accountId, {
-        $inc: { balance: -amount },
-      });
-
+      // Persist first so a validation failure cannot leave the balance moved
       await transaction.save();
 
-      // TBD
+      await AccountModel.findByIdAndUpdate(accountId, {
+        $inc: { balance: balanceDelta(typeDetails.typeName, amountValue) },
+      });
+
       await updateAnalyticsForTransaction({
         userId,
         transaction,
         operation: "create",
-        // transactionDate: transaction.date,
       });
-      // console.log(transaction.date);
 
       res.json({
         msg: `The transaction has been added`,
@@ -179,7 +204,6 @@
         .status(400)
         .send({ error: `Error in creating transaction, ${error}` });
     }
-    // res.json({msg: "You have 0 expenses"})
   };
 
   const deleteTransaction = async (req, res) => {
@@ -201,12 +225,21 @@
 
       await TransactionModel.findByIdAndDelete(id);
 
+      const typeName = transaction.type.typeName || TYPE[transaction.type.id];
+
+      // Reverse exactly what createTransaction applied
       const account = await AccountModel.findByIdAndUpdate(
         transaction.account.accountId,
         {
-          $inc: { balance: transaction.amount },
+          $inc: { balance: -balanceDelta(typeName, transaction.amount) },
         }
       );
+
+      await updateAnalyticsForTransaction({
+        userId,
+        transaction,
+        operation: "delete",
+      });
 
       return res.status(200).json({
         msg: `The transaction has been deleted successfully`,
@@ -224,108 +257,90 @@
   const updateTransaction = async (req, res) => {
     const { userId } = req.body.user;
     const { id, accountId } = req.body;
-  
+
     if (!id || !accountId) {
       return res
         .status(400)
         .json({ error: "Both Transaction ID and Account ID are required." });
     }
-  
+
     const { amount, date, type, category, status, payee, label, note, paymentType } = req.body;
-  
-    const updateFields = {};
-    if (amount !== undefined) updateFields.amount = amount;
-    if (date !== undefined) updateFields.date = date;
-    if (status !== undefined) updateFields.status = status;
-    if (payee !== undefined) updateFields.payee = payee;
-    if (label !== undefined) updateFields.label = label;
-    if (note !== undefined) updateFields.note = note;
-    if (paymentType !== undefined) updateFields.paymentType = paymentType;
-  
+
+    const sameId = (a, b) => String(a ?? "") === String(b ?? "");
+
     try {
       const transaction = await TransactionModel.findOne({ _id: id, userId });
-  
+
       if (!transaction) {
         return res.status(404).json({ error: "Transaction not found." });
       }
-  
-      const account = await AccountModel.findById(transaction.account.accountId);
+
+      if (!mongoose.isValidObjectId(accountId)) {
+        return res.status(400).json({ error: "Invalid account ID" });
+      }
+
+      const account = await AccountModel.findOne({ _id: accountId, userId });
       if (!account) {
         return res.status(400).json({ error: "Invalid account ID" });
       }
-  
-      var final = {};
-  
-      if (amount !== undefined && amount !== transaction.amount) {
-        // Reverse the old amount effect
-        if (transaction.type.id === 2) {
-          account.balance += transaction.amount; // Add back the old expense
-        } else if (transaction.type.id === 1) {
-          account.balance -= transaction.amount; // Subtract old income
+
+      const oldTypeName = transaction.type.typeName || TYPE[transaction.type.id];
+      const oldAmount = transaction.amount;
+
+      let newAmount = oldAmount;
+      if (amount !== undefined) {
+        newAmount = Number(amount);
+        if (!Number.isFinite(newAmount) || newAmount <= 0) {
+          return res.status(400).json({ error: "amount must be a positive number" });
         }
-  
-        // Apply the new amount effect
-        if (type?.id === 2) {
-          account.balance -= amount; // Deduct new expense
-        } else if (type?.id === 1) {
-          account.balance += amount; // Add new income
-        }
-  
-        await account.save();
       }
-  
-      // 🛑 **Step 2: Handle Account Changes**
-      if (accountId !== transaction.account.accountId.toString()) {
-        const prevAccount = await AccountModel.findById(transaction.account.accountId);
-        const newAccount = await AccountModel.findById(accountId);
-  
-        if (!newAccount) {
-          return res.status(400).json({ error: "Invalid new account ID" });
-        }
-  
-        // Reverse old transaction effect on previous account
-        if (prevAccount) {
-          if (transaction.type.id === 2) {
-            prevAccount.balance += transaction.amount; // Refund expense
-          } else if (transaction.type.id === 1) {
-            prevAccount.balance -= transaction.amount; // Deduct income
-          }
-          await prevAccount.save();
-        }
-  
-        // Apply transaction effect on new account
-        if (type?.id === 2) {
-          newAccount.balance -= amount; // Deduct expense
-        } else if (type?.id === 1) {
-          newAccount.balance += amount; // Add income
-        }
-        await newAccount.save();
-  
-        final.account = {
-          accountId: newAccount._id,
-          accountName: newAccount.accountName,
-        };
+
+      const newTypeId = type?.id ?? transaction.type.id;
+      if (!TYPE[newTypeId]) {
+        return res.status(400).json({ error: "Invalid type ID" });
       }
-  
-      // 🛑 **Step 3: Handle Type Change**
-      if (type?.id && type.id !== transaction.type.id) {
+      const newTypeName = TYPE[newTypeId];
+
+      const final = {};
+
+      if (date !== undefined) final.date = date;
+      if (status !== undefined) final.status = status;
+      if (payee !== undefined) final.payee = payee;
+      if (label !== undefined) final.label = label;
+      if (note !== undefined) final.note = note;
+      if (paymentType !== undefined) final.paymentType = paymentType;
+      if (amount !== undefined && newAmount !== oldAmount) final.amount = newAmount;
+
+      // Handle type change
+      if (type?.id && !sameId(type.id, transaction.type.id)) {
         final.type = {
-          typeName: TYPE[type.id],
-          id: type.id,
+          typeName: newTypeName,
+          id: newTypeId,
         };
       }
-  
-      // 🛑 **Step 4: Handle Category Changes**
-      if (category?.id && (category.id !== transaction.category.id || category.subCategory?.id !== transaction.category?.subCategory?.id)) {
+
+      // Handle category changes
+      if (
+        category?.id &&
+        (!sameId(category.id, transaction.category.id) ||
+          !sameId(category.subCategory?.id, transaction.category?.subCategory?.id))
+      ) {
+        if (!mongoose.isValidObjectId(category.id)) {
+          return res.status(400).json({ error: "Invalid category ID" });
+        }
+
         const newCategory = await CategoryModel.findOne({ _id: category.id, userId });
-  
+
         if (!newCategory) {
           return res.status(400).json({ error: "Invalid category ID" });
         }
-  
+
         let subCategoryDetails = transaction.category?.subCategory;
-  
+
         if (category?.subCategory?.id) {
+          if (!mongoose.isValidObjectId(category.subCategory.id)) {
+            return res.status(400).json({ error: "Invalid subCategory ID" });
+          }
           const newSubCategory = newCategory.subCategories.id(category.subCategory.id);
           if (!newSubCategory) {
             return res.status(400).json({ error: "Invalid subCategory ID" });
@@ -335,26 +350,53 @@
             subCategoryName: newSubCategory.subCategoryName,
           };
         }
-  
+
         final.category = {
           id: category?.id,
           categoryName: newCategory?.categoryName,
           subCategory: subCategoryDetails,
         };
       }
-  
-      // 🛑 **Step 5: Apply Other Updates**
-      for (let key in updateFields) {
-        if (transaction[key] !== updateFields[key]) {
-          final[key] = updateFields[key];
-        }
+
+      // Balance: one type-aware delta, applied atomically
+      const oldDelta = balanceDelta(oldTypeName, oldAmount);
+      const newDelta = balanceDelta(newTypeName, newAmount);
+      const prevAccountId = transaction.account.accountId.toString();
+      const accountChanged = accountId !== prevAccountId;
+
+      if (accountChanged) {
+        final.account = {
+          accountId: account._id,
+          accountName: account.accountName,
+        };
+
+        await AccountModel.updateOne(
+          { _id: prevAccountId },
+          { $inc: { balance: -oldDelta } }
+        );
+        await AccountModel.updateOne(
+          { _id: account._id },
+          { $inc: { balance: newDelta } }
+        );
+      } else if (newDelta !== oldDelta) {
+        await AccountModel.updateOne(
+          { _id: account._id },
+          { $inc: { balance: newDelta - oldDelta } }
+        );
       }
-  
-      var newTransaction;
+
+      let newTransaction = transaction;
       if (Object.keys(final).length > 0) {
         newTransaction = await TransactionModel.findByIdAndUpdate(id, final, { new: true });
       }
-  
+
+      await updateAnalyticsForTransaction({
+        userId,
+        transaction: newTransaction,
+        oldTransaction: transaction,
+        operation: "update",
+      });
+
       res.status(200).json({
         msg: "The transaction has been updated",
         transaction: newTransaction

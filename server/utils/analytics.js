@@ -1,8 +1,10 @@
 const { AnalyticsModel } = require("../models/analyticsModel");
-const moment = require("moment");
+const moment = require("moment-timezone");
+
+const APP_TZ = "Asia/Kolkata";
 
 function getPeriodInfo(transactionDate, type = "month") {
-  const date = moment(transactionDate);
+  const date = moment.tz(transactionDate, APP_TZ);
 
   if (type === "month") {
     return {
@@ -55,19 +57,14 @@ const updateAnalyticsDoc = async ({
       periodType,
     });
 
-    console.log(doc, periodId, periodType);
     if (!doc) {
-      console.log(
-        userId,
-        type,
-        category,
-        subcategory,
-        amount,
-        periodId,
-        periodType,
-        startDate,
-        endDate
-      );
+      // Nothing recorded for this period yet: a reversal (delete/update of an
+      // older transaction) has nothing to subtract, so don't create a doc with
+      // negative totals.
+      if (amount < 0) {
+        return;
+      }
+
       await AnalyticsModel.create({
         userId,
         totalIncome: type === "Income" ? amount : 0,
@@ -76,7 +73,7 @@ const updateAnalyticsDoc = async ({
           {
             categoryName: category,
             amount: type === "Expense" ? amount : 0,
-            subcategories: subcategory
+            subCategories: subcategory
               ? [
                   {
                     subCategoryName: subcategory,
@@ -91,7 +88,6 @@ const updateAnalyticsDoc = async ({
         startDate,
         endDate,
       });
-      console.log("created");
     } else {
       if (type === "Income") {
         doc.totalIncome += amount;
@@ -99,57 +95,66 @@ const updateAnalyticsDoc = async ({
         doc.totalExpense += amount;
       }
 
+      // Reversals (delete/update) must never drive totals negative
+      if (doc.totalIncome < 0) doc.totalIncome = 0;
+      if (doc.totalExpense < 0) doc.totalExpense = 0;
+
       // Checking if the category already exists in categoryBreakdown
       const categoryIndex = doc.categoryBreakdown.findIndex(
         (item) => item.categoryName === category
       );
 
       if (categoryIndex === -1) {
-        // If the category doesn't exist, add it
-        doc.categoryBreakdown.push({
-          categoryName: category,
-          amount: type === "Expense" ? amount : 0,
-          subCategories: subcategory
-            ? [
-                {
-                  subCategoryName: subcategory,
-                  amount: type === "Expense" ? amount: 0,
-                },
-              ]
-            : [],
-        });
+        // New category for this period: a negative reversal has nothing to
+        // subtract from, so don't add a negative row
+        if (amount >= 0) {
+          doc.categoryBreakdown.push({
+            categoryName: category,
+            amount: type === "Expense" ? amount : 0,
+            subCategories: subcategory
+              ? [
+                  {
+                    subCategoryName: subcategory,
+                    amount: type === "Expense" ? amount : 0,
+                  },
+                ]
+              : [],
+          });
+        }
       } else {
         // If the category exists, update it
         if (type === "Expense") {
-          doc.categoryBreakdown[categoryIndex].amount += amount;
+          const entry = doc.categoryBreakdown[categoryIndex];
+          entry.amount = Math.max(0, entry.amount + amount);
+          entry.subCategories = entry.subCategories || [];
 
           // If subcategory is provided, handle it
           if (subcategory) {
-            const subCategoryIndex = doc.categoryBreakdown[
-              categoryIndex
-            ].subCategories.findIndex(
+            const subCategoryIndex = entry.subCategories.findIndex(
               (sub) => sub.subCategoryName === subcategory
             );
 
             if (subCategoryIndex === -1) {
               // If the subcategory doesn't exist, add it
-              doc.categoryBreakdown[categoryIndex].subCategories.push({
-                subCategoryName: subcategory,
-                amount: type === "Expense" ? amount : 0,
-              });
+              if (amount >= 0) {
+                entry.subCategories.push({
+                  subCategoryName: subcategory,
+                  amount,
+                });
+              }
             } else {
               // If the subcategory exists, update it
-              doc.categoryBreakdown[categoryIndex].subCategories[
-                subCategoryIndex
-              ].amount += amount;
+              entry.subCategories[subCategoryIndex].amount = Math.max(
+                0,
+                entry.subCategories[subCategoryIndex].amount + amount
+              );
             }
           }
         }
       }
 
       await doc.save();
-    }
-  } catch (err) {
+    }  } catch (err) {
     console.error("Error updating analytics doc:", err);
   }
 };

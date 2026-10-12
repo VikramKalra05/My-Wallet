@@ -15,7 +15,12 @@ const analyticsRouter = require("./routes/analyticRoutes");
 
 const app = express();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
+const isProduction = process.env.NODE_ENV === "production";
+
+// Vercel (and any reverse proxy) terminates TLS, so express-session needs this
+// to honour `secure` cookies
+app.set("trust proxy", 1);
 
 app.use(express.json());
 app.use(cookieParser()); // Add this to parse cookies
@@ -35,9 +40,10 @@ app.use(
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production", // Set `true` in production if using HTTPS
+        secure: isProduction, // Set `true` in production if using HTTPS
         httpOnly: true,
-        sameSite: "None",
+        // Chrome rejects SameSite=None unless Secure, so only use it over HTTPS
+        sameSite: isProduction ? "None" : "Lax",
         maxAge: 1000 * 60 * 60 * 24, // 1 day session
       },
     })
@@ -62,11 +68,17 @@ app.get("/*", (req, res) => {
     res.json({msg: "Invalid Request"})
 })
 
-app.listen(PORT, async () => {
+// On Vercel (@vercel/node) the app itself is the handler; only listen when
+// run directly (local `npm run dev`)
+if (require.main === module) {
+  app.listen(PORT, async () => {
     try {
-        await connection;
-        console.log(`The server is running at ${PORT} and db is connected ${Date.now()}`);
+      await connection;
+      console.log(`The server is running at ${PORT} and db is connected ${Date.now()}`);
     } catch  (error){
-        console.log("Server error -", error);
+      console.log("Server error -", error);
     }
-}, )
+  }, )
+}
+
+module.exports = app;

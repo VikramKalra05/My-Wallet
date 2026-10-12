@@ -1,10 +1,10 @@
 const { upload } = require("../config/cloudinary");
 
 const uploadMiddleware = (req, res, next) => {
-//   console.log("before", req.body.user);
-  // Multer handles file first
-  const userId = req.body.user.userId;
-  console.log("before", req.body.user);
+  // Captured before multer replaces req.body on multipart requests
+  const authUser = req.body?.user;
+  const userId = typeof authUser === "object" ? authUser?.userId : undefined;
+
   upload(req, res, (err) => {
     if (err) {
       return res
@@ -12,17 +12,23 @@ const uploadMiddleware = (req, res, next) => {
         .json({ error: "File upload failed", details: err });
     }
 
-    // Ensure JSON body is parsed (Multer ignores JSON fields)
-    if (req.body.user) {
+    // On multipart uploads multer turns the `user` JSON field into a string;
+    // on plain JSON requests it stays an object (from the auth middleware)
+    if (typeof req.body.user === "string") {
       try {
-        req.body.user = JSON.parse(req.body.user); // Convert JSON string to object
-    } catch (parseError) {
+        req.body.user = JSON.parse(req.body.user);
+      } catch (parseError) {
         return res.status(400).json({ error: "Invalid JSON format in 'user'" });
+      }
     }
-}
 
-req.body.userId = userId;
-console.log("after",req.body.userId)
+    if (typeof req.body.user !== "object" || req.body.user === null) {
+      req.body.user = userId ? { userId } : {};
+    }
+
+    if (userId) {
+      req.body.userId = userId;
+    }
 
     next(); // Proceed to `updateUserDetails`
   });
