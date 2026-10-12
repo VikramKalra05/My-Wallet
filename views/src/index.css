@@ -1,13 +1,396 @@
+/* ------------------------------------------------------------------
+   Design tokens — the single source of truth for the whole UI.
+   Add new values here; never hardcode a hex/px in a module again.
+   Contrast-checked: --brand on white = 4.88:1, white on --brand = 4.88:1.
+------------------------------------------------------------------- */
+:root {
+  /* surfaces */
+  --bg: #f5f7f8;
+  --surface: #ffffff;
+  --surface-2: #eef2f3;
+  --surface-3: #e4ebec;
+  --border: #e2e8e9;
+  --border-strong: #cbd5d6;
+
+  /* text */
+  --text: #12211f;
+  --muted: #5b6b69;
+  --muted-2: #869493;
+
+  /* brand */
+  --brand: #0b7f74;
+  --brand-strong: #0a6e66;
+  --brand-bright: #12a594;
+  --brand-soft: #e6f6f4;
+  --brand-softer: #f2fbfa;
+
+  /* semantic */
+  --danger: #c92a2a;
+  --danger-strong: #a92222;
+  --danger-soft: #fdecec;
+  --income: #15803d;
+  --expense: #dc2626;
+  --warning: #b45309;
+  --warning-soft: #fef3e2;
+
+  /* radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* elevation */
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-2: 0 4px 14px rgba(16, 24, 40, 0.08);
+  --shadow-pop: 0 16px 40px rgba(16, 24, 40, 0.16);
+
+  /* layout */
+  --nav-h: 60px;
+  --content-max: 1200px;
+
+  /* type */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 34px;
+  --fs-4xl: 44px;
+}
+
+/* ------------------------------- reset ------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--brand-strong);
+}
+
+img,
+svg {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--text);
+}
+
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+::selection {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+/* Keyboard focus is visible everywhere (several modules used to kill it). */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* --------------------------- app shell ------------------------------ */
+.app-main {
+  min-height: calc(100vh - var(--nav-h));
+  padding-top: var(--nav-h);
+}
+
+.app-main--nonav {
+  padding-top: 0;
+  min-height: 100vh;
+}
+
+.app-container {
+  width: min(var(--content-max), 100% - 48px);
+  margin-inline: auto;
+}
+
+/* --------------------------- primitives ----------------------------- */
+
+/* Buttons: use with a module class only for layout overrides. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  background-color: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow-1);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--brand-strong);
+  color: #fff;
+}
+
+.btn--secondary {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.btn--danger {
+  background-color: var(--danger);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--danger-strong);
+  color: #fff;
+}
+
+.btn--ghost {
+  background-color: transparent;
+  color: var(--brand);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.btn--sm {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+}
+
+.btn--lg {
+  min-height: 48px;
+  padding: 13px 26px;
+  font-size: var(--fs-md);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* Card surface shared by every panel in the app. */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+
+/* Section heading used above lists/charts. */
+.section-title {
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  color: var(--text);
+}
+
+/* Loading / empty states — replaces four different one-off treatments. */
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: app-spin 0.8s linear infinite;
+}
+
+@keyframes app-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.state-block__icon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.state-block__title {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 650;
+  color: var(--text);
+}
+
+.state-block__text {
+  margin: 0;
+  font-size: var(--fs-base);
+  color: var(--muted);
+}
+
+/* Screen-reader-only text. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Consistent form controls. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field__label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field__input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field__input::placeholder {
+  color: var(--muted-2);
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.field__error {
+  font-size: var(--fs-sm);
+  color: var(--danger);
+}
+
+/* Inline form/global error message (replaces window.alert). */
+.form-error {
+  padding: 10px 14px;
+  background-color: var(--danger-soft);
+  border: 1px solid #f5c2c2;
+  border-radius: var(--r-md);
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+/* Horizontal page padding helper used by most pages. */
+.page {
+  padding: 28px 0 48px;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    width: min(var(--content-max), 100% - 32px);
+  }
+
+  .page {
+    padding: 20px 0 36px;
+  }
 }

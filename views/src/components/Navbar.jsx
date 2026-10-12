@@ -1,147 +1,201 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AuthContext, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import WALLETLOGO from "../assets/walletLogo.svg";
 import styles from "../css/navbar.module.css";
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaBars, FaTimes } from "react-icons/fa";
+import { FiLogOut, FiSettings } from "react-icons/fi";
 import AppContext from "../context/AppContext";
 import AddRecords from "./AddRecords";
 
 const profileColors = [
-  "#ff3b30",
-  "#ff9500",
-  "#5856d6",
-  "#30b0c7",
-  "#af52de",
-  "#ff2d55",
-  "#34c759",
-  "#007aff",
+  "#0b7f74",
+  "#1163d6",
+  "#8b5cf6",
+  "#db2777",
+  "#ea580c",
+  "#15803d",
+  "#0891b2",
+  "#b45309",
+];
+
+const NAV_LINKS = [
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/accounts", label: "Accounts" },
+  { to: "/records", label: "Records" },
+  { to: "/analytics", label: "Analytics" },
 ];
 
 const Navbar = () => {
   const { addRecords, setAddRecords } = useContext(AppContext);
-  const { userDetails } = useContext(AuthContext);
-  const { isAuthenticated } = useAuth();
+  const { userDetails, isAuthenticated } = useAuth();
+  const user = userDetails;
+
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileRandomColor, setProfileRandomColor] = useState(false);
-  const [showNav, setShowNav] = useState(true);
-  const dropDownRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const profileRef = useRef(null);
 
-  const isHomePage = location.pathname === "/";
+  const showNav = !["/login", "/register"].includes(location.pathname);
 
   useEffect(() => {
-    if (location.pathname === "/login" || location.pathname === "/register") {
-      setShowNav(false);
-    } else {
-      setShowNav(true);
-    }
+    setMenuOpen(false);
+    setDropdownOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (profileRandomColor) {
-      setProfileRandomColor(true);
-    }
-  }, [profileRandomColor])
-
-  const handleCustomColor = (letter) => {
-    const firstLetter = letter.toUpperCase();
-    // Calculate an index based on the ASCII value of the first letter
-    const index = firstLetter.charCodeAt(0) % profileColors.length;
-    return profileColors[index];
-  }
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropDownRef.current && !dropDownRef.current.contains(event.target)) {
+    const onPointerDown = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setDropdownOpen(false);
+        setMenuOpen(false);
+      }
     };
-  }, [dropDownRef])
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  const displayName = user?.name || "";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "?";
+  const avatarColor =
+    profileColors[(initial.charCodeAt(0) || 0) % profileColors.length];
+
+  if (!showNav) return null;
 
   return (
-    showNav && (
-      <nav className={styles.navbar}>
+    <>
+      <nav className={styles.navbar} aria-label="Main">
         <div className={styles.navContainer}>
-          <div className={styles.logo}>
+          <Link to="/" className={styles.logo}>
             <img
               src={WALLETLOGO}
-              alt="Wallet Logo"
+              alt=""
               className={styles.logoImg}
+              aria-hidden="true"
             />
-            <p>My Wallet</p>
-          </div>
+            <p className={styles.logoText}>My Wallet</p>
+          </Link>
 
-          <div className={styles.links}>
-            {isHomePage && !isAuthenticated ? (
+          <button
+            type="button"
+            className={styles.menuToggle}
+            aria-expanded={menuOpen}
+            aria-controls="main-nav-links"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
+          </button>
+
+          <div
+            id="main-nav-links"
+            className={`${styles.links} ${menuOpen ? styles.linksOpen : ""}`}
+          >
+            {isAuthenticated ? (
               <>
-                <Link to="/login" className={styles.link}>Login</Link>
-                <Link to="/register" className={styles.link}>Register</Link>
-              </>
-            ) : isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className={styles.link}>Dashboard</Link>
-                <Link to="/accounts" className={styles.link}>Accounts</Link>
-                <Link to="/records" className={styles.link}>Records</Link>
-                <Link to="/analytics" className={styles.link}>Analytics</Link>
-                <div>
-                  <button className={styles.button} onClick={() => setAddRecords(true)}>+ Record</button>
-                  {addRecords && <AddRecords />}
-                </div>
-                <div className={styles.profileSection}>
-                  <div
-                    className={styles.profileContainer}
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    {
-                      profileRandomColor && (
-                        <div className={styles.icon}>
-                          <div
-                            className={styles.profileIcon}
-                            style={{
-                              backgroundColor: handleCustomColor(userDetails?.name[0])
-                            }}
-                          >
-                            {userDetails?.name[0]}
-                          </div>
-                        </div>
-                      )
+                {NAV_LINKS.map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`${styles.link} ${
+                      location.pathname === to ? styles.linkActive : ""
+                    }`}
+                    aria-current={
+                      location.pathname === to ? "page" : undefined
                     }
-                    {!profileRandomColor && userDetails?.photo && (
-                      <div className={styles.icon}>
+                  >
+                    {label}
+                  </Link>
+                ))}
+                <div>
+                  <button
+                    type="button"
+                    className={`btn btn--primary ${styles.button}`}
+                    onClick={() => setAddRecords(true)}
+                  >
+                    + Record
+                  </button>
+                </div>
+                <div className={styles.profileSection} ref={profileRef}>
+                  <button
+                    type="button"
+                    className={styles.profileContainer}
+                    aria-haspopup="menu"
+                    aria-expanded={dropdownOpen}
+                    onClick={() => setDropdownOpen((open) => !open)}
+                  >
+                    {user?.photo && !photoFailed ? (
+                      <span className={styles.icon}>
                         <img
-                          src={userDetails?.photo}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            setProfileRandomColor(true)
-                          }}
-                          alt="user" loading="lazy" />
-                      </div>
+                          src={user.photo}
+                          onError={() => setPhotoFailed(true)}
+                          alt=""
+                        />
+                      </span>
+                    ) : (
+                      <span
+                        className={styles.profileIcon}
+                        style={{ backgroundColor: avatarColor }}
+                        aria-hidden="true"
+                      >
+                        {initial}
+                      </span>
                     )}
-                    <p className={styles.profileName}>{userDetails?.name}</p>
-                    <FaAngleDown />{" "}
-                  </div>
+                    <p className={styles.profileName}>{displayName}</p>
+                    <FaAngleDown
+                      className={`${styles.chevron} ${
+                        dropdownOpen ? styles.chevronOpen : ""
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
                   {dropdownOpen && (
-                    <div className={styles.dropdownMenu} ref={dropDownRef}>
-                      <Link to="/settings" className={`${styles.dropdownItem} ${styles.hoverDropdownBtn}`} onClick={() => setDropdownOpen(false)}>
-                        Settings
+                    <div className={styles.dropdownMenu} role="menu">
+                      <Link
+                        to="/settings"
+                        role="menuitem"
+                        className={styles.dropdownItem}
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <FiSettings aria-hidden="true" /> Settings
                       </Link>
-                      <Link to="/logout" className={`${styles.dropdownItem} ${styles.logoutBtn}`} onTouchMoveCapture={(e) => e.target.style.backgroundColor = "red"} onClick={() => setDropdownOpen(false)}>Logout</Link>
+                      <Link
+                        to="/logout"
+                        role="menuitem"
+                        className={`${styles.dropdownItem} ${styles.logoutBtn}`}
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <FiLogOut aria-hidden="true" /> Logout
+                      </Link>
                     </div>
                   )}
                 </div>
               </>
-            ) : null}
+            ) : (
+              <>
+                <Link to="/login" className={styles.link}>
+                  Login
+                </Link>
+                <Link to="/register" className={styles.link}>
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
-    )
+      {addRecords && <AddRecords />}
+    </>
   );
 };
 
