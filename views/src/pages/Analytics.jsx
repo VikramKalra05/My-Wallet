@@ -137,9 +137,12 @@ const Analytics = () => {
     }
   };
 
+  // Fetch both datasets once on mount; both handlers read from state only via
+  // their setters, and re-running them on every render would loop.
   useEffect(() => {
     handleFetchAnalytics();
     handleFetchLast6Months();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // A record exists only when the period genuinely has data — until then the

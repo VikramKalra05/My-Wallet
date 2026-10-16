@@ -76,8 +76,11 @@ const Records = ({
     setLoading(false);
   };
 
+  // updateFinally is redefined every render; the filter inputs that drive it
+  // are listed as deps below, so it re-runs exactly when it should.
   useEffect(() => {
     updateFinally();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     sortedRecords,
     selectedCategory,

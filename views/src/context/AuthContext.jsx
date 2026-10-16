@@ -38,7 +38,6 @@ export const AuthContextProvider = ({ children }) => {
 
     useEffect(() => {
         handleFetchUserDetails();
-        console.log("user details",userDetails);
     }, [isAuthenticated])
 
     const handleFetchUserDetails = async () => {

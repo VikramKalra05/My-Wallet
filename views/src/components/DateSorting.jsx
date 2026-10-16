@@ -119,10 +119,13 @@ const DateSorting = ({ sortedRecords, setSortedRecords }) => {
     setIsOpen(false);
   };
 
-  // Applying "all" filter by default whenever records change
+  // Applying "all" filter by default whenever records change.
+  // filterFunctions is rebuilt every render — listing it here would re-run
+  // this on every render and loop through setSortedRecords.
   useEffect(() => {
     setSortedRecords(filterFunctions["all"]());
     setIsOpen(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedRecords]);
 
   // Click-outside: ref wraps BOTH trigger and menu, so the trigger can close it.

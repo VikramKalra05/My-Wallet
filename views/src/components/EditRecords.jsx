@@ -91,7 +91,7 @@ const EditRecords = ({ selectedRecord, setShowEditModal, fetchRecords }) => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [setShowEditModal]);
 
   // Move focus to the first field once, when the record has loaded.
   useEffect(() => {

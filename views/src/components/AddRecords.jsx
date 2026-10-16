@@ -45,7 +45,8 @@ const AddRecords = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    // setAddRecords is a useState setter from context — stable identity.
+  }, [setAddRecords]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -238,7 +239,7 @@ const AddRecords = () => {
 
   useEffect(() => {
     if (accounts.length === 0) handleFetchAccounts();
-  }, []);
+  }, [accounts.length]);
 
   return (
     <div className={styles.modalOverlay} onClick={() => setAddRecords(false)}>

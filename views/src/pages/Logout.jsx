@@ -61,6 +61,7 @@ const Logout = () => {
         }, RETRY_DELAY_MS);
     };
 
+    // Kick off the first logout attempt once; retries are driven by their own timers.
     useEffect(() => {
         const timer = setTimeout(() => {
             handleLogout();
@@ -70,6 +71,7 @@ const Logout = () => {
             clearTimeout(timer);
             clearTimers();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

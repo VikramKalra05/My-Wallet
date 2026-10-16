@@ -26,8 +26,10 @@ const RecordsPage = () => {
     setRecords(fetchedRecords || []);
   };
 
+  // Fetch the list once on mount; filter changes re-trigger it from Sidebar.
   useEffect(() => {
     fetchRecords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
