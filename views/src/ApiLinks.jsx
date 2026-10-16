@@ -1,5 +1,11 @@
-// API base URL. Override with REACT_APP_API_URL (e.g. in views/.env.local)
-// so local development doesn't read/write production data.
+// API base URL.
+//
+// Production uses the same-origin /api proxy (see vercel.json) so the auth
+// cookie is first-party — a cross-origin cookie is a third-party cookie, and
+// Brave/Chrome block those by sign-in loops.
+// Local dev still points at the deployed API (override with REACT_APP_API_URL).
 export const TESTING_URL =
   process.env.REACT_APP_API_URL ||
-  "https://my-wallet-gamma-eight.vercel.app/api/v1";
+  (process.env.NODE_ENV === "production"
+    ? "/api/v1"
+    : "https://my-wallet-gamma-eight.vercel.app/api/v1");

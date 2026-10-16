@@ -10,7 +10,16 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.NODE_ENV === "production" ? "https://my-wallet-gamma-eight.vercel.app/api/v1/auth/google/callback" : "http://localhost:8080/api/v1/auth/google/callback",
+      // Set GOOGLE_CALLBACK_URL to the frontend-proxied URL
+      // (https://my-wallet-frontend-liard.vercel.app/api/v1/auth/google/callback)
+      // so the session cookie is issued on the frontend origin — same-site for
+      // the browser. Remember to register that URL in Google Cloud Console →
+      // Authorized redirect URIs. Falls back to the direct API URL otherwise.
+      callbackURL:
+        process.env.GOOGLE_CALLBACK_URL ||
+        (process.env.NODE_ENV === "production"
+          ? "https://my-wallet-gamma-eight.vercel.app/api/v1/auth/google/callback"
+          : "http://localhost:8080/api/v1/auth/google/callback"),
     },
     async (accessToken, refreshToken, profile, done) => {
       // Code to handle user authentication and retrieval
